@@ -59,7 +59,6 @@ public final class SignInPresenter {
             if (user != null) {
                 if (!mIsSignedInDetected) {
                     LOG.i("Signed in to firebase: %s", user.getUid());
-                    view.hideProgressDialog();
                     view.showTangoPermissionFragment();
                     mIsSignedInDetected = true;
                 } else {
@@ -112,20 +111,15 @@ public final class SignInPresenter {
             view.showSnackbar(R.string.snackbar_google_sign_in_failed);
         }
 
-        // If the sign-in is successful, Firebase's callback is called first rather than RX's processing
-        // so that the dialog is closed with Firebase's callback.
-        view.showProgressDialog();
-
         Subscription subscription = signInWithGoogleUseCase
                 .execute(googleSignInAccount)
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(() -> view.showProgressDialog())
+                .doOnUnsubscribe(() -> view.hideProgressDialog())
                 .subscribe(userId -> {
                     // As the main thread is called first, the fragments are discarded in Firebase's callback,
                     // so the RX processing is also canceled and will not be called here.
-                }, e -> {
-                    LOG.e("Failed to sign in to Firebase.", e);
-                    view.hideProgressDialog();
-                });
+                }, e -> LOG.e("Failed to sign in to Firebase.", e));
         compositeSubscription.add(subscription);
     }
 }

@@ -134,26 +134,6 @@ public final class MainPresenter
                 });
         compositeSubscription.add(subscription);
     }
-//
-//    private void downloadTexture(UserTexture entry) {
-//        LOG.d("Downloading the texture: entry = %s", entry);
-//
-//        Subscription subscription = ensureTextureCacheUseCase
-//                .execute(entry.id, (totalBytes, bytesTransferred) -> {
-//                    // TODO
-//                    LOG.v("The progress status: totalBytes = %d, bytesTransferred = %d", totalBytes, bytesTransferred);
-//                })
-//                .flatMap(findFileBitmapUseCase::execute)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(bitmap -> {
-//                    LOG.d("Downloaded the texture.");
-//
-//                }, e -> {
-//                    // TODO: How to recover.
-//                    LOG.w(String.format("Failed to download the texture: entry = %s", entry), e);
-//                });
-//        compositeSubscription.add(subscription);
-//    }
 
     public void onResume() {
         renderer.connectToTangoCamera(tango);
@@ -175,7 +155,6 @@ public final class MainPresenter
     public void onFrameAvailable(int cameraId) {
         if (active && cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
             renderer.onFrameAvailable();
-            // TODO: remove the following commented code.
         }
     }
 
@@ -318,12 +297,11 @@ public final class MainPresenter
                     })
                     .flatMap(findFileBitmapUseCase::execute)
                     .observeOn(AndroidSchedulers.mainThread())
+                    .doOnUnsubscribe(() -> itemView.hideProgress())
                     .subscribe(bitmap -> {
                         LOG.d("Loaded the texture.");
                         // Set the bitmap into the model.
                         model.bitmap = bitmap;
-                        // Hide the progress bar.
-                        itemView.hideProgress();
                         // Redraw.
                         itemView.showModel(model);
                     }, e -> {

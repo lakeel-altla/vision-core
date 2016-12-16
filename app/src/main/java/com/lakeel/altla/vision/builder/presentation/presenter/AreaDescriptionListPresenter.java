@@ -109,7 +109,6 @@ public final class AreaDescriptionListPresenter {
         LOG.d("Syncing the area description: id = %s", exportingId);
 
         prevBytesTransferred = 0;
-        view.showUploadProgressDialog();
 
         Subscription subscription = saveUserAreaDescriptionUseCase
                 .execute(exportingId, (totalBytes, bytesTransferred) -> {
@@ -118,6 +117,8 @@ public final class AreaDescriptionListPresenter {
                     view.setUploadProgressDialogProgress(totalBytes, increment);
                 })
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(() -> view.showUploadProgressDialog())
+                .doOnUnsubscribe(() -> view.hideUploadProgressDialog())
                 .subscribe(userAreaDescription -> {
                     LOG.d("Synced the area description.");
 
@@ -125,12 +126,10 @@ public final class AreaDescriptionListPresenter {
                     AreaDescriptionModel model = models.get(exportingPosition);
                     model.synced = true;
 
-                    view.hideUploadProgressDialog();
                     view.showSnackbar(R.string.snackbar_done);
                     view.updateItem(exportingPosition);
                 }, e -> {
                     LOG.e(String.format("Failed to sync the area description: id = %s", exportingId), e);
-                    view.hideUploadProgressDialog();
                     view.showSnackbar(R.string.snackbar_failed);
                 });
         compositeSubscription.add(subscription);
@@ -161,23 +160,21 @@ public final class AreaDescriptionListPresenter {
         private void desync(int position, AreaDescriptionModel model) {
             LOG.d("Desyncing the area description: id = %s", model.id);
 
-            view.showDesyncProgressDialog();
-
             Subscription subscription = deleteUserAreaDescriptionUseCase
                     .execute(model.id)
                     .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe(() -> view.showDesyncProgressDialog())
+                    .doOnUnsubscribe(() -> view.hideDesyncProgressDialog())
                     .subscribe(s -> {
                         LOG.d("Desynced the area description.");
 
                         model.synced = false;
 
-                        view.hideDesyncProgressDialog();
                         view.updateItem(position);
                         view.showSnackbar(R.string.snackbar_done);
                     }, e -> {
                         LOG.e("Failed to desync the area description.", e);
 
-                        view.hideDesyncProgressDialog();
                         view.showSnackbar(R.string.snackbar_failed);
                     });
             compositeSubscription.add(subscription);
