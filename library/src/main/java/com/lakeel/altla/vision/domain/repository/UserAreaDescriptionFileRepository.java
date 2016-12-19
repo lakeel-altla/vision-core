@@ -7,11 +7,11 @@ import rx.Single;
 
 public interface UserAreaDescriptionFileRepository {
 
-    Single<String> upload(String id, InputStream stream, OnProgressListener onProgressListener);
+    Single<String> upload(String areaDescriptionId, InputStream stream, OnProgressListener onProgressListener);
 
-    Single<String> download(String id, File destination, OnProgressListener onProgressListener);
+    Single<String> download(String areaDescriptionId, File destination, OnProgressListener onProgressListener);
 
-    Single<String> delete(String id);
+    Single<String> delete(String areaDescriptionId);
 
     interface OnProgressListener {
 

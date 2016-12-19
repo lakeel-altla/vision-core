@@ -30,8 +30,8 @@ public final class UserAreaDescriptionFileRepositoryImpl implements UserAreaDesc
     }
 
     @Override
-    public Single<String> upload(String id, InputStream stream, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> upload(String areaDescriptionId, InputStream stream, OnProgressListener onProgressListener) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
         if (stream == null) throw new ArgumentNullException("stream");
 
         // NOTE:
@@ -42,37 +42,37 @@ public final class UserAreaDescriptionFileRepositoryImpl implements UserAreaDesc
 
         StorageReference reference = rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(areaDescriptionId);
         UploadTask task = reference.putStream(stream);
 
         return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> id);
+                                    .map(snapshot -> areaDescriptionId);
     }
 
     @Override
-    public Single<String> download(String id, File destination, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> download(String areaDescriptionId, File destination, OnProgressListener onProgressListener) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
         if (destination == null) throw new ArgumentNullException("destination");
 
         StorageReference reference = rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(areaDescriptionId);
         FileDownloadTask task = reference.getFile(destination);
 
         return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> id);
+                                    .map(snapshot -> areaDescriptionId);
     }
 
     @Override
-    public Single<String> delete(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> delete(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         StorageReference reference = rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(areaDescriptionId);
         Task<Void> task = reference.delete();
 
-        return RxGmsTask.asObservable(task).map(aVoid -> id).toSingle();
+        return RxGmsTask.asObservable(task).map(aVoid -> areaDescriptionId).toSingle();
     }
 
     private String resolveCurrentUserId() {
