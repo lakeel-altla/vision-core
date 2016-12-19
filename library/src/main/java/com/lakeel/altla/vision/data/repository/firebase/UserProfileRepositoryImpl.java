@@ -37,7 +37,7 @@ public final class UserProfileRepositoryImpl implements UserProfileRepository {
         value.photoUri = userProfile.photoUri;
 
         rootReference.child(PATH_USER_PROFILES)
-                     .child(userProfile.id)
+                     .child(userProfile.userId)
                      .setValue(value, (error, reference) -> {
                          if (error != null) {
                              LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
@@ -48,10 +48,10 @@ public final class UserProfileRepositoryImpl implements UserProfileRepository {
     }
 
     @Override
-    public Observable<UserProfile> find(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<UserProfile> find(String userId) {
+        if (userId == null) throw new ArgumentNullException("userId");
 
-        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(id);
+        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(userId);
 
         return RxFirebaseQuery.asObservableForSingleValueEvent(reference)
                               .filter(DataSnapshot::exists)
@@ -59,10 +59,10 @@ public final class UserProfileRepositoryImpl implements UserProfileRepository {
     }
 
     @Override
-    public Observable<UserProfile> observe(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<UserProfile> observe(String userId) {
+        if (userId == null) throw new ArgumentNullException("userId");
 
-        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(id);
+        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(userId);
 
         return RxFirebaseQuery.asObservable(reference)
                               .filter(DataSnapshot::exists)

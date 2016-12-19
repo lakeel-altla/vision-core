@@ -9,7 +9,7 @@ public interface UserProfileRepository {
 
     Single<UserProfile> save(UserProfile userProfile);
 
-    Observable<UserProfile> find(String id);
+    Observable<UserProfile> find(String userId);
 
-    Observable<UserProfile> observe(String id);
+    Observable<UserProfile> observe(String userId);
 }
