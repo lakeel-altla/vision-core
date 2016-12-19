@@ -39,11 +39,11 @@ public final class EnsureTextureCacheUseCase {
     public EnsureTextureCacheUseCase() {
     }
 
-    public Single<File> execute(String id, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<File> execute(String textureId, OnProgressListener onProgressListener) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         // Find the texture reference.
-        return userTextureRepository.find(id)
+        return userTextureRepository.find(textureId)
                                     // Ensure that the cache is up to date.
                                     .flatMap(userTexture -> ensureCacheUpToDate(userTexture, onProgressListener))
                                     .toSingle()

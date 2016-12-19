@@ -21,10 +21,10 @@ public final class DeleteUserAreaDescriptionUseCase {
     public DeleteUserAreaDescriptionUseCase() {
     }
 
-    public Single<String> execute(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> execute(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return userAreaDescriptionFileRepository.delete(id)
+        return userAreaDescriptionFileRepository.delete(areaDescriptionId)
                                                 .flatMap(userAreaDescriptionRepository::delete)
                                                 .subscribeOn(Schedulers.io());
     }

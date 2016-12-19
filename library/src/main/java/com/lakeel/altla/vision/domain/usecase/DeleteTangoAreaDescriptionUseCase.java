@@ -17,10 +17,10 @@ public final class DeleteTangoAreaDescriptionUseCase {
     public DeleteTangoAreaDescriptionUseCase() {
     }
 
-    public Single<String> execute(String uuid) {
-        if (uuid == null) throw new ArgumentNullException("uuid");
+    public Single<String> execute(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return tangoAreaDescriptionMetadataRepository.delete(uuid)
+        return tangoAreaDescriptionMetadataRepository.delete(areaDescriptionId)
                                                      .subscribeOn(Schedulers.io());
     }
 }
