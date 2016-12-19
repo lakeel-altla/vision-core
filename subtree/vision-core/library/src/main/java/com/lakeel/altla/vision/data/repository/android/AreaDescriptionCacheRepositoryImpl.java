@@ -25,10 +25,10 @@ public final class AreaDescriptionCacheRepositoryImpl implements AreaDescription
     }
 
     @Override
-    public Single<File> getFile(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<File> getFile(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("id");
 
-        return Single.just(resolveCacheFile(id));
+        return Single.just(resolveCacheFile(areaDescriptionId));
     }
 
     private File ensureCacheDirectory() {

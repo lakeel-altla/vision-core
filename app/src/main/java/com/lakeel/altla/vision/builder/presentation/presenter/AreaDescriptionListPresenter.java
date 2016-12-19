@@ -68,7 +68,7 @@ public final class AreaDescriptionListPresenter {
                 // Map it to the model for the view.
                 .map(userAreaDescription -> {
                     AreaDescriptionModel model =
-                            new AreaDescriptionModel(userAreaDescription.id, userAreaDescription.name);
+                            new AreaDescriptionModel(userAreaDescription.areaDescriptionId, userAreaDescription.name);
                     model.synced = userAreaDescription.synced;
                     return model;
                 })

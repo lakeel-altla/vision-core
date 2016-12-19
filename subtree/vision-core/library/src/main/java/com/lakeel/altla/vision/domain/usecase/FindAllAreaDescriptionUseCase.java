@@ -33,7 +33,7 @@ public final class FindAllAreaDescriptionUseCase {
     }
 
     private Observable<UserAreaDescription> resolveAreaDescription(UserAreaDescription tangoAreaDescroption) {
-        return userAreaDescriptionRepository.find(tangoAreaDescroption.id)
+        return userAreaDescriptionRepository.find(tangoAreaDescroption.areaDescriptionId)
                                             .map(userAreaDescription -> {
                                                 // Mark as synced.
                                                 userAreaDescription.synced = true;

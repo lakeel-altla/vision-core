@@ -9,9 +9,9 @@ public interface UserAreaDescriptionRepository {
 
     Single<UserAreaDescription> save(UserAreaDescription userAreaDescription);
 
-    Observable<UserAreaDescription> find(String id);
+    Observable<UserAreaDescription> find(String areaDescriptionId);
 
     Observable<UserAreaDescription> findAll();
 
-    Single<String> delete(String id);
+    Single<String> delete(String areaDescriptionId);
 }

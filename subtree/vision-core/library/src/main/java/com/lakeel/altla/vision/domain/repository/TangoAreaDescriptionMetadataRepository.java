@@ -7,9 +7,9 @@ import rx.Single;
 
 public interface TangoAreaDescriptionMetadataRepository {
 
-    Observable<TangoAreaDescriptionMetaData> find(String id);
+    Observable<TangoAreaDescriptionMetaData> find(String areaDescriptionId);
 
     Observable<TangoAreaDescriptionMetaData> findAll();
 
-    Single<String> delete(String id);
+    Single<String> delete(String areaDescriptionId);
 }

@@ -40,7 +40,7 @@ public final class UserAreaDescriptionRepositoryImpl implements UserAreaDescript
 
         rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                      .child(resolveCurrentUserId())
-                     .child(userAreaDescription.id)
+                     .child(userAreaDescription.areaDescriptionId)
                      .setValue(value, (error, reference) -> {
                          if (error != null) {
                              LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
@@ -51,12 +51,12 @@ public final class UserAreaDescriptionRepositoryImpl implements UserAreaDescript
     }
 
     @Override
-    public Observable<UserAreaDescription> find(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<UserAreaDescription> find(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         DatabaseReference reference = rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                                                    .child(resolveCurrentUserId())
-                                                   .child(id);
+                                                   .child(areaDescriptionId);
 
         return RxFirebaseQuery.asObservableForSingleValueEvent(reference)
                               .filter(DataSnapshot::exists)
@@ -75,17 +75,19 @@ public final class UserAreaDescriptionRepositoryImpl implements UserAreaDescript
     }
 
     @Override
-    public Single<String> delete(String id) {
+    public Single<String> delete(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
+
         rootReference.child(PATH_USER_AREA_DESCRIPTIONS)
                      .child(resolveCurrentUserId())
-                     .child(id)
+                     .child(areaDescriptionId)
                      .removeValue((error, reference) -> {
                          if (error != null) {
                              LOG.e(String.format("Failed to remove: reference = %s", reference), error.toException());
                          }
                      });
 
-        return Single.just(id);
+        return Single.just(areaDescriptionId);
     }
 
     private UserAreaDescription map(DataSnapshot snapshot) {
