@@ -4,15 +4,15 @@ import com.lakeel.altla.vision.ArgumentNullException;
 
 public final class UserTexture {
 
-    public final String id;
+    public final String textureId;
 
     public final String name;
 
-    public UserTexture(String id, String name) {
-        if (id == null) throw new ArgumentNullException("id");
+    public UserTexture(String textureId, String name) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
         if (name == null) throw new ArgumentNullException("name");
 
-        this.id = id;
+        this.textureId = textureId;
         this.name = name;
     }
 }

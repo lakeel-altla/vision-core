@@ -124,7 +124,7 @@ public final class MainPresenter
                 .subscribe(userTexture -> {
                     LOG.d("Found the user texture: userTexture = %s", userTexture);
 
-                    TextureModel model = new TextureModel(userTexture.id, userTexture.name);
+                    TextureModel model = new TextureModel(userTexture.textureId, userTexture.name);
                     models.add(model);
                     view.updateTextureModelPane();
                 }, e -> {

@@ -39,7 +39,7 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
 
         rootReference.child(PATH_USER_TEXTURES)
                      .child(resolveCurrentUserId())
-                     .child(userTexture.id)
+                     .child(userTexture.textureId)
                      .setValue(value, (error, reference) -> {
                          if (error != null) {
                              LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
@@ -50,12 +50,12 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
     }
 
     @Override
-    public Observable<UserTexture> find(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<UserTexture> find(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         DatabaseReference reference = rootReference.child(PATH_USER_TEXTURES)
                                                    .child(resolveCurrentUserId())
-                                                   .child(id);
+                                                   .child(textureId);
 
         return RxFirebaseQuery.asObservableForSingleValueEvent(reference)
                               .filter(DataSnapshot::exists)
@@ -74,19 +74,19 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
     }
 
     @Override
-    public Single<String> delete(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> delete(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         rootReference.child(PATH_USER_TEXTURES)
                      .child(resolveCurrentUserId())
-                     .child(id)
+                     .child(textureId)
                      .removeValue((error, reference) -> {
                          if (error != null) {
                              LOG.e(String.format("Failed to remove: reference = %s", reference), error.toException());
                          }
                      });
 
-        return Single.just(id);
+        return Single.just(textureId);
     }
 
     private UserTexture map(DataSnapshot snapshot) {

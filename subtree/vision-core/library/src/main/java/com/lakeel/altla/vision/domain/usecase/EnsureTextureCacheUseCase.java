@@ -52,7 +52,7 @@ public final class EnsureTextureCacheUseCase {
 
     private Observable<File> ensureCacheUpToDate(UserTexture userTexture, OnProgressListener onProgressListener) {
         // Find the cache file.
-        return textureCacheRepository.find(userTexture.id)
+        return textureCacheRepository.find(userTexture.textureId)
                                      .map(file -> new TimestampModel(userTexture, file))
                                      // Find the timestamp of the file in Firebase Storage.
                                      .flatMap(this::findRemoteTimestamp)
@@ -64,7 +64,7 @@ public final class EnsureTextureCacheUseCase {
     }
 
     private Observable<TimestampModel> findRemoteTimestamp(TimestampModel model) {
-        return userTextureFileMetadataRepository.find(model.userTexture.id)
+        return userTextureFileMetadataRepository.find(model.userTexture.textureId)
                                                 .map(metadata -> {
                                                     model.remoteUpdateTimeMillis = metadata.updateTimeMillis;
                                                     return model;
@@ -82,9 +82,9 @@ public final class EnsureTextureCacheUseCase {
     }
 
     private Observable<File> download(UserTexture userTexture, OnProgressListener onProgressListener) {
-        return textureCacheRepository.create(userTexture.id)
+        return textureCacheRepository.create(userTexture.textureId)
                                      .toObservable()
-                                     .map(file -> new DownloadModel(userTexture.id, file))
+                                     .map(file -> new DownloadModel(userTexture.textureId, file))
                                      .flatMap(downloadInfo -> download(downloadInfo, onProgressListener));
     }
 

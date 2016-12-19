@@ -110,7 +110,7 @@ public final class RegisterTexturePresenter {
                         model.name = entry.name;
                         view.showModel(model);
 
-                        loadCachedTextureBitmap(entry.id);
+                        loadCachedTextureBitmap(entry.textureId);
                     }, e -> {
                         // TODO: How to recover.
                         LOG.w(String.format("Failed to load the texture: id = %s", model.id), e);
@@ -284,7 +284,7 @@ public final class RegisterTexturePresenter {
                     LOG.i("Saved the user texture.");
 
                     // Update ID of the model.
-                    model.id = _userTexture.id;
+                    model.id = _userTexture.textureId;
 
                     view.showSnackbar(R.string.snackbar_done);
                 }, e -> {

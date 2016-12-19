@@ -9,9 +9,9 @@ public interface UserTextureRepository {
 
     Single<UserTexture> save(UserTexture userTexture);
 
-    Observable<UserTexture> find(String id);
+    Observable<UserTexture> find(String textureId);
 
     Observable<UserTexture> findAll();
 
-    Single<String> delete(String id);
+    Single<String> delete(String textureId);
 }

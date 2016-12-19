@@ -26,12 +26,12 @@ public final class UserTextureFileMetadataRepositoryImpl implements UserTextureF
     }
 
     @Override
-    public Observable<TextureFileMetadata> find(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<TextureFileMetadata> find(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         Task<StorageMetadata> task = rootReference.child(PATH_USER_TEXTURES)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id)
+                                                  .child(textureId)
                                                   .getMetadata();
 
         return RxGmsTask.asObservable(task)
