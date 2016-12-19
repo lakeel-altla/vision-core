@@ -26,7 +26,7 @@ public final class AreaDescriptionCacheRepositoryImpl implements AreaDescription
 
     @Override
     public Single<File> getFile(String areaDescriptionId) {
-        if (areaDescriptionId == null) throw new ArgumentNullException("id");
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         return Single.just(resolveCacheFile(areaDescriptionId));
     }
