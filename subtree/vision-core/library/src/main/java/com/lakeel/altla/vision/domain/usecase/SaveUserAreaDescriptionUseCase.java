@@ -46,11 +46,11 @@ public final class SaveUserAreaDescriptionUseCase {
     public SaveUserAreaDescriptionUseCase() {
     }
 
-    public Single<UserAreaDescription> execute(String id, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<UserAreaDescription> execute(String areaDescriptionId, OnProgressListener onProgressListener) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         // Convert arguments to the internal model.
-        return Single.just(new Model(id, onProgressListener))
+        return Single.just(new Model(areaDescriptionId, onProgressListener))
                      // Get the metadata from Tango.
                      .flatMap(this::getMetadataFromTango)
                      // Open the stream of the area description file as cache.
@@ -68,7 +68,7 @@ public final class SaveUserAreaDescriptionUseCase {
 
     private Single<Model> getMetadataFromTango(Model model) {
         return tangoAreaDescriptionMetadataRepository
-                .find(model.id)
+                .find(model.areaDescriptionId)
                 .map(metaData -> {
                     model.userAreaDescription = UserAreaDescriptionMapper.map(metaData);
                     return model;
@@ -78,7 +78,7 @@ public final class SaveUserAreaDescriptionUseCase {
 
     private Single<Model> createCacheStream(Model model) {
         return areaDescriptionCacheRepository
-                .getFile(model.id)
+                .getFile(model.areaDescriptionId)
                 .map(path -> {
                     try {
                         model.stream = new FileInputStream(path);
@@ -107,7 +107,7 @@ public final class SaveUserAreaDescriptionUseCase {
         return Single.using(
                 () -> model.stream,
                 stream -> userAreaDescriptionFileRepository
-                        .upload(model.id, model.stream,
+                        .upload(model.areaDescriptionId, model.stream,
                                 (totalBytes, bytesTransferred) ->
                                         model.onProgressListener.onProgress(model.totalBytes, bytesTransferred))
                         .map(id -> model),
@@ -130,7 +130,7 @@ public final class SaveUserAreaDescriptionUseCase {
 
     private final class Model {
 
-        final String id;
+        final String areaDescriptionId;
 
         final OnProgressListener onProgressListener;
 
@@ -140,8 +140,8 @@ public final class SaveUserAreaDescriptionUseCase {
 
         long totalBytes;
 
-        Model(String id, OnProgressListener onProgressListener) {
-            this.id = id;
+        Model(String areaDescriptionId, OnProgressListener onProgressListener) {
+            this.areaDescriptionId = areaDescriptionId;
             this.onProgressListener = onProgressListener;
         }
     }

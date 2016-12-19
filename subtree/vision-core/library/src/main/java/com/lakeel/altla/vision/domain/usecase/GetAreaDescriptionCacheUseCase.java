@@ -19,10 +19,10 @@ public final class GetAreaDescriptionCacheUseCase {
     public GetAreaDescriptionCacheUseCase() {
     }
 
-    public Single<File> execute(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<File> execute(String areaDescriptionId) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return areaDescriptionCacheRepository.getFile(id)
+        return areaDescriptionCacheRepository.getFile(areaDescriptionId)
                                              .subscribeOn(Schedulers.io());
     }
 }

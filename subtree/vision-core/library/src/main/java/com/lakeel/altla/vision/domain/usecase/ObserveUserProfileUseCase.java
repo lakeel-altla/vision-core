@@ -18,10 +18,10 @@ public final class ObserveUserProfileUseCase {
     public ObserveUserProfileUseCase() {
     }
 
-    public Observable<UserProfile> execute(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Observable<UserProfile> execute(String userId) {
+        if (userId == null) throw new ArgumentNullException("userId");
 
-        return userProfileRepository.observe(id)
+        return userProfileRepository.observe(userId)
                                     .subscribeOn(Schedulers.io());
     }
 }

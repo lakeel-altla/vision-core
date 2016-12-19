@@ -25,15 +25,15 @@ public final class DeleteTextureUseCase {
     public DeleteTextureUseCase() {
     }
 
-    public Single<String> execute(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> execute(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         // Delete the user texture in Firebase Database.
-        return userTextureRepository.delete(id)
+        return userTextureRepository.delete(textureId)
                                     // Delete the user texture file in Firebase Storage.
-                                    .flatMap(_id -> userTextureFileRepository.delete(id))
+                                    .flatMap(_id -> userTextureFileRepository.delete(textureId))
                                     // Delete the local cache of the user texture.
-                                    .flatMap(_id -> textureCacheRepository.delete(id))
+                                    .flatMap(_id -> textureCacheRepository.delete(textureId))
                                     .subscribeOn(Schedulers.io());
     }
 }
