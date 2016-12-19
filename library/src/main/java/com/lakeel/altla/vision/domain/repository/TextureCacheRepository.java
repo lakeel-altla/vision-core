@@ -7,9 +7,9 @@ import rx.Single;
 
 public interface TextureCacheRepository {
 
-    Observable<File> find(String fileId);
+    Observable<File> find(String textureId);
 
-    Single<File> create(String fileId);
+    Single<File> create(String textureId);
 
-    Single<String> delete(String fileId);
+    Single<String> delete(String textureId);
 }

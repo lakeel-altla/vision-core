@@ -26,13 +26,13 @@ public final class TextureCacheRepositoryImpl implements TextureCacheRepository 
     }
 
     @Override
-    public Observable<File> find(String fileId) {
-        if (fileId == null) throw new ArgumentNullException("fileId");
+    public Observable<File> find(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         return Observable.create(subscriber -> {
-            File file = resolveCacheFile(fileId);
+            File file = resolveCacheFile(textureId);
             if (file.exists()) {
-                LOG.d("The cache file exists: fileId = %s", fileId);
+                LOG.d("The cache file exists: textureId = %s", textureId);
 
                 subscriber.onNext(file);
             }
@@ -42,16 +42,16 @@ public final class TextureCacheRepositoryImpl implements TextureCacheRepository 
     }
 
     @Override
-    public Single<File> create(String fileId) {
-        if (fileId == null) throw new ArgumentNullException("fileId");
+    public Single<File> create(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         return Single.create(subscriber -> {
-            File file = resolveCacheFile(fileId);
+            File file = resolveCacheFile(textureId);
             try {
                 if (file.createNewFile()) {
-                    LOG.d("Created the new cache file: fileId = %s", fileId);
+                    LOG.d("Created the new cache file: textureId = %s", textureId);
                 } else {
-                    LOG.w("The cache file already exists: fileId = %s", fileId);
+                    LOG.w("The cache file already exists: textureId = %s", textureId);
                 }
 
                 subscriber.onSuccess(file);
@@ -62,27 +62,27 @@ public final class TextureCacheRepositoryImpl implements TextureCacheRepository 
     }
 
     @Override
-    public Single<String> delete(String fileId) {
-        if (fileId == null) throw new ArgumentNullException("fileId");
+    public Single<String> delete(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         return Single.create(subscriber -> {
-            File file = resolveCacheFile(fileId);
+            File file = resolveCacheFile(textureId);
             if (file.delete()) {
-                LOG.d("Deleted the new cache file: fileId = %s", fileId);
+                LOG.d("Deleted the new cache file: textureId = %s", textureId);
             } else {
-                LOG.w("The cache file does not exist: fileId = %s", fileId);
+                LOG.w("The cache file does not exist: textureId = %s", textureId);
             }
 
-            subscriber.onSuccess(fileId);
+            subscriber.onSuccess(textureId);
         });
     }
 
-    private File resolveCacheFile(String fileId) {
+    private File resolveCacheFile(String textureId) {
         File directory = new File(context.getCacheDir(), "textures");
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        return new File(directory, fileId);
+        return new File(directory, textureId);
     }
 }
