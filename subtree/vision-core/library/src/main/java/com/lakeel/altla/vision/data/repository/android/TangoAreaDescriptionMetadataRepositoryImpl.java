@@ -21,7 +21,7 @@ public final class TangoAreaDescriptionMetadataRepositoryImpl implements TangoAr
 
     @Override
     public Observable<TangoAreaDescriptionMetaData> find(String areaDescriptionId) {
-        if (areaDescriptionId == null) throw new ArgumentNullException("id");
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         return Observable.just(tango.loadAreaDescriptionMetaData(areaDescriptionId));
     }
@@ -34,7 +34,7 @@ public final class TangoAreaDescriptionMetadataRepositoryImpl implements TangoAr
 
     @Override
     public Single<String> delete(String areaDescriptionId) {
-        if (areaDescriptionId == null) throw new ArgumentNullException("id");
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         return Single.create(subscriber -> {
             tango.deleteAreaDescription(areaDescriptionId);
