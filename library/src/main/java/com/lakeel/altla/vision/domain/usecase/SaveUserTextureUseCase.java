@@ -81,7 +81,7 @@ public final class SaveUserTextureUseCase {
     private Single<Model> uploadUserTextureFile(Model model) {
         // Use the value obtained from the stream, because totalBytes returned by Firebase is always -1.
         return userTextureFileRepository
-                .save(model.userTexture.id,
+                .save(model.userTexture.textureId,
                       model.stream,
                       (totalBytes, bytesTransferred) ->
                               model.onProgressListener.onProgress(model.totalBytes, bytesTransferred)

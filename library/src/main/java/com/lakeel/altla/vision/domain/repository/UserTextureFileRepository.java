@@ -7,11 +7,11 @@ import rx.Single;
 
 public interface UserTextureFileRepository {
 
-    Single<String> save(String id, InputStream stream, OnProgressListener onProgressListener);
+    Single<String> save(String textureId, InputStream stream, OnProgressListener onProgressListener);
 
-    Single<String> delete(String id);
+    Single<String> delete(String textureId);
 
-    Single<String> download(String id, File destination, OnProgressListener onProgressListener);
+    Single<String> download(String textureId, File destination, OnProgressListener onProgressListener);
 
     interface OnProgressListener {
 

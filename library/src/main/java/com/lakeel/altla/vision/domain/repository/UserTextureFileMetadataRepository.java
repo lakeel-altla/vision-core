@@ -6,5 +6,5 @@ import rx.Observable;
 
 public interface UserTextureFileMetadataRepository {
 
-    Observable<TextureFileMetadata> find(String id);
+    Observable<TextureFileMetadata> find(String textureId);
 }

@@ -30,8 +30,8 @@ public final class UserTextureFileRepositoryImpl implements UserTextureFileRepos
     }
 
     @Override
-    public Single<String> save(String id, InputStream stream, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> save(String textureId, InputStream stream, OnProgressListener onProgressListener) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
         if (stream == null) throw new ArgumentNullException("stream");
 
         // NOTE:
@@ -42,37 +42,37 @@ public final class UserTextureFileRepositoryImpl implements UserTextureFileRepos
 
         StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(textureId);
         UploadTask task = reference.putStream(stream);
 
         return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> id);
+                                    .map(snapshot -> textureId);
     }
 
     @Override
-    public Single<String> delete(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> delete(String textureId) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
 
         StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(textureId);
         Task<Void> task = reference.delete();
 
-        return RxGmsTask.asObservable(task).map(aVoid -> id).toSingle();
+        return RxGmsTask.asObservable(task).map(aVoid -> textureId).toSingle();
     }
 
     @Override
-    public Single<String> download(String id, File destination, OnProgressListener onProgressListener) {
-        if (id == null) throw new ArgumentNullException("id");
+    public Single<String> download(String textureId, File destination, OnProgressListener onProgressListener) {
+        if (textureId == null) throw new ArgumentNullException("textureId");
         if (destination == null) throw new ArgumentNullException("destination");
 
         StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
                                                   .child(resolveCurrentUserId())
-                                                  .child(id);
+                                                  .child(textureId);
         FileDownloadTask task = reference.getFile(destination);
 
         return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> id);
+                                    .map(snapshot -> textureId);
     }
 
     private String resolveCurrentUserId() {
