@@ -37,7 +37,7 @@ public final class SignInWithGoogleUseCase {
         return Single.just(googleSignInAccount)
                      .flatMap(this::signIn)
                      .flatMap(this::ensureUserProfile)
-                     .map(userProfile -> userProfile.id)
+                     .map(userProfile -> userProfile.userId)
                      .flatMap(this::saveUserDevice)
                      .subscribeOn(Schedulers.io());
     }

@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.ArgumentNullException;
 
 public final class UserProfile {
 
-    public final String id;
+    public final String userId;
 
     public String displayName;
 
@@ -12,9 +12,9 @@ public final class UserProfile {
 
     public String photoUri;
 
-    public UserProfile(String id) {
-        if (id == null) throw new ArgumentNullException("id");
+    public UserProfile(String userId) {
+        if (userId == null) throw new ArgumentNullException("userId");
 
-        this.id = id;
+        this.userId = userId;
     }
 }
