@@ -339,7 +339,7 @@ public final class MainActivity extends AppCompatActivity
                 // Subscribe the connection.
                 if (subscriptionObserveConnection == null) {
                     subscriptionObserveConnection = observeConnectionUseCase
-                            .execute(user.getUid())
+                            .execute()
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe();
                 }
@@ -347,7 +347,7 @@ public final class MainActivity extends AppCompatActivity
                 // Subscribe the user profile.
                 if (subscriptionObserveUserProfile == null) {
                     subscriptionObserveUserProfile = observeUserProfileUseCase
-                            .execute(user.getUid())
+                            .execute()
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(userProfile -> {
                                 // Update UI each time the user profile is updated.

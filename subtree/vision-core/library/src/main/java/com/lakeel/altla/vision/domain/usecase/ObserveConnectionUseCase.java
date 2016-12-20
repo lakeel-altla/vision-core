@@ -1,8 +1,9 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.model.UserConnection;
 import com.lakeel.altla.vision.domain.repository.ConnectionRepository;
 import com.lakeel.altla.vision.domain.repository.UserConnectionRepository;
@@ -24,9 +25,11 @@ public final class ObserveConnectionUseCase {
     public ObserveConnectionUseCase() {
     }
 
-    public Observable<UserConnection> execute(String userId) {
-        if (userId == null) throw new ArgumentNullException("userId");
+    public Observable<UserConnection> execute() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
 
+        String userId = user.getUid();
         String instanceId = FirebaseInstanceId.getInstance().getId();
         UserConnection userConnection = new UserConnection(userId, instanceId);
 
