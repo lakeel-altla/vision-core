@@ -44,8 +44,7 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
                              .child(userTexture.textureId)
                              .setValue(value, (error, reference) -> {
                                  if (error != null) {
-                                     LOG.e(String.format("Failed to save: reference = %s", reference),
-                                           error.toException());
+                                     LOG.e("Failed to save.", error.toException());
                                  }
                              });
 
@@ -98,8 +97,7 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
                              .child(textureId)
                              .removeValue((error, reference) -> {
                                  if (error != null) {
-                                     LOG.e(String.format("Failed to remove: reference = %s", reference),
-                                           error.toException());
+                                     LOG.e("Failed to delete.", error.toException());
                                  }
                              });
 

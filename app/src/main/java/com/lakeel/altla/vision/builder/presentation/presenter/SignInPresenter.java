@@ -114,9 +114,9 @@ public final class SignInPresenter {
         Subscription subscription = signInWithGoogleUseCase
                 .execute(googleSignInAccount)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> view.showProgressDialog())
+                .doOnSubscribe(_subscription -> view.showProgressDialog())
                 .doOnUnsubscribe(() -> view.hideProgressDialog())
-                .subscribe(userId -> {
+                .subscribe(() -> {
                     // As the main thread is called first, the fragments are discarded in Firebase's callback,
                     // so the RX processing is also canceled and will not be called here.
                 }, e -> LOG.e("Failed to sign in to Firebase.", e));

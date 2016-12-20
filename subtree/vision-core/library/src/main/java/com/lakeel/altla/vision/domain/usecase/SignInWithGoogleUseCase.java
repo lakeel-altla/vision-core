@@ -17,6 +17,7 @@ import com.lakeel.altla.vision.domain.repository.UserProfileRepository;
 
 import javax.inject.Inject;
 
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 import rx.schedulers.Schedulers;
@@ -33,12 +34,11 @@ public final class SignInWithGoogleUseCase {
     public SignInWithGoogleUseCase() {
     }
 
-    public Single<String> execute(GoogleSignInAccount googleSignInAccount) {
+    public Completable execute(GoogleSignInAccount googleSignInAccount) {
         return Single.just(googleSignInAccount)
                      .flatMap(this::signIn)
                      .flatMap(this::ensureUserProfile)
-                     .map(userProfile -> userProfile.userId)
-                     .flatMap(this::saveUserDevice)
+                     .flatMapCompletable(this::saveUserDevice)
                      .subscribeOn(Schedulers.io());
     }
 
@@ -59,28 +59,26 @@ public final class SignInWithGoogleUseCase {
     }
 
     private Observable<UserProfile> saveUserProfile(final FirebaseUser firebaseUser) {
-        return Single
-                .<UserProfile>create(subscriber -> {
-                    UserProfile userProfile = new UserProfile(firebaseUser.getUid());
-                    userProfile.displayName = firebaseUser.getDisplayName();
-                    userProfile.email = firebaseUser.getEmail();
-                    if (firebaseUser.getPhotoUrl() != null) {
-                        userProfile.photoUri = firebaseUser.getPhotoUrl().toString();
-                    }
+        return Single.<UserProfile>create(subscriber -> {
+            UserProfile userProfile = new UserProfile(firebaseUser.getUid());
+            userProfile.displayName = firebaseUser.getDisplayName();
+            userProfile.email = firebaseUser.getEmail();
+            if (firebaseUser.getPhotoUrl() != null) {
+                userProfile.photoUri = firebaseUser.getPhotoUrl().toString();
+            }
 
-                    subscriber.onSuccess(userProfile);
-                })
-                .flatMap(userProfileRepository::save)
-                .toObservable();
+            subscriber.onSuccess(userProfile);
+        }).flatMap(userProfile -> userProfileRepository.save(userProfile)
+                                                       .toSingleDefault(userProfile))
+          .toObservable();
     }
 
-    private Single<String> saveUserDevice(String userId) {
+    private Completable saveUserDevice(UserProfile userProfile) {
         String instanceId = FirebaseInstanceId.getInstance().getId();
         long creationTime = FirebaseInstanceId.getInstance().getCreationTime();
 
-        UserDevice userDevice = new UserDevice(userId, instanceId, creationTime);
+        UserDevice userDevice = new UserDevice(userProfile.userId, instanceId, creationTime);
 
-        return userDeviceRepository.save(userDevice)
-                                   .map(_userDevice -> userId);
+        return userDeviceRepository.save(userDevice);
     }
 }

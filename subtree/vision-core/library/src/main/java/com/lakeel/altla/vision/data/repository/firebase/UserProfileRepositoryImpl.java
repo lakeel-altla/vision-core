@@ -10,8 +10,9 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.model.UserProfile;
 import com.lakeel.altla.vision.domain.repository.UserProfileRepository;
 
+import rx.Completable;
+import rx.CompletableSubscriber;
 import rx.Observable;
-import rx.Single;
 
 public final class UserProfileRepositoryImpl implements UserProfileRepository {
 
@@ -28,45 +29,57 @@ public final class UserProfileRepositoryImpl implements UserProfileRepository {
     }
 
     @Override
-    public Single<UserProfile> save(UserProfile userProfile) {
+    public Completable save(UserProfile userProfile) {
         if (userProfile == null) throw new ArgumentNullException("userProfile");
 
-        UserProfileValue value = new UserProfileValue();
-        value.displayName = userProfile.displayName;
-        value.email = userProfile.email;
-        value.photoUri = userProfile.photoUri;
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber subscriber) {
+                UserProfileValue value = new UserProfileValue();
+                value.displayName = userProfile.displayName;
+                value.email = userProfile.email;
+                value.photoUri = userProfile.photoUri;
 
-        rootReference.child(PATH_USER_PROFILES)
-                     .child(userProfile.userId)
-                     .setValue(value, (error, reference) -> {
-                         if (error != null) {
-                             LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
-                         }
-                     });
+                rootReference.child(PATH_USER_PROFILES)
+                             .child(userProfile.userId)
+                             .setValue(value, (error, reference) -> {
+                                 if (error != null) {
+                                     LOG.e("Failed to save.", error.toException());
+                                 }
+                             });
 
-        return Single.just(userProfile);
+                subscriber.onCompleted();
+            }
+        });
     }
 
     @Override
     public Observable<UserProfile> find(String userId) {
         if (userId == null) throw new ArgumentNullException("userId");
 
-        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(userId);
+        return Observable.<DatabaseReference>create(subscriber -> {
+            DatabaseReference reference = rootReference.child(PATH_USER_PROFILES)
+                                                       .child(userId);
 
-        return RxFirebaseQuery.asObservableForSingleValueEvent(reference)
-                              .filter(DataSnapshot::exists)
-                              .map(this::map);
+            subscriber.onNext(reference);
+            subscriber.onCompleted();
+        }).flatMap(RxFirebaseQuery::asObservableForSingleValueEvent)
+          .filter(DataSnapshot::exists)
+          .map(this::map);
     }
 
     @Override
     public Observable<UserProfile> observe(String userId) {
         if (userId == null) throw new ArgumentNullException("userId");
 
-        DatabaseReference reference = rootReference.child(PATH_USER_PROFILES).child(userId);
+        return Observable.<DatabaseReference>create(subscriber -> {
+            DatabaseReference reference = rootReference.child(PATH_USER_PROFILES)
+                                                       .child(userId);
 
-        return RxFirebaseQuery.asObservable(reference)
-                              .filter(DataSnapshot::exists)
-                              .map(this::map);
+            subscriber.onNext(reference);
+        }).flatMap(RxFirebaseQuery::asObservable)
+          .filter(DataSnapshot::exists)
+          .map(this::map);
     }
 
     private UserProfile map(DataSnapshot snapshot) {
