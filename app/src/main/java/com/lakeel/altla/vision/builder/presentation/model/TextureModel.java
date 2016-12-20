@@ -4,14 +4,14 @@ import android.graphics.Bitmap;
 
 public final class TextureModel {
 
-    public final String id;
+    public final String textureId;
 
     public final String name;
 
     public Bitmap bitmap;
 
-    public TextureModel(String id, String name) {
-        this.id = id;
+    public TextureModel(String textureId, String name) {
+        this.textureId = textureId;
         this.name = name;
     }
 }

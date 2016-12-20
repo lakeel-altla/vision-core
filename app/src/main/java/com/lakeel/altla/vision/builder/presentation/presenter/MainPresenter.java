@@ -116,21 +116,15 @@ public final class MainPresenter
     public void onStart() {
         models.clear();
 
-        LOG.d("Find all user textures.");
-
         Subscription subscription = findAllUserTexturesUseCase
                 .execute()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userTexture -> {
-                    LOG.d("Found the user texture: userTexture = %s", userTexture);
-
                     TextureModel model = new TextureModel(userTexture.textureId, userTexture.name);
                     models.add(model);
                     view.updateTextureModelPane();
                 }, e -> {
                     LOG.e("Failed to find all user textures.", e);
-                }, () -> {
-                    LOG.d("Found all user textures.");
                 });
         compositeSubscription.add(subscription);
     }
@@ -288,10 +282,8 @@ public final class MainPresenter
         public void onLoadBitmap(int position) {
             TextureModel model = models.get(position);
 
-            LOG.d("Loading the texture: id = %s", model.id);
-
             Subscription subscription = ensureTextureCacheUseCase
-                    .execute(model.id, (totalBytes, bytesTransferred) -> {
+                    .execute(model.textureId, (totalBytes, bytesTransferred) -> {
                         // Update the progress bar.
                         itemView.showProgress((int) totalBytes, (int) bytesTransferred);
                     })
@@ -299,14 +291,13 @@ public final class MainPresenter
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnUnsubscribe(() -> itemView.hideProgress())
                     .subscribe(bitmap -> {
-                        LOG.d("Loaded the texture.");
                         // Set the bitmap into the model.
                         model.bitmap = bitmap;
                         // Redraw.
                         itemView.showModel(model);
                     }, e -> {
                         // TODO: How to recover.
-                        LOG.w(String.format("Failed to load the texture: id = %s", model.id), e);
+                        LOG.w(String.format("Failed to load the texture: textureId = %s", model.textureId), e);
                     });
             compositeSubscription.add(subscription);
         }
@@ -322,7 +313,7 @@ public final class MainPresenter
 
         public void onClickImageButtonEditTexture(int position) {
             TextureModel model = models.get(position);
-            view.showEditTextureFragment(model.id);
+            view.showEditTextureFragment(model.textureId);
         }
 
         public void onClickImageButtonDeleteTexture(int position) {
@@ -332,19 +323,15 @@ public final class MainPresenter
         public void onDelete(int position) {
             TextureModel model = models.get(position);
 
-            LOG.d("Deleting the texture: id = %s", model.id);
-
             Subscription subscription = deleteTextureUseCase
-                    .execute(model.id)
+                    .execute(model.textureId)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(id -> {
-                        LOG.d("Deleted the texture.");
-
+                    .subscribe(() -> {
                         models.remove(position);
                         view.updateTextureModelPane();
                         view.showSnackbar(R.string.snackbar_done);
                     }, e -> {
-                        LOG.e(String.format("Failed to delete the texture: id = %s", model.id), e);
+                        LOG.e(String.format("Failed to delete the texture: textureId = %s", model.textureId), e);
                     });
             compositeSubscription.add(subscription);
         }

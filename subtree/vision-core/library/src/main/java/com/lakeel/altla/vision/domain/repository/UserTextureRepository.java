@@ -2,16 +2,16 @@ package com.lakeel.altla.vision.domain.repository;
 
 import com.lakeel.altla.vision.domain.model.UserTexture;
 
+import rx.Completable;
 import rx.Observable;
-import rx.Single;
 
 public interface UserTextureRepository {
 
-    Single<UserTexture> save(UserTexture userTexture);
+    Completable save(UserTexture userTexture);
 
-    Observable<UserTexture> find(String textureId);
+    Observable<UserTexture> find(String userId, String textureId);
 
-    Observable<UserTexture> findAll();
+    Observable<UserTexture> findAll(String userId);
 
-    Single<String> delete(String textureId);
+    Completable delete(String userId, String textureId);
 }

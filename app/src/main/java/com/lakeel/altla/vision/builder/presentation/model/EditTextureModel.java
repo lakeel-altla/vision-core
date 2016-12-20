@@ -5,7 +5,7 @@ import android.net.Uri;
 
 public final class EditTextureModel {
 
-    public String id;
+    public String textureId;
 
     public String name;
 

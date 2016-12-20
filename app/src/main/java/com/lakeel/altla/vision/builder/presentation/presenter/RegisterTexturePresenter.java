@@ -5,7 +5,6 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.EditTextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.RegisterTextureView;
-import com.lakeel.altla.vision.domain.model.UserTexture;
 import com.lakeel.altla.vision.domain.usecase.EnsureTextureCacheUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindDocumentBitmapUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindDocumentFilenameUseCase;
@@ -20,7 +19,6 @@ import android.support.annotation.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -68,7 +66,7 @@ public final class RegisterTexturePresenter {
     public void onCreate(@Nullable String id) {
         LOG.d("onCreate(): id = %s", id);
 
-        model.id = id;
+        model.textureId = id;
     }
 
     public void onCreateView(@NonNull RegisterTextureView view) {
@@ -93,15 +91,15 @@ public final class RegisterTexturePresenter {
             } else {
                 loadLocalTextureBitmap();
             }
-        } else if (model.id != null) {
+        } else if (model.textureId != null) {
             LOG.d("onStart(): Loading the existing texture.");
 
             // Load the texture information.
-            LOG.d("Loading the texture: id = %s", model.id);
+            LOG.d("Loading the texture: id = %s", model.textureId);
 
             Subscription subscription = findUserTextureUseCase
                     // Find the texture entry to get its name.
-                    .execute(model.id)
+                    .execute(model.textureId)
                     .toSingle()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(entry -> {
@@ -113,7 +111,7 @@ public final class RegisterTexturePresenter {
                         loadCachedTextureBitmap(entry.textureId);
                     }, e -> {
                         // TODO: How to recover.
-                        LOG.w(String.format("Failed to load the texture: id = %s", model.id), e);
+                        LOG.w(String.format("Failed to load the texture: id = %s", model.textureId), e);
                     });
             compositeSubscription.add(subscription);
         } else {
@@ -143,37 +141,32 @@ public final class RegisterTexturePresenter {
         }
     }
 
-    private void loadCachedTextureBitmap(String id) {
-        LOG.d("Loading the bitmap from the texture cache: id = %s", id);
-
+    private void loadCachedTextureBitmap(String textureId) {
         view.setTextureVisible(false);
 
         Subscription subscription = ensureTextureCacheUseCase
                 // Ensure the texture cache.
-                .execute(id, null)
+                .execute(textureId, null)
                 // Load the bitmap from the cache.
                 .flatMap(findFileBitmapUseCase::execute)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
                 .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
-                    LOG.d("Loaded the bitmap from the texture cache.");
-
                     model.bitmap = bitmap;
 
                     view.setTextureVisible(true);
                     view.showModel(model);
                 }, e -> {
                     // TODO: How to recover.
-                    LOG.w(String.format("Failed to load the bitmap from the texture cache: id = %s", id), e);
+                    LOG.w(String.format("Failed to load the bitmap from the texture cache: textureId = %s", textureId),
+                          e);
                 });
 
         compositeSubscription.add(subscription);
     }
 
     private void loadLocalTextureBitmap() {
-        LOG.d("Loading the local texture: uri = %s", model.localUri);
-
         view.setTextureVisible(false);
 
         Subscription subscription = findDocumentBitmapUseCase
@@ -182,8 +175,6 @@ public final class RegisterTexturePresenter {
                 .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
                 .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
-                    LOG.d("Loaded the local texture.");
-
                     model.bitmap = bitmap;
 
                     view.setTextureVisible(true);
@@ -203,8 +194,6 @@ public final class RegisterTexturePresenter {
     }
 
     private void loadLocalTextureBitmapAndName() {
-        LOG.d("Loading the bitmap and the name of the local texture: uri = %s", model.localUri);
-
         view.setTextureVisible(false);
 
         Subscription subscription = Single
@@ -217,8 +206,6 @@ public final class RegisterTexturePresenter {
                 .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
                 .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(localBitmap -> {
-                    LOG.d("Loaded the bitmap and the name of the local texture.");
-
                     model.bitmap = localBitmap.bitmap;
                     model.name = localBitmap.name;
 
@@ -226,8 +213,7 @@ public final class RegisterTexturePresenter {
                     view.showModel(model);
                 }, e -> {
                     if (e instanceof FileNotFoundException) {
-                        LOG.w(String.format("The image could not be found: uri = %s",
-                                            model.localUri), e);
+                        LOG.w(String.format("The image could not be found: uri = %s", model.localUri), e);
                         view.showSnackbar(R.string.snackbar_image_file_not_found);
                     } else if (e instanceof IOException) {
                         LOG.w("Closing file failed.", e);
@@ -257,20 +243,10 @@ public final class RegisterTexturePresenter {
 
     public void onClickButtonRegister() {
 
-        String id = model.id;
-
-        if (id == null) {
-            id = UUID.randomUUID().toString();
-        }
-
-        LOG.i("Saving the user texture: id = %s", id);
-
-        UserTexture userTexture = new UserTexture(id, model.name);
-
         String localUri = (model.localUri != null) ? model.localUri.toString() : null;
 
         Subscription subscription = saveUserTextureUseCase
-                .execute(userTexture, localUri, (totalBytes, bytesTransferred) -> {
+                .execute(model.textureId, model.name, localUri, (totalBytes, bytesTransferred) -> {
                     long increment = bytesTransferred - prevBytesTransferred;
                     prevBytesTransferred = bytesTransferred;
 
@@ -279,18 +255,13 @@ public final class RegisterTexturePresenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(() -> view.showUploadProgressDialog())
                 .doOnUnsubscribe(() -> view.hideUploadProgressDialog())
-                .subscribe(_userTexture -> {
-                    // Done.
-                    LOG.i("Saved the user texture.");
-
+                .subscribe(textureId -> {
                     // Update ID of the model.
-                    model.id = _userTexture.textureId;
+                    model.textureId = textureId;
 
                     view.showSnackbar(R.string.snackbar_done);
                 }, e -> {
-                    // Failed.
                     LOG.e("Failed to save the user texture.", e);
-
                     view.showSnackbar(R.string.snackbar_failed);
                 });
         compositeSubscription.add(subscription);

@@ -10,6 +10,8 @@ import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 
+import rx.Completable;
+import rx.CompletableSubscriber;
 import rx.Observable;
 import rx.Single;
 
@@ -62,18 +64,21 @@ public final class TextureCacheRepositoryImpl implements TextureCacheRepository 
     }
 
     @Override
-    public Single<String> delete(String textureId) {
+    public Completable delete(String textureId) {
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        return Single.create(subscriber -> {
-            File file = resolveCacheFile(textureId);
-            if (file.delete()) {
-                LOG.d("Deleted the new cache file: textureId = %s", textureId);
-            } else {
-                LOG.w("The cache file does not exist: textureId = %s", textureId);
-            }
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber subscriber) {
+                File file = resolveCacheFile(textureId);
+                if (file.delete()) {
+                    LOG.d("Deleted the new cache file: textureId = %s", textureId);
+                } else {
+                    LOG.w("The cache file does not exist: textureId = %s", textureId);
+                }
 
-            subscriber.onSuccess(textureId);
+                subscriber.onCompleted();
+            }
         });
     }
 

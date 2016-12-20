@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.domain.repository;
 
 import java.io.File;
 
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -11,5 +12,5 @@ public interface TextureCacheRepository {
 
     Single<File> create(String textureId);
 
-    Single<String> delete(String textureId);
+    Completable delete(String textureId);
 }
