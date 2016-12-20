@@ -17,9 +17,8 @@ import com.lakeel.altla.vision.builder.presentation.view.MainView;
 import com.lakeel.altla.vision.builder.presentation.view.TextureModelListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
-import com.lakeel.altla.vision.domain.usecase.EnsureTextureCacheUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindFileBitmapUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -62,10 +61,7 @@ public final class MainPresenter
     FindAllUserTexturesUseCase findAllUserTexturesUseCase;
 
     @Inject
-    EnsureTextureCacheUseCase ensureTextureCacheUseCase;
-
-    @Inject
-    FindFileBitmapUseCase findFileBitmapUseCase;
+    FindUserTextureBitmapUseCase findUserTextureBitmapUseCase;
 
     @Inject
     DeleteUserTextureUseCase deleteUserTextureUseCase;
@@ -282,12 +278,11 @@ public final class MainPresenter
         public void onLoadBitmap(int position) {
             TextureModel model = models.get(position);
 
-            Subscription subscription = ensureTextureCacheUseCase
+            Subscription subscription = findUserTextureBitmapUseCase
                     .execute(model.textureId, (totalBytes, bytesTransferred) -> {
                         // Update the progress bar.
                         itemView.showProgress((int) totalBytes, (int) bytesTransferred);
                     })
-                    .flatMap(findFileBitmapUseCase::execute)
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnUnsubscribe(() -> itemView.hideProgress())
                     .subscribe(bitmap -> {
@@ -297,7 +292,8 @@ public final class MainPresenter
                         itemView.showModel(model);
                     }, e -> {
                         // TODO: How to recover.
-                        LOG.w(String.format("Failed to load the texture: textureId = %s", model.textureId), e);
+                        LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", model.textureId),
+                              e);
                     });
             compositeSubscription.add(subscription);
         }
@@ -331,7 +327,7 @@ public final class MainPresenter
                         view.updateTextureModelPane();
                         view.showSnackbar(R.string.snackbar_done);
                     }, e -> {
-                        LOG.e(String.format("Failed to delete the texture: textureId = %s", model.textureId), e);
+                        LOG.e(String.format("Failed to delete the user texture: textureId = %s", model.textureId), e);
                     });
             compositeSubscription.add(subscription);
         }

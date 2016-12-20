@@ -5,10 +5,9 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.EditTextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.RegisterTextureView;
-import com.lakeel.altla.vision.domain.usecase.EnsureTextureCacheUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindDocumentBitmapUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindDocumentFilenameUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindFileBitmapUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserTextureUseCase;
 
@@ -35,10 +34,7 @@ public final class RegisterTexturePresenter {
     FindUserTextureUseCase findUserTextureUseCase;
 
     @Inject
-    EnsureTextureCacheUseCase ensureTextureCacheUseCase;
-
-    @Inject
-    FindFileBitmapUseCase findFileBitmapUseCase;
+    FindUserTextureBitmapUseCase findUserTextureBitmapUseCase;
 
     @Inject
     FindDocumentBitmapUseCase findDocumentBitmapUseCase;
@@ -144,11 +140,8 @@ public final class RegisterTexturePresenter {
     private void loadCachedTextureBitmap(String textureId) {
         view.setTextureVisible(false);
 
-        Subscription subscription = ensureTextureCacheUseCase
-                // Ensure the texture cache.
+        Subscription subscription = findUserTextureBitmapUseCase
                 .execute(textureId, null)
-                // Load the bitmap from the cache.
-                .flatMap(findFileBitmapUseCase::execute)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
                 .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
@@ -159,8 +152,7 @@ public final class RegisterTexturePresenter {
                     view.showModel(model);
                 }, e -> {
                     // TODO: How to recover.
-                    LOG.w(String.format("Failed to load the bitmap from the texture cache: textureId = %s", textureId),
-                          e);
+                    LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", textureId), e);
                 });
 
         compositeSubscription.add(subscription);
