@@ -8,7 +8,8 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.model.UserDevice;
 import com.lakeel.altla.vision.domain.repository.UserDeviceRepository;
 
-import rx.Single;
+import rx.Completable;
+import rx.CompletableSubscriber;
 
 public final class UserDeviceRepositoryImpl implements UserDeviceRepository {
 
@@ -25,25 +26,31 @@ public final class UserDeviceRepositoryImpl implements UserDeviceRepository {
     }
 
     @Override
-    public Single<UserDevice> save(UserDevice userDevice) {
+    public Completable save(UserDevice userDevice) {
         if (userDevice == null) throw new ArgumentNullException("userDevice");
 
-        UserDeviceValue value = new UserDeviceValue();
-        value.creationTime = userDevice.creationTime;
-        value.osName = userDevice.osName;
-        value.osModel = userDevice.osModel;
-        value.osVersion = userDevice.osVersion;
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber subscriber) {
+                UserDeviceValue value = new UserDeviceValue();
+                value.creationTime = userDevice.creationTime;
+                value.osName = userDevice.osName;
+                value.osModel = userDevice.osModel;
+                value.osVersion = userDevice.osVersion;
 
-        rootReference.child(PATH_USER_DEVICES)
-                     .child(userDevice.userId)
-                     .child(userDevice.instanceId)
-                     .setValue(value, (error, reference) -> {
-                         if (error != null) {
-                             LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
-                         }
-                     });
+                rootReference.child(PATH_USER_DEVICES)
+                             .child(userDevice.userId)
+                             .child(userDevice.instanceId)
+                             .setValue(value, (error, reference) -> {
+                                 if (error != null) {
+                                     LOG.e(String.format("Failed to save: reference = %s", reference),
+                                           error.toException());
+                                 }
+                             });
 
-        return Single.just(userDevice);
+                subscriber.onCompleted();
+            }
+        });
     }
 
     public final class UserDeviceValue {
