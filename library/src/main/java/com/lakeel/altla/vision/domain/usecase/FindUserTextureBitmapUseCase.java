@@ -7,10 +7,13 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.helper.OnProgressListener;
+import com.lakeel.altla.vision.domain.repository.FileBitmapRepository;
 import com.lakeel.altla.vision.domain.repository.TextureCacheRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileMetadataRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
+
+import android.graphics.Bitmap;
 
 import java.io.File;
 
@@ -20,9 +23,9 @@ import rx.Observable;
 import rx.Single;
 import rx.schedulers.Schedulers;
 
-public final class EnsureTextureCacheUseCase {
+public final class FindUserTextureBitmapUseCase {
 
-    private static final Log LOG = LogFactory.getLog(EnsureTextureCacheUseCase.class);
+    private static final Log LOG = LogFactory.getLog(FindUserTextureBitmapUseCase.class);
 
     @Inject
     UserTextureRepository userTextureRepository;
@@ -37,10 +40,13 @@ public final class EnsureTextureCacheUseCase {
     UserTextureFileMetadataRepository userTextureFileMetadataRepository;
 
     @Inject
-    public EnsureTextureCacheUseCase() {
+    FileBitmapRepository fileBitmapRepository;
+
+    @Inject
+    public FindUserTextureBitmapUseCase() {
     }
 
-    public Single<File> execute(String textureId, OnProgressListener onProgressListener) {
+    public Single<Bitmap> execute(String textureId, OnProgressListener onProgressListener) {
         if (textureId == null) throw new ArgumentNullException("textureId");
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -52,7 +58,7 @@ public final class EnsureTextureCacheUseCase {
                      .flatMap(this::ensureCacheFile)
                      .flatMap(this::findRemoteUpdateTime)
                      .flatMap(this::cacheIfOutdated)
-                     .map(_model -> _model.cacheFile)
+                     .flatMap(this::loadBitmap)
                      .subscribeOn(Schedulers.io());
     }
 
@@ -105,6 +111,11 @@ public final class EnsureTextureCacheUseCase {
             return Single.just(model)
                          .doOnSuccess(_model -> LOG.d("The cache is fresh: textureId = %s", model.textureId));
         }
+    }
+
+    private Single<Bitmap> loadBitmap(Model model) {
+        return fileBitmapRepository.find(model.cacheFile)
+                                   .subscribeOn(Schedulers.io());
     }
 
     private final class Model {
