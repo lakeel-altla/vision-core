@@ -1,8 +1,6 @@
 package com.lakeel.altla.vision.data.repository.firebase;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -10,11 +8,13 @@ import com.google.firebase.storage.UploadTask;
 import com.lakeel.altla.rx.firebase.storage.RxFirebaseStorageTask;
 import com.lakeel.altla.rx.tasks.RxGmsTask;
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.domain.helper.OnProgressListener;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileRepository;
 
 import java.io.File;
 import java.io.InputStream;
 
+import rx.Completable;
 import rx.Single;
 
 public final class UserTextureFileRepositoryImpl implements UserTextureFileRepository {
@@ -30,56 +30,54 @@ public final class UserTextureFileRepositoryImpl implements UserTextureFileRepos
     }
 
     @Override
-    public Single<String> save(String textureId, InputStream stream, OnProgressListener onProgressListener) {
+    public Completable save(String userId, String textureId, InputStream stream,
+                            OnProgressListener onProgressListener) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
         if (stream == null) throw new ArgumentNullException("stream");
 
-        // NOTE:
-        //
-        // Callbacks of the task for Firebase Storage are called by the thread for Firebase Storage.
-        // Calling RxJava methods from them will be also called by its thread.
-        // Note that a subsequent stream processing is also handled by its thread.
-
-        StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
-                                                  .child(resolveCurrentUserId())
-                                                  .child(textureId);
-        UploadTask task = reference.putStream(stream);
-
-        return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> textureId);
+        return Single.<StorageReference>create(subscriber -> {
+            StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
+                                                      .child(userId)
+                                                      .child(textureId);
+            subscriber.onSuccess(reference);
+        }).flatMapCompletable(reference -> {
+            UploadTask task = reference.putStream(stream);
+            return RxFirebaseStorageTask.asCompletable(task, onProgressListener::onProgress);
+        });
     }
 
     @Override
-    public Single<String> delete(String textureId) {
+    public Completable delete(String userId, String textureId) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
-                                                  .child(resolveCurrentUserId())
-                                                  .child(textureId);
-        Task<Void> task = reference.delete();
-
-        return RxGmsTask.asObservable(task).map(aVoid -> textureId).toSingle();
+        return Single.<StorageReference>create(subscriber -> {
+            StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
+                                                      .child(userId)
+                                                      .child(textureId);
+            subscriber.onSuccess(reference);
+        }).flatMapCompletable(reference -> {
+            Task<Void> task = reference.delete();
+            return RxGmsTask.asCompletable(task);
+        });
     }
 
     @Override
-    public Single<String> download(String textureId, File destination, OnProgressListener onProgressListener) {
+    public Completable download(String userId, String textureId, File destination,
+                                OnProgressListener onProgressListener) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
         if (destination == null) throw new ArgumentNullException("destination");
 
-        StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
-                                                  .child(resolveCurrentUserId())
-                                                  .child(textureId);
-        FileDownloadTask task = reference.getFile(destination);
-
-        return RxFirebaseStorageTask.asSingle(task, onProgressListener::onProgress)
-                                    .map(snapshot -> textureId);
-    }
-
-    private String resolveCurrentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            throw new IllegalStateException("The current user could not be resolved.");
-        }
-        return user.getUid();
+        return Single.<StorageReference>create(subscriber -> {
+            StorageReference reference = rootReference.child(PATH_USER_TEXTURES)
+                                                      .child(userId)
+                                                      .child(textureId);
+            subscriber.onSuccess(reference);
+        }).flatMapCompletable(reference -> {
+            FileDownloadTask task = reference.getFile(destination);
+            return RxFirebaseStorageTask.asCompletable(task, onProgressListener::onProgress);
+        });
     }
 }

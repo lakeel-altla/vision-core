@@ -1,8 +1,6 @@
 package com.lakeel.altla.vision.data.repository.firebase;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
@@ -12,6 +10,7 @@ import com.lakeel.altla.vision.domain.model.TextureFileMetadata;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileMetadataRepository;
 
 import rx.Observable;
+import rx.Single;
 
 public final class UserTextureFileMetadataRepositoryImpl implements UserTextureFileMetadataRepository {
 
@@ -26,28 +25,22 @@ public final class UserTextureFileMetadataRepositoryImpl implements UserTextureF
     }
 
     @Override
-    public Observable<TextureFileMetadata> find(String textureId) {
+    public Observable<TextureFileMetadata> find(String userId, String textureId) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        Task<StorageMetadata> task = rootReference.child(PATH_USER_TEXTURES)
-                                                  .child(resolveCurrentUserId())
-                                                  .child(textureId)
-                                                  .getMetadata();
-
-        return RxGmsTask.asObservable(task)
-                        .map(storageMetadata -> {
-                            TextureFileMetadata fileMetadata = new TextureFileMetadata();
-                            fileMetadata.createTimeMillis = storageMetadata.getCreationTimeMillis();
-                            fileMetadata.updateTimeMillis = storageMetadata.getUpdatedTimeMillis();
-                            return fileMetadata;
-                        });
-    }
-
-    private String resolveCurrentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            throw new IllegalStateException("The current user could not be resolved.");
-        }
-        return user.getUid();
+        return Single.<Task<StorageMetadata>>create(subscriber -> {
+            Task<StorageMetadata> task = rootReference.child(PATH_USER_TEXTURES)
+                                                      .child(userId)
+                                                      .child(textureId)
+                                                      .getMetadata();
+            subscriber.onSuccess(task);
+        }).flatMapObservable(RxGmsTask::asObservable)
+          .map(storageMetadata -> {
+              TextureFileMetadata fileMetadata = new TextureFileMetadata();
+              fileMetadata.createTimeMillis = storageMetadata.getCreationTimeMillis();
+              fileMetadata.updateTimeMillis = storageMetadata.getUpdatedTimeMillis();
+              return fileMetadata;
+          });
     }
 }

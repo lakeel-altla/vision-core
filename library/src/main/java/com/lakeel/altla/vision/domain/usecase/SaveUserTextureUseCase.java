@@ -1,6 +1,10 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.domain.helper.OnProgressListener;
 import com.lakeel.altla.vision.domain.model.UserTexture;
 import com.lakeel.altla.vision.domain.repository.DocumentRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileRepository;
@@ -8,9 +12,11 @@ import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
+import rx.Completable;
 import rx.Single;
 import rx.schedulers.Schedulers;
 
@@ -29,17 +35,27 @@ public final class SaveUserTextureUseCase {
     public SaveUserTextureUseCase() {
     }
 
-    public Single<UserTexture> execute(UserTexture userTexture, String localUri,
-                                       OnProgressListener onProgressListener) {
-        if (userTexture == null) throw new ArgumentNullException("userTexture");
+    public Single<String> execute(String textureId, String name, String localUri,
+                                  OnProgressListener onProgressListener) {
+        if (name == null) throw new ArgumentNullException("name");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
+
+        // Generate a new texture ID.
+        if (textureId == null) {
+            textureId = UUID.randomUUID().toString();
+        }
+
+        UserTexture userTexture = new UserTexture(user.getUid(), textureId, name);
 
         Single<Model> single = Single.just(new Model(userTexture, localUri, onProgressListener));
 
         if (localUri == null) {
             // Save the user texture to Firebase Database.
-            return single.flatMap(this::saveUserTexture)
-                         // Return the id.
-                         .map(model -> model.userTexture)
+            return single.flatMapCompletable(this::saveUserTexture)
+                         // Stream the texture ID.
+                         .toSingleDefault(textureId)
                          .subscribeOn(Schedulers.io());
         } else {
             // Open the stream to the android local file.
@@ -49,9 +65,9 @@ public final class SaveUserTextureUseCase {
                          // Upload its file to Firebase Storage.
                          .flatMap(this::uploadUserTextureFile)
                          // Save the user texture to Firebase Database.
-                         .flatMap(this::saveUserTexture)
-                         // Return the id.
-                         .map(model -> model.userTexture)
+                         .flatMapCompletable(this::saveUserTexture)
+                         // Stream the texture ID.
+                         .toSingleDefault(textureId)
                          .subscribeOn(Schedulers.io());
         }
     }
@@ -81,22 +97,16 @@ public final class SaveUserTextureUseCase {
     private Single<Model> uploadUserTextureFile(Model model) {
         // Use the value obtained from the stream, because totalBytes returned by Firebase is always -1.
         return userTextureFileRepository
-                .save(model.userTexture.textureId,
+                .save(model.userTexture.userId,
+                      model.userTexture.textureId,
                       model.stream,
                       (totalBytes, bytesTransferred) ->
                               model.onProgressListener.onProgress(model.totalBytes, bytesTransferred)
-                )
-                .map(id -> model);
+                ).toSingleDefault(model);
     }
 
-    private Single<Model> saveUserTexture(Model model) {
-        return userTextureRepository.save(model.userTexture)
-                                    .map(id -> model);
-    }
-
-    public interface OnProgressListener {
-
-        void onProgress(long totalBytes, long bytesTransferred);
+    private Completable saveUserTexture(Model model) {
+        return userTextureRepository.save(model.userTexture);
     }
 
     private final class Model {

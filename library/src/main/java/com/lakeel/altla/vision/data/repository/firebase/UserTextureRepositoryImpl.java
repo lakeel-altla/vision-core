@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.data.repository.firebase;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
@@ -13,8 +11,9 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.model.UserTexture;
 import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
 
+import rx.Completable;
+import rx.CompletableSubscriber;
 import rx.Observable;
-import rx.Single;
 
 public final class UserTextureRepositoryImpl implements UserTextureRepository {
 
@@ -31,78 +30,89 @@ public final class UserTextureRepositoryImpl implements UserTextureRepository {
     }
 
     @Override
-    public Single<UserTexture> save(UserTexture userTexture) {
+    public Completable save(UserTexture userTexture) {
         if (userTexture == null) throw new ArgumentNullException("userTexture");
 
-        UserTextureValue value = new UserTextureValue();
-        value.name = userTexture.name;
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber subscriber) {
+                UserTextureValue value = new UserTextureValue();
+                value.name = userTexture.name;
 
-        rootReference.child(PATH_USER_TEXTURES)
-                     .child(resolveCurrentUserId())
-                     .child(userTexture.textureId)
-                     .setValue(value, (error, reference) -> {
-                         if (error != null) {
-                             LOG.e(String.format("Failed to save: reference = %s", reference), error.toException());
-                         }
-                     });
+                rootReference.child(PATH_USER_TEXTURES)
+                             .child(userTexture.userId)
+                             .child(userTexture.textureId)
+                             .setValue(value, (error, reference) -> {
+                                 if (error != null) {
+                                     LOG.e(String.format("Failed to save: reference = %s", reference),
+                                           error.toException());
+                                 }
+                             });
 
-        return Single.just(userTexture);
+                subscriber.onCompleted();
+            }
+        });
     }
 
     @Override
-    public Observable<UserTexture> find(String textureId) {
+    public Observable<UserTexture> find(String userId, String textureId) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        DatabaseReference reference = rootReference.child(PATH_USER_TEXTURES)
-                                                   .child(resolveCurrentUserId())
-                                                   .child(textureId);
-
-        return RxFirebaseQuery.asObservableForSingleValueEvent(reference)
-                              .filter(DataSnapshot::exists)
-                              .map(this::map);
+        return Observable.<DatabaseReference>create(subscriber -> {
+            DatabaseReference reference = rootReference.child(PATH_USER_TEXTURES)
+                                                       .child(userId)
+                                                       .child(textureId);
+            subscriber.onNext(reference);
+            subscriber.onCompleted();
+        }).flatMap(RxFirebaseQuery::asObservableForSingleValueEvent)
+          .filter(DataSnapshot::exists)
+          .map(snapshot -> map(userId, snapshot));
     }
 
     @Override
-    public Observable<UserTexture> findAll() {
-        Query query = rootReference.child(PATH_USER_TEXTURES)
-                                   .child(resolveCurrentUserId())
-                                   .orderByChild(UserTextureValue.FIELD_NAME);
+    public Observable<UserTexture> findAll(String userId) {
+        if (userId == null) throw new ArgumentNullException("userId");
 
-        return RxFirebaseQuery.asObservableForSingleValueEvent(query)
-                              .flatMap(snapshot -> Observable.from(snapshot.getChildren()))
-                              .map(this::map);
+        return Observable.<Query>create(subscriber -> {
+            Query query = rootReference.child(PATH_USER_TEXTURES)
+                                       .child(userId)
+                                       .orderByChild(UserTextureValue.FIELD_NAME);
+            subscriber.onNext(query);
+            subscriber.onCompleted();
+        }).flatMap(RxFirebaseQuery::asObservableForSingleValueEvent)
+          .flatMap(snapshot -> Observable.from(snapshot.getChildren()))
+          .map(snapshot -> map(userId, snapshot));
     }
 
     @Override
-    public Single<String> delete(String textureId) {
+    public Completable delete(String userId, String textureId) {
+        if (userId == null) throw new ArgumentNullException("userId");
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        rootReference.child(PATH_USER_TEXTURES)
-                     .child(resolveCurrentUserId())
-                     .child(textureId)
-                     .removeValue((error, reference) -> {
-                         if (error != null) {
-                             LOG.e(String.format("Failed to remove: reference = %s", reference), error.toException());
-                         }
-                     });
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber subscriber) {
+                rootReference.child(PATH_USER_TEXTURES)
+                             .child(userId)
+                             .child(textureId)
+                             .removeValue((error, reference) -> {
+                                 if (error != null) {
+                                     LOG.e(String.format("Failed to remove: reference = %s", reference),
+                                           error.toException());
+                                 }
+                             });
 
-        return Single.just(textureId);
+                subscriber.onCompleted();
+            }
+        });
     }
 
-    private UserTexture map(DataSnapshot snapshot) {
-        String id = snapshot.getKey();
+    private UserTexture map(String userId, DataSnapshot snapshot) {
+        String textureId = snapshot.getKey();
         UserTextureValue value = snapshot.getValue(UserTextureValue.class);
 
-        return new UserTexture(id, value.name);
-    }
-
-    private String resolveCurrentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            throw new IllegalStateException("The current user could not be resolved.");
-        }
-
-        return user.getUid();
+        return new UserTexture(userId, textureId, value.name);
     }
 
     public static final class UserTextureValue {

@@ -1,15 +1,16 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.domain.model.UserTexture;
+import com.lakeel.altla.vision.domain.helper.OnProgressListener;
 import com.lakeel.altla.vision.domain.repository.TextureCacheRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileMetadataRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureFileRepository;
 import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
-
-import android.support.annotation.NonNull;
 
 import java.io.File;
 
@@ -42,90 +43,92 @@ public final class EnsureTextureCacheUseCase {
     public Single<File> execute(String textureId, OnProgressListener onProgressListener) {
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        // Find the texture reference.
-        return userTextureRepository.find(textureId)
-                                    // Ensure that the cache is up to date.
-                                    .flatMap(userTexture -> ensureCacheUpToDate(userTexture, onProgressListener))
-                                    .toSingle()
-                                    .subscribeOn(Schedulers.io());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
+
+        Model model = new Model(user.getUid(), textureId, onProgressListener);
+
+        return Single.just(model)
+                     .flatMap(this::ensureCacheFile)
+                     .flatMap(this::findRemoteUpdateTime)
+                     .flatMap(this::cacheIfOutdated)
+                     .map(_model -> _model.cacheFile)
+                     .subscribeOn(Schedulers.io());
     }
 
-    private Observable<File> ensureCacheUpToDate(UserTexture userTexture, OnProgressListener onProgressListener) {
-        // Find the cache file.
-        return textureCacheRepository.find(userTexture.textureId)
-                                     .map(file -> new TimestampModel(userTexture, file))
-                                     // Find the timestamp of the file in Firebase Storage.
-                                     .flatMap(this::findRemoteTimestamp)
-                                     // Download the file from Firebase Storage if its cache is outdated;
-                                     // otherwise return the cache.
-                                     .flatMap(model -> downloadIfCacheOutdated(model, onProgressListener))
-                                     // Download the file from Firebase Storage if no cache exists.
-                                     .switchIfEmpty(download(userTexture, onProgressListener));
+    private Single<Model> ensureCacheFile(Model model) {
+        return textureCacheRepository
+                .find(model.textureId)
+                .doOnNext(file -> LOG.d("Found the cache: file = %s", file))
+                .map(file -> {
+                    model.cacheFile = file;
+                    model.cached = true;
+                    return model;
+                }).switchIfEmpty(createCacheFile(model).toObservable())
+                .toSingle();
     }
 
-    private Observable<TimestampModel> findRemoteTimestamp(TimestampModel model) {
-        return userTextureFileMetadataRepository.find(model.userTexture.textureId)
-                                                .map(metadata -> {
-                                                    model.remoteUpdateTimeMillis = metadata.updateTimeMillis;
-                                                    return model;
-                                                });
+    private Single<Model> createCacheFile(Model model) {
+        return textureCacheRepository
+                .create(model.textureId)
+                .doOnSuccess(file -> LOG.d("Created the new cache: file = %s", file))
+                .map(file -> {
+                    model.cacheFile = file;
+                    return model;
+                });
     }
 
-    private Observable<File> downloadIfCacheOutdated(TimestampModel model, OnProgressListener onProgressListener) {
+    private Single<Model> findRemoteUpdateTime(Model model) {
+        return userTextureFileMetadataRepository
+                .find(model.userId, model.textureId)
+                .doOnNext(metadata -> LOG.d("Found the texture metadata: textureId = %s", model.textureId))
+                .map(metadata -> {
+                    model.remoteUpdateTimeMillis = metadata.updateTimeMillis;
+                    return model;
+                })
+                .switchIfEmpty(Observable.create(subscriber -> {
+                    // TODO
+                    subscriber.onError(new RuntimeException(String.format(
+                            "The user texture metadata not found: textureId = %s",
+                            model.textureId)));
+                }))
+                .toSingle();
+    }
+
+    private Single<Model> cacheIfOutdated(Model model) {
         if (model.isCacheOutdated()) {
-            LOG.d("The cache is outdated.");
-            return download(model.userTexture, onProgressListener);
+            return userTextureFileRepository
+                    .download(model.userId, model.textureId, model.cacheFile, model.onProgressListener)
+                    .doOnCompleted(() -> LOG.d("Donwloaded the texture: textureId = %s", model.textureId))
+                    .toSingleDefault(model);
         } else {
-            LOG.d("The cache is up to date.");
-            return Observable.just(model.cacheFile);
+            return Single.just(model)
+                         .doOnSuccess(_model -> LOG.d("The cache is fresh: textureId = %s", model.textureId));
         }
     }
 
-    private Observable<File> download(UserTexture userTexture, OnProgressListener onProgressListener) {
-        return textureCacheRepository.create(userTexture.textureId)
-                                     .toObservable()
-                                     .map(file -> new DownloadModel(userTexture.textureId, file))
-                                     .flatMap(downloadInfo -> download(downloadInfo, onProgressListener));
-    }
+    private final class Model {
 
-    private Observable<File> download(DownloadModel downloadModel, OnProgressListener onProgressListener) {
-        return userTextureFileRepository.download(downloadModel.id, downloadModel.file, onProgressListener::onProgress)
-                                        .toObservable()
-                                        .map(fileId -> downloadModel.file);
-    }
+        final String userId;
 
-    public interface OnProgressListener {
+        final String textureId;
 
-        void onProgress(long totalBytes, long bytesTransferred);
-    }
+        final OnProgressListener onProgressListener;
 
-    private final class TimestampModel {
+        File cacheFile;
 
-        final UserTexture userTexture;
-
-        final File cacheFile;
+        boolean cached;
 
         long remoteUpdateTimeMillis;
 
-        TimestampModel(@NonNull UserTexture userTexture, @NonNull File cacheFile) {
-            this.userTexture = userTexture;
-            this.cacheFile = cacheFile;
+        Model(String userId, String textureId, OnProgressListener onProgressListener) {
+            this.userId = userId;
+            this.textureId = textureId;
+            this.onProgressListener = onProgressListener;
         }
 
         boolean isCacheOutdated() {
-            return cacheFile.lastModified() < remoteUpdateTimeMillis;
-        }
-    }
-
-    private final class DownloadModel {
-
-        final String id;
-
-        final File file;
-
-        DownloadModel(String id, File file) {
-            this.id = id;
-            this.file = file;
+            return !cached || cacheFile.lastModified() < remoteUpdateTimeMillis;
         }
     }
 }

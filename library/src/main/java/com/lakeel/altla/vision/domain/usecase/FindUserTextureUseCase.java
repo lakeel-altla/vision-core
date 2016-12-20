@@ -1,5 +1,8 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.model.UserTexture;
 import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
@@ -21,7 +24,10 @@ public final class FindUserTextureUseCase {
     public Observable<UserTexture> execute(String textureId) {
         if (textureId == null) throw new ArgumentNullException("textureId");
 
-        return userTextureRepository.find(textureId)
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
+
+        return userTextureRepository.find(user.getUid(), textureId)
                                     .subscribeOn(Schedulers.io());
     }
 }
