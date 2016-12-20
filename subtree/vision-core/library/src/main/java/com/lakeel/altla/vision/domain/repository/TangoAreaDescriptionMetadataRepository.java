@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.domain.repository;
 
 import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
 
+import rx.Completable;
 import rx.Observable;
-import rx.Single;
 
 public interface TangoAreaDescriptionMetadataRepository {
 
@@ -11,5 +11,5 @@ public interface TangoAreaDescriptionMetadataRepository {
 
     Observable<TangoAreaDescriptionMetaData> findAll();
 
-    Single<String> delete(String areaDescriptionId);
+    Completable delete(String areaDescriptionId);
 }

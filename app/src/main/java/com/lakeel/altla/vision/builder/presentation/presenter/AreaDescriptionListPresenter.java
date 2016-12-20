@@ -158,16 +158,12 @@ public final class AreaDescriptionListPresenter {
         }
 
         private void desync(int position, AreaDescriptionModel model) {
-            LOG.d("Desyncing the area description: id = %s", model.id);
-
             Subscription subscription = deleteUserAreaDescriptionUseCase
-                    .execute(model.id)
+                    .execute(model.areaDescriptionId)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe(() -> view.showDesyncProgressDialog())
+                    .doOnSubscribe(_subscription -> view.showDesyncProgressDialog())
                     .doOnUnsubscribe(() -> view.hideDesyncProgressDialog())
-                    .subscribe(s -> {
-                        LOG.d("Desynced the area description.");
-
+                    .subscribe(() -> {
                         model.synced = false;
 
                         view.updateItem(position);
@@ -185,7 +181,7 @@ public final class AreaDescriptionListPresenter {
                     .execute()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(directory -> {
-                        exportingId = model.id;
+                        exportingId = model.areaDescriptionId;
                         exportingPosition = position;
                         view.showExportActivity(exportingId, directory);
                     });

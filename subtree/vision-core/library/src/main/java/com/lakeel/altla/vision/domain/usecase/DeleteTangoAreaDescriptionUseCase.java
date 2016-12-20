@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.domain.repository.TangoAreaDescriptionMetadataRep
 
 import javax.inject.Inject;
 
-import rx.Single;
+import rx.Completable;
 import rx.schedulers.Schedulers;
 
 public final class DeleteTangoAreaDescriptionUseCase {
@@ -17,7 +17,7 @@ public final class DeleteTangoAreaDescriptionUseCase {
     public DeleteTangoAreaDescriptionUseCase() {
     }
 
-    public Single<String> execute(String areaDescriptionId) {
+    public Completable execute(String areaDescriptionId) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         return tangoAreaDescriptionMetadataRepository.delete(areaDescriptionId)

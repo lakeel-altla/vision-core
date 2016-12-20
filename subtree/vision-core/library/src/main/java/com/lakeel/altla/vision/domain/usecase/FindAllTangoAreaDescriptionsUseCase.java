@@ -1,5 +1,8 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.lakeel.altla.vision.domain.mapper.UserAreaDescriptionMapper;
 import com.lakeel.altla.vision.domain.model.UserAreaDescription;
 import com.lakeel.altla.vision.domain.repository.TangoAreaDescriptionMetadataRepository;
@@ -19,8 +22,12 @@ public final class FindAllTangoAreaDescriptionsUseCase {
     }
 
     public Observable<UserAreaDescription> execute() {
-        return tangoAreaDescriptionMetadataRepository.findAll()
-                                                     .map(UserAreaDescriptionMapper::map)
-                                                     .subscribeOn(Schedulers.io());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
+
+        return tangoAreaDescriptionMetadataRepository
+                .findAll()
+                .map(metaData -> UserAreaDescriptionMapper.map(user.getUid(), metaData))
+                .subscribeOn(Schedulers.io());
     }
 }

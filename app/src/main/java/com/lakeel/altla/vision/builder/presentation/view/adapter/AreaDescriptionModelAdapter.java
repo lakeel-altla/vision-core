@@ -75,7 +75,7 @@ public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<Area
         @Override
         public void showModel(@NonNull AreaDescriptionModel model) {
             textViewName.setText(model.name);
-            textViewId.setText(model.id);
+            textViewId.setText(model.areaDescriptionId);
 
             if (model.synced) {
                 imageButtonSyncCloud.setImageResource(R.drawable.ic_cloud_done_black_24dp);

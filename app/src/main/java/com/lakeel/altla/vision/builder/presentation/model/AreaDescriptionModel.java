@@ -4,14 +4,14 @@ import android.support.annotation.NonNull;
 
 public final class AreaDescriptionModel {
 
-    public final String id;
+    public final String areaDescriptionId;
 
     public final String name;
 
     public boolean synced;
 
-    public AreaDescriptionModel(@NonNull String id, @NonNull String name) {
-        this.id = id;
+    public AreaDescriptionModel(@NonNull String areaDescriptionId, @NonNull String name) {
+        this.areaDescriptionId = areaDescriptionId;
         this.name = name;
     }
 }
