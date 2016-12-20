@@ -6,8 +6,11 @@ import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.repository.TangoAreaDescriptionMetadataRepository;
 
+import java.util.List;
+
+import rx.Completable;
+import rx.CompletableSubscriber;
 import rx.Observable;
-import rx.Single;
 
 public final class TangoAreaDescriptionMetadataRepositoryImpl implements TangoAreaDescriptionMetadataRepository {
 
@@ -23,22 +26,33 @@ public final class TangoAreaDescriptionMetadataRepositoryImpl implements TangoAr
     public Observable<TangoAreaDescriptionMetaData> find(String areaDescriptionId) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return Observable.just(tango.loadAreaDescriptionMetaData(areaDescriptionId));
+        return Observable.create(subscriber -> {
+            TangoAreaDescriptionMetaData metaData = tango.loadAreaDescriptionMetaData(areaDescriptionId);
+            subscriber.onNext(metaData);
+            subscriber.onCompleted();
+        });
     }
 
     @Override
     public Observable<TangoAreaDescriptionMetaData> findAll() {
-        return Observable.from(tango.listAreaDescriptions())
-                         .flatMap(this::find);
+        return Observable.<String>create(subscriber -> {
+            List<String> areaDescriptionIds = tango.listAreaDescriptions();
+            for (String areaDescriptionId : areaDescriptionIds) {
+                subscriber.onNext(areaDescriptionId);
+            }
+            subscriber.onCompleted();
+        }).flatMap(this::find);
     }
 
     @Override
-    public Single<String> delete(String areaDescriptionId) {
+    public Completable delete(String areaDescriptionId) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return Single.create(subscriber -> {
-            tango.deleteAreaDescription(areaDescriptionId);
-            subscriber.onSuccess(areaDescriptionId);
+        return Completable.create(new Completable.OnSubscribe() {
+            @Override
+            public void call(CompletableSubscriber completableSubscriber) {
+                tango.deleteAreaDescription(areaDescriptionId);
+            }
         });
     }
 }

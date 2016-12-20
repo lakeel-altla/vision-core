@@ -1,6 +1,10 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.domain.helper.OnProgressListener;
 import com.lakeel.altla.vision.domain.mapper.UserAreaDescriptionMapper;
 import com.lakeel.altla.vision.domain.model.UserAreaDescription;
 import com.lakeel.altla.vision.domain.repository.AreaDescriptionCacheRepository;
@@ -15,6 +19,7 @@ import java.io.InputStream;
 
 import javax.inject.Inject;
 
+import rx.Completable;
 import rx.Single;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -49,8 +54,11 @@ public final class SaveUserAreaDescriptionUseCase {
     public Single<UserAreaDescription> execute(String areaDescriptionId, OnProgressListener onProgressListener) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) throw new IllegalStateException("The user is not signed in.");
+
         // Convert arguments to the internal model.
-        return Single.just(new Model(areaDescriptionId, onProgressListener))
+        return Single.just(new Model(user.getUid(), areaDescriptionId, onProgressListener))
                      // Get the metadata from Tango.
                      .flatMap(this::getMetadataFromTango)
                      // Open the stream of the area description file as cache.
@@ -70,7 +78,7 @@ public final class SaveUserAreaDescriptionUseCase {
         return tangoAreaDescriptionMetadataRepository
                 .find(model.areaDescriptionId)
                 .map(metaData -> {
-                    model.userAreaDescription = UserAreaDescriptionMapper.map(metaData);
+                    model.userAreaDescription = UserAreaDescriptionMapper.map(model.userId, metaData);
                     return model;
                 })
                 .toSingle();
@@ -104,31 +112,30 @@ public final class SaveUserAreaDescriptionUseCase {
     }
 
     private Single<Model> uploadUserAreaDescriptionFile(Model model) {
-        return Single.using(
-                () -> model.stream,
-                stream -> userAreaDescriptionFileRepository
-                        .upload(model.areaDescriptionId, model.stream,
-                                (totalBytes, bytesTransferred) ->
-                                        model.onProgressListener.onProgress(model.totalBytes, bytesTransferred))
-                        .map(id -> model),
-                closeStream);
+        return Completable
+                .using(() -> model.stream,
+                       stream -> userAreaDescriptionFileRepository.upload(
+                               model.userId, model.areaDescriptionId, model.stream,
+                               (totalBytes, bytesTransferred) ->
+                                       model.onProgressListener.onProgress(model.totalBytes, bytesTransferred)),
+                       closeStream)
+                .toSingleDefault(model);
     }
 
     private Single<Model> saveUserAreaDescription(Model model) {
-        return userAreaDescriptionRepository.save(model.userAreaDescription)
-                                            .map(userAreaDescription -> {
-                                                // Mark as synced.
-                                                model.userAreaDescription.synced = true;
-                                                return model;
-                                            });
-    }
-
-    public interface OnProgressListener {
-
-        void onProgress(long totalBytes, long bytesTransferred);
+        return userAreaDescriptionRepository
+                .save(model.userAreaDescription)
+                .toSingleDefault(model)
+                .map(_model -> {
+                    // Mark as synced.
+                    _model.userAreaDescription.synced = true;
+                    return _model;
+                });
     }
 
     private final class Model {
+
+        final String userId;
 
         final String areaDescriptionId;
 
@@ -140,7 +147,8 @@ public final class SaveUserAreaDescriptionUseCase {
 
         long totalBytes;
 
-        Model(String areaDescriptionId, OnProgressListener onProgressListener) {
+        Model(String userId, String areaDescriptionId, OnProgressListener onProgressListener) {
+            this.userId = userId;
             this.areaDescriptionId = areaDescriptionId;
             this.onProgressListener = onProgressListener;
         }
