@@ -6,7 +6,7 @@ import rx.Single;
 
 public interface UserConnectionRepository {
 
-    Single<UserConnection> setOnline(UserConnection userConnection);
+    Single<UserConnection> markAsOnline(UserConnection userConnection);
 
-    Single<UserConnection> setOffline(UserConnection userConnection);
+    Single<UserConnection> markAsOffline(UserConnection userConnection);
 }

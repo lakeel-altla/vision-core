@@ -33,57 +33,59 @@ public final class UserConnectionRepositoryImpl implements UserConnectionReposit
     }
 
     @Override
-    public Single<UserConnection> setOnline(UserConnection userConnection) {
+    public Single<UserConnection> markAsOnline(UserConnection userConnection) {
         if (userConnection == null) throw new ArgumentNullException("userConnection");
 
-        DatabaseReference connectionReference = rootReference.child(PATH_USER_CONNECTIONS)
-                                                             .child(userConnection.userId)
-                                                             .child(userConnection.instanceId);
-        DatabaseReference onlineReference = connectionReference.child(PATH_ONLINE);
-        DatabaseReference lastOnlineTimeReference = connectionReference.child(PATH_LAST_ONLINE_TIME);
+        return Single.create(subscriber -> {
+            DatabaseReference connectionReference = rootReference.child(PATH_USER_CONNECTIONS)
+                                                                 .child(userConnection.userId)
+                                                                 .child(userConnection.instanceId);
+            DatabaseReference onlineReference = connectionReference.child(PATH_ONLINE);
+            DatabaseReference lastOnlineTimeReference = connectionReference.child(PATH_LAST_ONLINE_TIME);
 
-        // when connected.
-        onlineReference.setValue(Boolean.TRUE, (error, reference) -> {
-            if (error != null) {
-                LOG.e(String.format("Failed to setOnline: reference = %s", reference), error.toException());
-            }
-        });
+            // when connected.
+            onlineReference.setValue(Boolean.TRUE, (error, reference) -> {
+                if (error != null) {
+                    LOG.e(String.format("Failed to do setValue: reference = %s", reference), error.toException());
+                }
+            });
 
-        // when disconnected.
-        onlineReference.onDisconnect().setValue(Boolean.FALSE, (error, reference) -> {
-            if (error != null) {
-                LOG.e(String.format("Failed to onDisconnect on setOnline: reference = %s", reference),
-                      error.toException());
-            }
-        });
-        lastOnlineTimeReference.onDisconnect().setValue(ServerValue.TIMESTAMP, (error, reference) -> {
-            if (error != null) {
-                LOG.e(String.format("Failed to onDisconnect on setOnline: reference = %s", reference),
-                      error.toException());
-            }
-        });
+            // when disconnected.
+            onlineReference.onDisconnect().setValue(Boolean.FALSE, (error, reference) -> {
+                if (error != null) {
+                    LOG.e(String.format("Failed to do setValue: reference = %s", reference), error.toException());
+                }
+            });
+            lastOnlineTimeReference.onDisconnect().setValue(ServerValue.TIMESTAMP, (error, reference) -> {
+                if (error != null) {
+                    LOG.e(String.format("Failed to do setValue: reference = %s", reference), error.toException());
+                }
+            });
 
-        return Single.just(userConnection);
+            subscriber.onSuccess(userConnection);
+        });
     }
 
     @Override
-    public Single<UserConnection> setOffline(UserConnection userConnection) {
+    public Single<UserConnection> markAsOffline(UserConnection userConnection) {
         if (userConnection == null) throw new ArgumentNullException("userConnection");
 
-        DatabaseReference connectionReference = rootReference.child(PATH_USER_CONNECTIONS)
-                                                             .child(userConnection.userId)
-                                                             .child(userConnection.instanceId);
+        return Single.create(subscriber -> {
+            DatabaseReference connectionReference = rootReference.child(PATH_USER_CONNECTIONS)
+                                                                 .child(userConnection.userId)
+                                                                 .child(userConnection.instanceId);
 
-        Map<String, Object> children = new HashMap<>(2);
-        children.put(PATH_ONLINE, Boolean.FALSE);
-        children.put(PATH_LAST_ONLINE_TIME, ServerValue.TIMESTAMP);
+            Map<String, Object> children = new HashMap<>(2);
+            children.put(PATH_ONLINE, Boolean.FALSE);
+            children.put(PATH_LAST_ONLINE_TIME, ServerValue.TIMESTAMP);
 
-        connectionReference.updateChildren(children, (error, reference) -> {
-            if (error != null) {
-                LOG.e(String.format("Failed to setOffline: reference = %s", reference), error.toException());
-            }
+            connectionReference.updateChildren(children, (error, reference) -> {
+                if (error != null) {
+                    LOG.e(String.format("Failed to do updateChildren: reference = %s", reference), error.toException());
+                }
+            });
+
+            subscriber.onSuccess(userConnection);
         });
-
-        return Single.just(userConnection);
     }
 }
