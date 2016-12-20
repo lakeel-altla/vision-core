@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import rx.Completable;
 import rx.schedulers.Schedulers;
 
-public final class DeleteTextureUseCase {
+public final class DeleteUserTextureUseCase {
 
     @Inject
     UserTextureRepository userTextureRepository;
@@ -25,7 +25,7 @@ public final class DeleteTextureUseCase {
     TextureCacheRepository textureCacheRepository;
 
     @Inject
-    public DeleteTextureUseCase() {
+    public DeleteUserTextureUseCase() {
     }
 
     public Completable execute(String textureId) {
