@@ -31,7 +31,7 @@ public final class SignOutUseCase {
         String instanceId = FirebaseInstanceId.getInstance().getId();
         UserConnection userConnection = new UserConnection(userId, instanceId);
 
-        return userConnectionRepository.setOffline(userConnection)
+        return userConnectionRepository.markAsOffline(userConnection)
                                        .flatMap(this::signOut)
                                        .subscribeOn(Schedulers.io());
     }
