@@ -7,7 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserAreaDescriptionUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindAllAreaDescriptionUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetAreaDescriptionCacheDirectoryUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserAreaDescriptionUseCase;
 
@@ -27,7 +27,7 @@ public final class AreaDescriptionListPresenter {
     private static final Log LOG = LogFactory.getLog(AreaDescriptionListPresenter.class);
 
     @Inject
-    FindAllAreaDescriptionUseCase findAllAreaDescriptionUseCase;
+    FindAllUserAreaDescriptionsUseCase findAllUserAreaDescriptionsUseCase;
 
     @Inject
     GetAreaDescriptionCacheDirectoryUseCase getAreaDescriptionCacheDirectoryUseCase;
@@ -63,7 +63,7 @@ public final class AreaDescriptionListPresenter {
 
         LOG.d("Loading all area descriptions...");
 
-        Subscription subscription = findAllAreaDescriptionUseCase
+        Subscription subscription = findAllUserAreaDescriptionsUseCase
                 .execute()
                 // Map it to the model for the view.
                 .map(userAreaDescription -> {

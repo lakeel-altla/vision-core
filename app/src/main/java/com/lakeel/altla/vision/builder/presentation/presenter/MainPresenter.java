@@ -16,7 +16,7 @@ import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
 import com.lakeel.altla.vision.builder.presentation.view.TextureModelListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
-import com.lakeel.altla.vision.domain.usecase.DeleteTextureUseCase;
+import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.EnsureTextureCacheUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindFileBitmapUseCase;
@@ -68,7 +68,7 @@ public final class MainPresenter
     FindFileBitmapUseCase findFileBitmapUseCase;
 
     @Inject
-    DeleteTextureUseCase deleteTextureUseCase;
+    DeleteUserTextureUseCase deleteUserTextureUseCase;
 
     private final CompositeSubscription compositeSubscription = new CompositeSubscription();
 
@@ -323,7 +323,7 @@ public final class MainPresenter
         public void onDelete(int position) {
             TextureModel model = models.get(position);
 
-            Subscription subscription = deleteTextureUseCase
+            Subscription subscription = deleteUserTextureUseCase
                     .execute(model.textureId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(() -> {
