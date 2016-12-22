@@ -121,7 +121,7 @@ public final class MainPresenter
     }
 
     public void onResume() {
-        renderer.connectToTangoCamera(tangoWrapper.getTango());
+        tangoWrapper.addOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.addOnFrameAvailableListener(this);
         active = true;
     }
