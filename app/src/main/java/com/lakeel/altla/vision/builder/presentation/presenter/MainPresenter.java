@@ -1,13 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.google.atap.tango.ux.TangoUx;
-import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
-import com.lakeel.altla.tango.TangoUpdateDispatcher;
+import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -49,15 +47,6 @@ public final class MainPresenter
     Context context;
 
     @Inject
-    Tango tango;
-
-    @Inject
-    TangoUx tangoUx;
-
-    @Inject
-    TangoUpdateDispatcher tangoUpdateDispatcher;
-
-    @Inject
     FindAllUserTexturesUseCase findAllUserTexturesUseCase;
 
     @Inject
@@ -71,6 +60,8 @@ public final class MainPresenter
     private final List<TextureModel> models = new ArrayList<>();
 
     private final SingleSelection selection = new SingleSelection();
+
+    private TangoWrapper tangoWrapper;
 
     private MainView view;
 
@@ -88,12 +79,16 @@ public final class MainPresenter
     public MainPresenter() {
     }
 
+    public void onCreate(@NonNull TangoWrapper tangoWrapper) {
+        this.tangoWrapper = tangoWrapper;
+    }
+
     public void onCreateView(@NonNull MainView view) {
         LOG.v("onCreateView");
 
         this.view = view;
 
-        this.view.setTangoUxLayout(tangoUx);
+        this.view.setTangoUxLayout(tangoWrapper.getTangoUx());
 
         renderer = new MainRenderer(context);
         renderer.setOnPickedObjectChangedListener(this);
@@ -126,14 +121,14 @@ public final class MainPresenter
     }
 
     public void onResume() {
-        renderer.connectToTangoCamera(tango);
-        tangoUpdateDispatcher.getOnFrameAvailableListeners().add(this);
+        renderer.connectToTangoCamera(tangoWrapper.getTango());
+        tangoWrapper.addOnFrameAvailableListener(this);
         active = true;
     }
 
     public void onPause() {
         active = false;
-        tangoUpdateDispatcher.getOnFrameAvailableListeners().remove(this);
+        tangoWrapper.removeOnFrameAvailableListener(this);
         renderer.disconnectFromTangoCamera();
     }
 

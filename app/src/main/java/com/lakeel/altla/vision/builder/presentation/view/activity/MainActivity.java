@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.activity;
 
-import com.google.atap.tango.ux.TangoUx;
-import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
@@ -11,7 +9,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoUpdateDispatcher;
+import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -26,7 +24,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissio
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
-import com.projecttango.tangosupport.TangoSupport;
 import com.squareup.picasso.Picasso;
 
 import android.graphics.Color;
@@ -62,23 +59,12 @@ public final class MainActivity extends AppCompatActivity
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
                    RegisterTextureFragment.InteractionListener,
+                   AreaDescriptionListFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
     private static final List<TangoCoordinateFramePair> FRAME_PAIRS;
-
-    @Inject
-    Tango tango;
-
-    @Inject
-    TangoUx tangoUx;
-
-    @Inject
-    TangoUpdateDispatcher tangoUpdateDispatcher;
-
-    @Inject
-    TangoConfig tangoConfig;
 
     @Inject
     ObserveUserProfileUseCase observeUserProfileUseCase;
@@ -99,6 +85,8 @@ public final class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     private final CompositeSubscription compositeSubscription = new CompositeSubscription();
+
+    private TangoWrapper tangoWrapper;
 
     private ActivityComponent activityComponent;
 
@@ -129,6 +117,37 @@ public final class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        tangoWrapper = new TangoWrapper(this);
+        tangoWrapper.setCoordinateFramePairs(FRAME_PAIRS);
+        tangoWrapper.setTangoConfigFactory(tango -> {
+            TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+
+            // NOTE: Low latency integration is necessary to achieve a precise alignment of
+            // virtual objects with the RBG image and produce a good AR effect.
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+            // Depth Perseption を有効化。
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+            config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+            // カラー カメラを有効化。
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+            // NOTE:
+            //
+            // トラッキング ロストからの復旧を検知するにはドリフト コレクションを有効にする。
+            // ドリフトを正したポーズ データは、ベース フレーム TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION から
+            // 任意のターゲット フレームに対してのフレーム ペアで利用可能。
+            // 公式サンプルの java_plane_fitting_example では、
+            // コメント文でターゲット フレームが TangoPoseData.COORDINATE_FRAME_DEVICE であるものとしているが、
+            // 同サンプルにもあるように TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR としても利用可能。
+            //
+            // なお、ドリフト コレクションを有効にしなければ、COORDINATE_FRAME_AREA_DESCRIPTION をベースにしたフレーム ペアは
+            // 機能しない模様。
+            // モーション トラッキングを有効にすれば機能しそうなものだが、
+            // KEY_BOOLEAN_MOTIONTRACKING を true に設定しただけでは機能しない。
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+
+            return config;
+        });
 
         // Enable the toolbar and the material menu.
         setSupportActionBar(toolbar);
@@ -178,25 +197,14 @@ public final class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        // NOTE:
-        //
-        // 現状、TangoUX を用いるとデバッグ モードでは起動しなくなる。
-        // これは、TangoUxLayout の配置の有無ではなく、TangoUx#start の実行により発生する。
-        // このため、開発効率のために TangoUX を OFF にする場合には、TangoUx#start も止めなければならない。
-//        mTangoUx.start(new TangoUx.StartParams());
-
-        tango.connectListener(FRAME_PAIRS, tangoUpdateDispatcher);
-        tango.connect(tangoConfig);
-
-        TangoSupport.initialize();
+        tangoWrapper.connect();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        tango.disconnect();
-        tangoUx.stop();
+        tangoWrapper.disconnect();
     }
 
     @Override
@@ -240,6 +248,11 @@ public final class MainActivity extends AppCompatActivity
     @Override
     public void onShowMainFragment() {
         showMainFragment();
+    }
+
+    @Override
+    public TangoWrapper getTangoWrapper() {
+        return tangoWrapper;
     }
 
     @Override

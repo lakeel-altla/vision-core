@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
@@ -42,6 +43,8 @@ public final class AreaDescriptionListPresenter {
 
     private final List<AreaDescriptionModel> models = new ArrayList<>();
 
+    private TangoWrapper tangoWrapper;
+
     private AreaDescriptionListView view;
 
     private String exportingId;
@@ -54,6 +57,10 @@ public final class AreaDescriptionListPresenter {
     public AreaDescriptionListPresenter() {
     }
 
+    public void onCreate(@NonNull TangoWrapper tangoWrapper) {
+        this.tangoWrapper = tangoWrapper;
+    }
+
     public void onCreateView(@NonNull AreaDescriptionListView view) {
         this.view = view;
     }
@@ -64,7 +71,7 @@ public final class AreaDescriptionListPresenter {
         LOG.d("Loading all area descriptions...");
 
         Subscription subscription = findAllUserAreaDescriptionsUseCase
-                .execute()
+                .execute(tangoWrapper.getTango())
                 // Map it to the model for the view.
                 .map(userAreaDescription -> {
                     AreaDescriptionModel model =
@@ -111,7 +118,7 @@ public final class AreaDescriptionListPresenter {
         prevBytesTransferred = 0;
 
         Subscription subscription = saveUserAreaDescriptionUseCase
-                .execute(exportingId, (totalBytes, bytesTransferred) -> {
+                .execute(tangoWrapper.getTango(), exportingId, (totalBytes, bytesTransferred) -> {
                     long increment = bytesTransferred - prevBytesTransferred;
                     prevBytesTransferred = bytesTransferred;
                     view.setUploadProgressDialogProgress(totalBytes, increment);

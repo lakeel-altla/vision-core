@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
-import com.google.atap.tangoservice.Tango;
-
 import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepositoryImpl;
 import com.lakeel.altla.vision.data.repository.android.DocumentBitmapRepositoryImpl;
 import com.lakeel.altla.vision.data.repository.android.DocumentFilenameRepositoryImpl;
@@ -63,8 +61,8 @@ public final class AndroidRepositoryModule {
 
     @ActivityScope
     @Provides
-    public TangoAreaDescriptionMetadataRepository provideTangoMetadataRepository(Tango tango) {
-        return new TangoAreaDescriptionMetadataRepositoryImpl(tango);
+    public TangoAreaDescriptionMetadataRepository provideTangoMetadataRepository() {
+        return new TangoAreaDescriptionMetadataRepositoryImpl();
     }
 
     @ActivityScope
