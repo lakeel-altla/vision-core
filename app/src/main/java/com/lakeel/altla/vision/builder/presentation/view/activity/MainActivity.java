@@ -119,6 +119,7 @@ public final class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         tangoWrapper = new TangoWrapper(this);
+        tangoWrapper.setStartTangoUx(true);
         tangoWrapper.setCoordinateFramePairs(FRAME_PAIRS);
         tangoWrapper.setTangoConfigFactory(tango -> {
             TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);

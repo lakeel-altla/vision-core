@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 
 import com.google.atap.tango.ux.TangoUx;
+import com.google.atap.tango.ux.TangoUxLayout;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
@@ -55,8 +56,8 @@ public final class MainFragment extends Fragment implements MainView {
     @BindView(R.id.view_top)
     ViewGroup viewTop;
 
-//    @BindView(R.id.layout_tango_ux)
-//    TangoUxLayout tangoUxLayout;
+    @BindView(R.id.layout_tango_ux)
+    TangoUxLayout tangoUxLayout;
 
     @BindView(R.id.texture_view)
     TextureView textureView;
@@ -231,7 +232,7 @@ public final class MainFragment extends Fragment implements MainView {
 
     @Override
     public void setTangoUxLayout(TangoUx tangoUx) {
-//        tangoUx.setLayout(tangoUxLayout);
+        tangoUx.setLayout(tangoUxLayout);
     }
 
     @Override
