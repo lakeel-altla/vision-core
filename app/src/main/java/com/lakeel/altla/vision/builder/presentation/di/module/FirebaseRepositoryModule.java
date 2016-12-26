@@ -61,35 +61,35 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    public UserTextureRepository provideTextureEntryRepository(
+    public UserTextureRepository provideUserTextureRepository(
             @Named(Names.FIREBASE_DATABASE_REFERENCE_ROOT) DatabaseReference reference) {
         return new UserTextureRepositoryImpl(reference);
     }
 
     @ActivityScope
     @Provides
-    public UserTextureFileRepository provideTextureFileRepository(
+    public UserTextureFileRepository provideUserTextureFileRepository(
             @Named(Names.FIREBASE_STORAGE_REFERENCE_ROOT) StorageReference reference) {
         return new UserTextureFileRepositoryImpl(reference);
     }
 
     @ActivityScope
     @Provides
-    public UserTextureFileMetadataRepository provideTextureFileMetadataRepository(
+    public UserTextureFileMetadataRepository provideUserTextureFileMetadataRepository(
             @Named(Names.FIREBASE_STORAGE_REFERENCE_ROOT) StorageReference reference) {
         return new UserTextureFileMetadataRepositoryImpl(reference);
     }
 
     @ActivityScope
     @Provides
-    public UserAreaDescriptionRepository provideAreaDescriptionEntryRepository(
+    public UserAreaDescriptionRepository provideUserAreaDescriptionRepository(
             @Named(Names.FIREBASE_DATABASE_REFERENCE_ROOT) DatabaseReference reference) {
         return new UserAreaDescriptionRepositoryImpl(reference);
     }
 
     @ActivityScope
     @Provides
-    public UserAreaDescriptionFileRepository provideAreaDescriptionFileRepository(
+    public UserAreaDescriptionFileRepository provideUserAreaDescriptionFileRepository(
             @Named(Names.FIREBASE_STORAGE_REFERENCE_ROOT) StorageReference reference) {
         return new UserAreaDescriptionFileRepositoryImpl(reference);
     }
