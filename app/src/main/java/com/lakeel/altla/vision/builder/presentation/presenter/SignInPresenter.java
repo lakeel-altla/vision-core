@@ -48,7 +48,7 @@ public final class SignInPresenter {
 
     private SignInView view;
 
-    private boolean mIsSignedInDetected;
+    private boolean signedInDetected;
 
     @Inject
     public SignInPresenter() {
@@ -57,10 +57,10 @@ public final class SignInPresenter {
         authStateListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
-                if (!mIsSignedInDetected) {
+                if (!signedInDetected) {
                     LOG.i("Signed in to firebase: %s", user.getUid());
                     view.showTangoPermissionFragment();
-                    mIsSignedInDetected = true;
+                    signedInDetected = true;
                 } else {
                     LOG.d("onAuthStateChanged() is fired twice.");
                 }
