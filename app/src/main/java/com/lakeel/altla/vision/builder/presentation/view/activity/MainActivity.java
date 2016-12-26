@@ -124,27 +124,28 @@ public final class MainActivity extends AppCompatActivity
         tangoWrapper.setTangoConfigFactory(tango -> {
             TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
 
-            // NOTE: Low latency integration is necessary to achieve a precise alignment of
+            // NOTE:
+            // Low latency integration is necessary to achieve a precise alignment of
             // virtual objects with the RBG image and produce a good AR effect.
             config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
-            // Depth Perseption を有効化。
+            // Enable the depth perseption.
             config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
             config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-            // カラー カメラを有効化。
+            // Enable the color camera.
             config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
             // NOTE:
+            // To detect recovery from tracking lost, enable drift collection.
             //
-            // トラッキング ロストからの復旧を検知するにはドリフト コレクションを有効にする。
-            // ドリフトを正したポーズ データは、ベース フレーム TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION から
-            // 任意のターゲット フレームに対してのフレーム ペアで利用可能。
-            // 公式サンプルの java_plane_fitting_example では、
-            // コメント文でターゲット フレームが TangoPoseData.COORDINATE_FRAME_DEVICE であるものとしているが、
-            // 同サンプルにもあるように TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR としても利用可能。
+            // Corrected drift pose data is available in frame pairs for any target frame
+            // from base frame TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION.
+            // In the official sample java_plane_fitting_example,
+            // it is assumed that the target frame is TangoPoseData.COORDINATE_FRAME_DEVICE in the comment sentence,
+            // but it can also be used as TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR as in the same sample.
             //
-            // なお、ドリフト コレクションを有効にしなければ、COORDINATE_FRAME_AREA_DESCRIPTION をベースにしたフレーム ペアは
-            // 機能しない模様。
-            // モーション トラッキングを有効にすれば機能しそうなものだが、
-            // KEY_BOOLEAN_MOTIONTRACKING を true に設定しただけでは機能しない。
+            // Note that frame pairs based on COORDINATE_FRAME_AREA_DESCRIPTION do not work
+            // unless drift collection is enabled.
+            // Although it seems to work if you enable motion tracking,
+            // setting KEY_BOOLEAN_MOTIONTRACKING to true does not work.
             config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
             return config;
