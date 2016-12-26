@@ -34,7 +34,7 @@ public final class SignInFragment extends Fragment implements SignInView {
     @BindView(R.id.view_top)
     View viewTop;
 
-    private OnShowMainFragmentListener listener;
+    private InteractionListener listener;
 
     private ProgressDialog progressDialog;
 
@@ -46,7 +46,7 @@ public final class SignInFragment extends Fragment implements SignInView {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        listener = OnShowMainFragmentListener.class.cast(context);
+        listener = InteractionListener.class.cast(context);
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
     }
 
@@ -115,7 +115,7 @@ public final class SignInFragment extends Fragment implements SignInView {
         presenter.onSignIn();
     }
 
-    public interface OnShowMainFragmentListener {
+    public interface InteractionListener {
 
         void onShowTangoPermissionFragment();
     }

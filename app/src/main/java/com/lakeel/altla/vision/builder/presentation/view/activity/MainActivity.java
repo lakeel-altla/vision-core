@@ -55,7 +55,7 @@ import rx.subscriptions.CompositeSubscription;
 public final class MainActivity extends AppCompatActivity
         implements ActivityScopeContext,
                    NavigationViewHost,
-                   SignInFragment.OnShowMainFragmentListener,
+                   SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
                    RegisterTextureFragment.InteractionListener,
