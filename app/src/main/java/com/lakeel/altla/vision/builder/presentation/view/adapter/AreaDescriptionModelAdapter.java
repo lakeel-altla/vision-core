@@ -10,12 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<AreaDescriptionModelAdapter.ViewHolder> {
 
@@ -57,9 +55,6 @@ public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<Area
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        @BindView(R.id.image_button_sync_cloud)
-        ImageButton imageButtonSyncCloud;
-
         private AreaDescriptionListPresenter.ItemPresenter itemPresenter;
 
         private ViewHolder(View itemView) {
@@ -76,17 +71,6 @@ public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<Area
         public void showModel(@NonNull AreaDescriptionModel model) {
             textViewName.setText(model.name);
             textViewId.setText(model.areaDescriptionId);
-
-            if (model.synced) {
-                imageButtonSyncCloud.setImageResource(R.drawable.ic_cloud_done_black_24dp);
-            } else {
-                imageButtonSyncCloud.setImageResource(R.drawable.ic_cloud_off_black_24dp);
-            }
-        }
-
-        @OnClick(R.id.image_button_sync_cloud)
-        void onClickImageButtonSyncCloud() {
-            itemPresenter.onClickImageButtonSyncCloud(getAdapterPosition());
         }
 
         private void onBind(int position) {

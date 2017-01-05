@@ -6,7 +6,6 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.TangoWrapper;
@@ -26,7 +25,6 @@ import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
 import com.squareup.picasso.Picasso;
 
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,6 +36,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,7 +57,6 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   RegisterTextureFragment.InteractionListener,
                    AreaDescriptionListFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
@@ -91,8 +89,6 @@ public final class MainActivity extends AppCompatActivity
     private ActivityComponent activityComponent;
 
     private NavigationViewHeader navigationViewHeader;
-
-    private MaterialMenuDrawable materialMenu;
 
     private Subscription subscriptionObserveUserProfile;
 
@@ -151,16 +147,12 @@ public final class MainActivity extends AppCompatActivity
             return config;
         });
 
-        // Enable the toolbar and the material menu.
         setSupportActionBar(toolbar);
-        materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
-        toolbar.setNavigationIcon(materialMenu);
 
-        // Using Material Menu, Construct without the toolbar and do not call ActionBarDrawerToggle#syncState().
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
-//        toggle.syncState();
+        toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
@@ -268,18 +260,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void animateHomeIconToBurger() {
-        LOG.d("animateHomeIconToBurger()");
-        materialMenu.animateIconState(MaterialMenuDrawable.IconState.BURGER);
-    }
-
-    @Override
-    public void animateHomeIconToArrow() {
-        LOG.d("animateHomeIconToArrow()");
-        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-    }
-
-    @Override
     public void openDrawer() {
         drawerLayout.openDrawer(GravityCompat.START);
     }
@@ -298,7 +278,7 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void showSignInFragment() {
-        materialMenu.setVisible(false);
+        toolbar.setVisibility(View.INVISIBLE);
 
         SignInFragment fragment = SignInFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
@@ -307,7 +287,7 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void showTangoPermissionFragment() {
-        materialMenu.setVisible(false);
+        toolbar.setVisibility(View.INVISIBLE);
 
         TangoPermissionFragment fragment = TangoPermissionFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
@@ -316,7 +296,7 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void showMainFragment() {
-        materialMenu.setVisible(true);
+        toolbar.setVisibility(View.VISIBLE);
 
         MainFragment fragment = MainFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
@@ -325,6 +305,8 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void showAreaDescriptionListFragment() {
+        toolbar.setVisibility(View.VISIBLE);
+
         AreaDescriptionListFragment fragment = AreaDescriptionListFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment)

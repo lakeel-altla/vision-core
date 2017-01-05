@@ -3,10 +3,10 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.EditTextureModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.RegisterTexturePresenter;
 import com.lakeel.altla.vision.builder.presentation.view.RegisterTextureView;
-import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -58,8 +58,6 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     @BindView(R.id.text_input_edit_text_name)
     TextInputEditText textInputEditTextName;
 
-    private InteractionListener interactionListener;
-
     private ProgressDialog progressDialog;
 
     @NonNull
@@ -76,7 +74,6 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
         super.onAttach(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
     }
 
     @Override
@@ -99,8 +96,6 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
         ButterKnife.bind(this, view);
 
         presenter.onCreateView(this);
-
-        interactionListener.animateHomeIconToArrow();
 
         // Set to true to enable handling on onOptionsItemSelected.
         setHasOptionsMenu(true);
@@ -218,10 +213,5 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     @OnTextChanged(value = R.id.text_input_edit_text_name, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     void afterNameChanged(Editable editable) {
         presenter.afterNameChanged(editable.toString());
-    }
-
-    public interface InteractionListener {
-
-        void animateHomeIconToArrow();
     }
 }
