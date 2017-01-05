@@ -1,11 +1,13 @@
 package com.lakeel.altla.vision.domain.usecase;
 
+import com.google.atap.tangoservice.Tango;
+
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.domain.repository.TangoAreaDescriptionMetadataRepository;
 
 import javax.inject.Inject;
 
-import rx.Single;
+import rx.Completable;
 import rx.schedulers.Schedulers;
 
 public final class DeleteTangoAreaDescriptionUseCase {
@@ -17,10 +19,12 @@ public final class DeleteTangoAreaDescriptionUseCase {
     public DeleteTangoAreaDescriptionUseCase() {
     }
 
-    public Single<String> execute(String uuid) {
-        if (uuid == null) throw new ArgumentNullException("uuid");
+    public Completable execute(Tango tango, String areaDescriptionId) {
+        if (tango == null) throw new ArgumentNullException("tango");
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
-        return tangoAreaDescriptionMetadataRepository.delete(uuid)
-                                                     .subscribeOn(Schedulers.io());
+        return tangoAreaDescriptionMetadataRepository
+                .delete(tango, areaDescriptionId)
+                .subscribeOn(Schedulers.io());
     }
 }
