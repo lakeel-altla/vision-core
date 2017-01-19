@@ -235,7 +235,7 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowTangoPermissionFragment() {
+    public void onCloseSignInFragment() {
         showTangoPermissionFragment();
     }
 

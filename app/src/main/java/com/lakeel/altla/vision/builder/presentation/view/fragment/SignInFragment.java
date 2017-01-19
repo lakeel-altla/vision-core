@@ -84,8 +84,8 @@ public final class SignInFragment extends Fragment implements SignInView {
     }
 
     @Override
-    public void showTangoPermissionFragment() {
-        listener.onShowTangoPermissionFragment();
+    public void closeSignInFragment() {
+        listener.onCloseSignInFragment();
     }
 
     @Override
@@ -117,6 +117,6 @@ public final class SignInFragment extends Fragment implements SignInView {
 
     public interface InteractionListener {
 
-        void onShowTangoPermissionFragment();
+        void onCloseSignInFragment();
     }
 }
