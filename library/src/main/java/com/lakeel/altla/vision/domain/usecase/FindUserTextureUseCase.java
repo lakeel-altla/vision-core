@@ -4,8 +4,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.data.repository.firebase.UserTextureRepository;
 import com.lakeel.altla.vision.domain.model.UserTexture;
-import com.lakeel.altla.vision.domain.repository.UserTextureRepository;
 
 import javax.inject.Inject;
 
@@ -27,7 +27,13 @@ public final class FindUserTextureUseCase {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) throw new IllegalStateException("The user is not signed in.");
 
-        return userTextureRepository.find(user.getUid(), textureId)
-                                    .subscribeOn(Schedulers.io());
+        return Observable.<UserTexture>create(subscriber -> {
+            userTextureRepository.find(user.getUid(), textureId, userTexture -> {
+                if (userTexture != null) {
+                    subscriber.onNext(userTexture);
+                }
+                subscriber.onCompleted();
+            }, subscriber::onError);
+        }).subscribeOn(Schedulers.io());
     }
 }
