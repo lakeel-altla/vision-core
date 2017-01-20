@@ -98,13 +98,13 @@ public final class RegisterTexturePresenter {
                     .execute(model.textureId)
                     .singleOrError()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(entry -> {
+                    .subscribe(userTexture -> {
                         LOG.d("Loaded the texture.");
 
-                        model.name = entry.name;
+                        model.name = userTexture.name;
                         view.showModel(model);
 
-                        loadCachedTextureBitmap(entry.textureId);
+                        loadCachedTextureBitmap(userTexture.textureId);
                     }, e -> {
                         // TODO: How to recover.
                         LOG.w(String.format("Failed to load the texture: id = %s", model.textureId), e);
