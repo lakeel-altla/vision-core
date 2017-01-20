@@ -21,10 +21,10 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import rx.Single;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public final class RegisterTexturePresenter {
 
@@ -45,7 +45,7 @@ public final class RegisterTexturePresenter {
     @Inject
     SaveUserTextureUseCase saveUserTextureUseCase;
 
-    private final CompositeSubscription compositeSubscription = new CompositeSubscription();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private RegisterTextureView view;
 
@@ -93,10 +93,10 @@ public final class RegisterTexturePresenter {
             // Load the texture information.
             LOG.d("Loading the texture: id = %s", model.textureId);
 
-            Subscription subscription = findUserTextureUseCase
+            Disposable disposable = findUserTextureUseCase
                     // Find the texture entry to get its name.
                     .execute(model.textureId)
-                    .toSingle()
+                    .singleOrError()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(entry -> {
                         LOG.d("Loaded the texture.");
@@ -109,7 +109,7 @@ public final class RegisterTexturePresenter {
                         // TODO: How to recover.
                         LOG.w(String.format("Failed to load the texture: id = %s", model.textureId), e);
                     });
-            compositeSubscription.add(subscription);
+            compositeDisposable.add(disposable);
         } else {
             LOG.d("onStart(): Just onStart().");
 
@@ -118,7 +118,7 @@ public final class RegisterTexturePresenter {
     }
 
     public void onStop() {
-        compositeSubscription.clear();
+        compositeDisposable.clear();
     }
 
     public void onClickButtonSelectDocument() {
@@ -140,11 +140,11 @@ public final class RegisterTexturePresenter {
     private void loadCachedTextureBitmap(String textureId) {
         view.setTextureVisible(false);
 
-        Subscription subscription = findUserTextureBitmapUseCase
+        Disposable disposable = findUserTextureBitmapUseCase
                 .execute(textureId, null)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
-                .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
+                .doFinally(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
                     model.bitmap = bitmap;
 
@@ -155,17 +155,17 @@ public final class RegisterTexturePresenter {
                     LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", textureId), e);
                 });
 
-        compositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     private void loadLocalTextureBitmap() {
         view.setTextureVisible(false);
 
-        Subscription subscription = findDocumentBitmapUseCase
+        Disposable disposable = findDocumentBitmapUseCase
                 .execute(model.localUri)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
-                .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
+                .doFinally(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
                     model.bitmap = bitmap;
 
@@ -182,21 +182,21 @@ public final class RegisterTexturePresenter {
                         view.showSnackbar(R.string.snackbar_unexpected_error_occured);
                     }
                 });
-        compositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     private void loadLocalTextureBitmapAndName() {
         view.setTextureVisible(false);
 
-        Subscription subscription = Single
+        Disposable disposable = Single
                 .just(new LocalBitmap(model.localUri))
                 // Load the bitmap.
                 .flatMap(this::loadLocalBitmap)
                 // Load the filename as a texture name if needed.
                 .flatMap(this::loadLocalFilename)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> view.setLoadTextureProgressVisible(true))
-                .doOnUnsubscribe(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
+                .doFinally(() -> view.setLoadTextureProgressVisible(false))
                 .subscribe(localBitmap -> {
                     model.bitmap = localBitmap.bitmap;
                     model.name = localBitmap.name;
@@ -214,7 +214,7 @@ public final class RegisterTexturePresenter {
                         view.showSnackbar(R.string.snackbar_unexpected_error_occured);
                     }
                 });
-        compositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     private Single<LocalBitmap> loadLocalBitmap(LocalBitmap localBitmap) {
@@ -237,7 +237,7 @@ public final class RegisterTexturePresenter {
 
         String localUri = (model.localUri != null) ? model.localUri.toString() : null;
 
-        Subscription subscription = saveUserTextureUseCase
+        Disposable disposable = saveUserTextureUseCase
                 .execute(model.textureId, model.name, localUri, (totalBytes, bytesTransferred) -> {
                     long increment = bytesTransferred - prevBytesTransferred;
                     prevBytesTransferred = bytesTransferred;
@@ -245,8 +245,8 @@ public final class RegisterTexturePresenter {
                     view.setUploadProgressDialogProgress(totalBytes, increment);
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(() -> view.showUploadProgressDialog())
-                .doOnUnsubscribe(() -> view.hideUploadProgressDialog())
+                .doOnSubscribe(_disposable -> view.showUploadProgressDialog())
+                .doFinally(() -> view.hideUploadProgressDialog())
                 .subscribe(textureId -> {
                     // Update ID of the model.
                     model.textureId = textureId;
@@ -256,7 +256,7 @@ public final class RegisterTexturePresenter {
                     LOG.e("Failed to save the user texture.", e);
                     view.showSnackbar(R.string.snackbar_failed);
                 });
-        compositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     public void afterNameChanged(String filename) {

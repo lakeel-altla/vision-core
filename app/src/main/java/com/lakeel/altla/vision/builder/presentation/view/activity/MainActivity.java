@@ -47,9 +47,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public final class MainActivity extends AppCompatActivity
         implements ActivityScopeContext,
@@ -82,7 +82,7 @@ public final class MainActivity extends AppCompatActivity
     @BindView(R.id.navigation_view)
     NavigationView navigationView;
 
-    private final CompositeSubscription compositeSubscription = new CompositeSubscription();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private TangoWrapper tangoWrapper;
 
@@ -90,9 +90,9 @@ public final class MainActivity extends AppCompatActivity
 
     private NavigationViewHeader navigationViewHeader;
 
-    private Subscription subscriptionObserveUserProfile;
+    private Disposable observeUserProfileDisposable;
 
-    private Subscription subscriptionObserveConnection;
+    private Disposable observeConnectionDisposable;
 
     static {
         FRAME_PAIRS = new ArrayList<>();
@@ -171,18 +171,18 @@ public final class MainActivity extends AppCompatActivity
         super.onStop();
 
         // Unsubscribe the connection.
-        if (subscriptionObserveConnection != null) {
-            subscriptionObserveConnection.unsubscribe();
-            subscriptionObserveConnection = null;
+        if (observeConnectionDisposable != null) {
+            observeConnectionDisposable.dispose();
+            observeConnectionDisposable = null;
         }
 
         // Unsubscribe the user profile.
-        if (subscriptionObserveUserProfile != null) {
-            subscriptionObserveUserProfile.unsubscribe();
-            subscriptionObserveUserProfile = null;
+        if (observeUserProfileDisposable != null) {
+            observeUserProfileDisposable.dispose();
+            observeUserProfileDisposable = null;
         }
 
-        compositeSubscription.clear();
+        compositeDisposable.clear();
 
         FirebaseAuth.getInstance().removeAuthStateListener(navigationViewHeader);
     }
@@ -269,10 +269,10 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void onSignOut() {
-        Subscription subscription = signOutUseCase.execute()
-                                                  .observeOn(AndroidSchedulers.mainThread())
-                                                  .subscribe();
-        compositeSubscription.add(subscription);
+        Disposable disposable = signOutUseCase.execute()
+                                              .observeOn(AndroidSchedulers.mainThread())
+                                              .subscribe();
+        compositeDisposable.add(disposable);
 
         showSignInFragment();
     }
@@ -334,16 +334,16 @@ public final class MainActivity extends AppCompatActivity
 
             if (user != null) {
                 // Subscribe the connection.
-                if (subscriptionObserveConnection == null) {
-                    subscriptionObserveConnection = observeConnectionUseCase
+                if (observeConnectionDisposable == null) {
+                    observeConnectionDisposable = observeConnectionUseCase
                             .execute()
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe();
                 }
 
                 // Subscribe the user profile.
-                if (subscriptionObserveUserProfile == null) {
-                    subscriptionObserveUserProfile = observeUserProfileUseCase
+                if (observeUserProfileDisposable == null) {
+                    observeUserProfileDisposable = observeUserProfileUseCase
                             .execute()
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(userProfile -> {
@@ -358,15 +358,15 @@ public final class MainActivity extends AppCompatActivity
                 }
             } else {
                 // Unsubscribe the connection.
-                if (subscriptionObserveConnection != null) {
-                    subscriptionObserveConnection.unsubscribe();
-                    subscriptionObserveConnection = null;
+                if (observeConnectionDisposable != null) {
+                    observeConnectionDisposable.dispose();
+                    observeConnectionDisposable = null;
                 }
 
                 // Unsubscribe the user profile.
-                if (subscriptionObserveUserProfile != null) {
-                    subscriptionObserveUserProfile.unsubscribe();
-                    subscriptionObserveUserProfile = null;
+                if (observeUserProfileDisposable != null) {
+                    observeUserProfileDisposable.dispose();
+                    observeUserProfileDisposable = null;
                 }
 
                 // Clear UI.

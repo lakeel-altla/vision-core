@@ -30,9 +30,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Defines the presenter for {@link MainView}.
@@ -55,7 +55,7 @@ public final class MainPresenter
     @Inject
     DeleteUserTextureUseCase deleteUserTextureUseCase;
 
-    private final CompositeSubscription compositeSubscription = new CompositeSubscription();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<TextureModel> models = new ArrayList<>();
 
@@ -107,7 +107,7 @@ public final class MainPresenter
     public void onStart() {
         models.clear();
 
-        Subscription subscription = findAllUserTexturesUseCase
+        Disposable disposable = findAllUserTexturesUseCase
                 .execute()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userTexture -> {
@@ -117,7 +117,7 @@ public final class MainPresenter
                 }, e -> {
                     LOG.e("Failed to find all user textures.", e);
                 });
-        compositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     public void onResume() {
@@ -133,7 +133,7 @@ public final class MainPresenter
     }
 
     public void onStop() {
-        compositeSubscription.clear();
+        compositeDisposable.clear();
     }
 
     @Override
@@ -273,13 +273,13 @@ public final class MainPresenter
         public void onLoadBitmap(int position) {
             TextureModel model = models.get(position);
 
-            Subscription subscription = findUserTextureBitmapUseCase
+            Disposable disposable = findUserTextureBitmapUseCase
                     .execute(model.textureId, (totalBytes, bytesTransferred) -> {
                         // Update the progress bar.
                         itemView.showProgress((int) totalBytes, (int) bytesTransferred);
                     })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doOnUnsubscribe(() -> itemView.hideProgress())
+                    .doFinally(() -> itemView.hideProgress())
                     .subscribe(bitmap -> {
                         // Set the bitmap into the model.
                         model.bitmap = bitmap;
@@ -290,7 +290,7 @@ public final class MainPresenter
                         LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", model.textureId),
                               e);
                     });
-            compositeSubscription.add(subscription);
+            compositeDisposable.add(disposable);
         }
 
         public void onClickViewTop(int position) {
@@ -314,7 +314,7 @@ public final class MainPresenter
         public void onDelete(int position) {
             TextureModel model = models.get(position);
 
-            Subscription subscription = deleteUserTextureUseCase
+            Disposable disposable = deleteUserTextureUseCase
                     .execute(model.textureId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(() -> {
@@ -324,7 +324,7 @@ public final class MainPresenter
                     }, e -> {
                         LOG.e(String.format("Failed to delete the user texture: textureId = %s", model.textureId), e);
                     });
-            compositeSubscription.add(subscription);
+            compositeDisposable.add(disposable);
         }
 
         void setSelected(int selectedPosition, boolean selected) {

@@ -18,7 +18,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
 
 public final class AreaDescriptionListPresenter {
 
@@ -36,7 +36,7 @@ public final class AreaDescriptionListPresenter {
     @Inject
     DeleteUserAreaDescriptionUseCase deleteUserAreaDescriptionUseCase;
 
-    private final CompositeSubscription compositeSubscription = new CompositeSubscription();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<AreaDescriptionModel> models = new ArrayList<>();
 
@@ -61,7 +61,7 @@ public final class AreaDescriptionListPresenter {
     }
 
     public void onStop() {
-        compositeSubscription.clear();
+        compositeDisposable.clear();
     }
 
     public void onCreateItemView(@NonNull AreaDescriptionListItemView itemView) {
