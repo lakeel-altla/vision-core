@@ -217,12 +217,11 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void onSignOut() {
-        Disposable disposable = signOutUseCase.execute()
-                                              .observeOn(AndroidSchedulers.mainThread())
-                                              .subscribe();
+        Disposable disposable = signOutUseCase
+                .execute()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showSignInFragment);
         compositeDisposable.add(disposable);
-
-        showSignInFragment();
     }
 
     private void showSignInFragment() {
