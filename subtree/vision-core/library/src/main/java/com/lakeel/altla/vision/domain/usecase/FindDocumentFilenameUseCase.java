@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.domain.usecase;
 
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.domain.repository.DocumentFilenameRepository;
+import com.lakeel.altla.vision.data.repository.android.DocumentFilenameRepository;
 
 import android.net.Uri;
 
@@ -21,6 +21,9 @@ public final class FindDocumentFilenameUseCase {
     public Single<String> execute(Uri uri) {
         if (uri == null) throw new ArgumentNullException("uri");
 
-        return documentFilenameRepository.find(uri);
+        return Single.create(subscriber -> {
+            String filename = documentFilenameRepository.find(uri);
+            subscriber.onSuccess(filename);
+        });
     }
 }

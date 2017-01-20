@@ -3,10 +3,10 @@ package com.lakeel.altla.vision.domain.usecase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
 import com.lakeel.altla.vision.domain.model.UserAreaDescription;
-import com.lakeel.altla.vision.domain.repository.AreaDescriptionCacheRepository;
-import com.lakeel.altla.vision.domain.repository.UserAreaDescriptionFileRepository;
-import com.lakeel.altla.vision.domain.repository.UserAreaDescriptionRepository;
 
 import javax.inject.Inject;
 
@@ -34,28 +34,28 @@ public final class FindAllUserAreaDescriptionsUseCase {
 
         String userId = user.getUid();
 
-        return userAreaDescriptionRepository
-                .findAll(userId)
-                .flatMap(this::checkFileCached)
-                .flatMap(userAreaDescription -> checkFileUploaded(userId, userAreaDescription))
-                .subscribeOn(Schedulers.io());
-    }
+        return Observable.<UserAreaDescription>create(subscriber -> {
+            userAreaDescriptionRepository.findAll(userId, userAreaDescriptions -> {
+                for (UserAreaDescription userAreaDescription : userAreaDescriptions) {
+                    userAreaDescription.fileCached = areaDescriptionCacheRepository.exists(
+                            userAreaDescription.areaDescriptionId);
 
-    private Observable<UserAreaDescription> checkFileCached(UserAreaDescription userAreaDescription) {
-        return areaDescriptionCacheRepository
-                .exists(userAreaDescription.areaDescriptionId)
-                .map(fileCached -> {
-                    userAreaDescription.fileCached = fileCached;
-                    return userAreaDescription;
-                }).toObservable();
+                    subscriber.onNext(userAreaDescription);
+                }
+
+                subscriber.onCompleted();
+            }, subscriber::onError);
+        }).flatMap(userAreaDescription -> checkFileUploaded(userId, userAreaDescription))
+          .subscribeOn(Schedulers.io());
     }
 
     private Observable<UserAreaDescription> checkFileUploaded(String userId, UserAreaDescription userAreaDescription) {
-        return userAreaDescriptionFileRepository
-                .exists(userId, userAreaDescription.areaDescriptionId)
-                .map(fileUploaded -> {
-                    userAreaDescription.fileUploaded = fileUploaded;
-                    return userAreaDescription;
-                }).toObservable();
+        return Observable.create(subscriber -> {
+            userAreaDescriptionFileRepository.exists(userId, userAreaDescription.areaDescriptionId, result -> {
+                userAreaDescription.fileUploaded = result;
+                subscriber.onNext(userAreaDescription);
+                subscriber.onCompleted();
+            }, subscriber::onError);
+        });
     }
 }

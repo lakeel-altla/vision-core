@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.domain.usecase;
 
-import com.lakeel.altla.vision.domain.repository.AreaDescriptionCacheRepository;
+import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
 
 import java.io.File;
 
@@ -19,7 +19,9 @@ public final class GetAreaDescriptionCacheDirectoryUseCase {
     }
 
     public Single<File> execute() {
-        return areaDescriptionCacheRepository.getDirectory()
-                                             .subscribeOn(Schedulers.io());
+        return Single.<File>create(subscriber -> {
+            File file = areaDescriptionCacheRepository.getDirectory();
+            subscriber.onSuccess(file);
+        }).subscribeOn(Schedulers.io());
     }
 }

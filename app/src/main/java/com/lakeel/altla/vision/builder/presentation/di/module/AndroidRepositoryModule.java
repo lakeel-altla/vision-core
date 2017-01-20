@@ -1,20 +1,13 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
-import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.DocumentBitmapRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.DocumentFilenameRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.DocumentRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.FileBitmapRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.TangoAreaDescriptionMetadataRepositoryImpl;
-import com.lakeel.altla.vision.data.repository.android.TextureCacheRepositoryImpl;
+import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
+import com.lakeel.altla.vision.data.repository.android.DocumentBitmapRepository;
+import com.lakeel.altla.vision.data.repository.android.DocumentFilenameRepository;
+import com.lakeel.altla.vision.data.repository.android.DocumentRepository;
+import com.lakeel.altla.vision.data.repository.android.FileBitmapRepository;
+import com.lakeel.altla.vision.data.repository.android.TangoAreaDescriptionMetadataRepository;
+import com.lakeel.altla.vision.data.repository.android.TextureCacheRepository;
 import com.lakeel.altla.vision.di.ActivityScope;
-import com.lakeel.altla.vision.domain.repository.AreaDescriptionCacheRepository;
-import com.lakeel.altla.vision.domain.repository.DocumentBitmapRepository;
-import com.lakeel.altla.vision.domain.repository.DocumentFilenameRepository;
-import com.lakeel.altla.vision.domain.repository.DocumentRepository;
-import com.lakeel.altla.vision.domain.repository.FileBitmapRepository;
-import com.lakeel.altla.vision.domain.repository.TangoAreaDescriptionMetadataRepository;
-import com.lakeel.altla.vision.domain.repository.TextureCacheRepository;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -32,43 +25,43 @@ public final class AndroidRepositoryModule {
     @ActivityScope
     @Provides
     public DocumentRepository provideDocumentRepository(ContentResolver contentResolver) {
-        return new DocumentRepositoryImpl(contentResolver);
+        return new DocumentRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
     public DocumentBitmapRepository provideDocumentBitmapRepository(ContentResolver contentResolver) {
-        return new DocumentBitmapRepositoryImpl(contentResolver);
+        return new DocumentBitmapRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
     public DocumentFilenameRepository provideDocumentFilenameRepository(ContentResolver contentResolver) {
-        return new DocumentFilenameRepositoryImpl(contentResolver);
+        return new DocumentFilenameRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
     public FileBitmapRepository provideFileBitmapRepository() {
-        return new FileBitmapRepositoryImpl();
+        return new FileBitmapRepository();
     }
 
     @ActivityScope
     @Provides
     public TextureCacheRepository provideTextureCacheRepository(@Named(Names.ACTIVITY_CONTEXT) Context context) {
-        return new TextureCacheRepositoryImpl(context);
+        return new TextureCacheRepository(context);
     }
 
     @ActivityScope
     @Provides
     public TangoAreaDescriptionMetadataRepository provideTangoMetadataRepository() {
-        return new TangoAreaDescriptionMetadataRepositoryImpl();
+        return new TangoAreaDescriptionMetadataRepository();
     }
 
     @ActivityScope
     @Provides
     public AreaDescriptionCacheRepository provideAreaDescriptionCacheRepository(
             @Named(Names.EXTERNAL_STORAGE_ROOT) File rootDirectory) {
-        return new AreaDescriptionCacheRepositoryImpl(rootDirectory);
+        return new AreaDescriptionCacheRepository(rootDirectory);
     }
 }
