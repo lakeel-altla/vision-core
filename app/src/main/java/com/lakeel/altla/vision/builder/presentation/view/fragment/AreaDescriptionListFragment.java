@@ -1,8 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionListPresenter;
@@ -11,7 +8,6 @@ import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescription
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -28,15 +24,11 @@ import butterknife.ButterKnife;
 
 public final class AreaDescriptionListFragment extends Fragment implements AreaDescriptionListView {
 
-    private static final Log LOG = LogFactory.getLog(AreaDescriptionListFragment.class);
-
     @Inject
     AreaDescriptionListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-
-    private InteractionListener interactionListener;
 
     public static AreaDescriptionListFragment newInstance() {
         return new AreaDescriptionListFragment();
@@ -47,14 +39,6 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
         super.onAttach(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        presenter.onCreate(interactionListener.getTangoWrapper());
     }
 
     @Override
@@ -95,10 +79,5 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
     @Override
     public void showSnackbar(@StringRes int resId) {
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    public interface InteractionListener {
-
-        TangoWrapper getTangoWrapper();
     }
 }

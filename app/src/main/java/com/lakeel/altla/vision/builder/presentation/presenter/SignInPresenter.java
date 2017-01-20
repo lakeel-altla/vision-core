@@ -87,6 +87,8 @@ public final class SignInPresenter {
     }
 
     public void onSignIn() {
+        signInButtonClicked = true;
+
         Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
 
         view.startActivityForResult(intent, REQUEST_CODE_GOOGLE_SIGN_IN);

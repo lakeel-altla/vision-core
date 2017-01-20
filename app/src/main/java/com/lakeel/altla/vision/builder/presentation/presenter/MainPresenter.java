@@ -55,13 +55,14 @@ public final class MainPresenter
     @Inject
     DeleteUserTextureUseCase deleteUserTextureUseCase;
 
+    @Inject
+    TangoWrapper tangoWrapper;
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<TextureModel> models = new ArrayList<>();
 
     private final SingleSelection selection = new SingleSelection();
-
-    private TangoWrapper tangoWrapper;
 
     private MainView view;
 
@@ -77,10 +78,6 @@ public final class MainPresenter
 
     @Inject
     public MainPresenter() {
-    }
-
-    public void onCreate(@NonNull TangoWrapper tangoWrapper) {
-        this.tangoWrapper = tangoWrapper;
     }
 
     public void onCreateView(@NonNull MainView view) {

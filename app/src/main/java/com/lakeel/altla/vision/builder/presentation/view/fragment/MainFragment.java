@@ -6,7 +6,6 @@ import com.google.atap.tango.ux.TangoUxLayout;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -138,13 +137,6 @@ public final class MainFragment extends Fragment implements MainView {
     public void onDetach() {
         super.onDetach();
         interactionListener = null;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        presenter.onCreate(interactionListener.getTangoWrapper());
     }
 
     @Override
@@ -408,8 +400,6 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     public interface InteractionListener {
-
-        TangoWrapper getTangoWrapper();
 
         void onShowEditTextureFragment(@Nullable String id);
     }

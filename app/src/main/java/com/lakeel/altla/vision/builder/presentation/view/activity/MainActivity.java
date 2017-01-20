@@ -1,8 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.activity;
 
-import com.google.atap.tangoservice.TangoConfig;
-import com.google.atap.tangoservice.TangoCoordinateFramePair;
-import com.google.atap.tangoservice.TangoPoseData;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -40,9 +37,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -57,12 +51,12 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   AreaDescriptionListFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
-    private static final List<TangoCoordinateFramePair> FRAME_PAIRS;
+    @Inject
+    TangoWrapper tangoWrapper;
 
     @Inject
     ObserveUserProfileUseCase observeUserProfileUseCase;
@@ -84,8 +78,6 @@ public final class MainActivity extends AppCompatActivity
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private TangoWrapper tangoWrapper;
-
     private ActivityComponent activityComponent;
 
     private NavigationViewHeader navigationViewHeader;
@@ -93,12 +85,6 @@ public final class MainActivity extends AppCompatActivity
     private Disposable observeUserProfileDisposable;
 
     private Disposable observeConnectionDisposable;
-
-    static {
-        FRAME_PAIRS = new ArrayList<>();
-        FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
-                                                     TangoPoseData.COORDINATE_FRAME_DEVICE));
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,39 +99,6 @@ public final class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        tangoWrapper = new TangoWrapper(this);
-        tangoWrapper.setStartTangoUx(true);
-        tangoWrapper.setCoordinateFramePairs(FRAME_PAIRS);
-        tangoWrapper.setTangoConfigFactory(tango -> {
-            TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-
-            // NOTE:
-            // Low latency integration is necessary to achieve a precise alignment of
-            // virtual objects with the RBG image and produce a good AR effect.
-            config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
-            // Enable the depth perseption.
-            config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
-            config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-            // Enable the color camera.
-            config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
-            // NOTE:
-            // To detect recovery from tracking lost, enable drift collection.
-            //
-            // Corrected drift pose data is available in frame pairs for any target frame
-            // from base frame TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION.
-            // In the official sample java_plane_fitting_example,
-            // it is assumed that the target frame is TangoPoseData.COORDINATE_FRAME_DEVICE in the comment sentence,
-            // but it can also be used as TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR as in the same sample.
-            //
-            // Note that frame pairs based on COORDINATE_FRAME_AREA_DESCRIPTION do not work
-            // unless drift collection is enabled.
-            // Although it seems to work if you enable motion tracking,
-            // setting KEY_BOOLEAN_MOTIONTRACKING to true does not work.
-            config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
-
-            return config;
-        });
 
         setSupportActionBar(toolbar);
 
@@ -242,11 +195,6 @@ public final class MainActivity extends AppCompatActivity
     @Override
     public void onShowMainFragment() {
         showMainFragment();
-    }
-
-    @Override
-    public TangoWrapper getTangoWrapper() {
-        return tangoWrapper;
     }
 
     @Override

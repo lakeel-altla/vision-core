@@ -2,7 +2,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
@@ -40,16 +39,10 @@ public final class AreaDescriptionListPresenter {
 
     private final List<AreaDescriptionModel> models = new ArrayList<>();
 
-    private TangoWrapper tangoWrapper;
-
     private AreaDescriptionListView view;
 
     @Inject
     public AreaDescriptionListPresenter() {
-    }
-
-    public void onCreate(@NonNull TangoWrapper tangoWrapper) {
-        this.tangoWrapper = tangoWrapper;
     }
 
     public void onCreateView(@NonNull AreaDescriptionListView view) {
