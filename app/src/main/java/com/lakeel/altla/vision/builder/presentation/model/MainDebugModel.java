@@ -8,6 +8,8 @@ public final class MainDebugModel {
 
     public final Translation ad2DTranslation = new Translation();
 
+    public final Translation ss2DTranslation = new Translation();
+
     public final class Translation {
 
         public double x;

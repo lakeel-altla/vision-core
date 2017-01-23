@@ -53,6 +53,8 @@ public final class MainFragment extends Fragment implements MainView {
 
     private static final Log LOG = LogFactory.getLog(MainFragment.class);
 
+    private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
+
     @Inject
     MainPresenter presenter;
 
@@ -111,6 +113,9 @@ public final class MainFragment extends Fragment implements MainView {
 
     @BindView(R.id.text_view_ad2d_translation)
     TextView textViewAd2DTranslation;
+
+    @BindView(R.id.text_view_ss2d_translation)
+    TextView textViewSs2DTranslation;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -267,15 +272,20 @@ public final class MainFragment extends Fragment implements MainView {
     public void updateDebugModel(MainDebugModel model) {
         textViewLocalizedValue.setText(Boolean.toString(model.localized));
         textViewAd2SsTranslation.setText(String.format(Locale.getDefault(),
-                                                       "{ %7.2f, %7.2f, %7.2f }",
+                                                       FORMAT_TRANSLATION,
                                                        model.ad2SsTranslation.x,
                                                        model.ad2SsTranslation.y,
                                                        model.ad2SsTranslation.z));
         textViewAd2DTranslation.setText(String.format(Locale.getDefault(),
-                                                      "{ %7.2f, %7.2f, %7.2f }",
+                                                      FORMAT_TRANSLATION,
                                                       model.ad2DTranslation.x,
                                                       model.ad2DTranslation.y,
                                                       model.ad2DTranslation.z));
+        textViewSs2DTranslation.setText(String.format(Locale.getDefault(),
+                                                      FORMAT_TRANSLATION,
+                                                      model.ss2DTranslation.x,
+                                                      model.ss2DTranslation.y,
+                                                      model.ss2DTranslation.z));
     }
 
     @Override

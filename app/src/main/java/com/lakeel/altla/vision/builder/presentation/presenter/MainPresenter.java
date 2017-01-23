@@ -90,19 +90,31 @@ public final class MainPresenter
     // on non-UI thread.
     private LocalizationState localizationState = LocalizationState.UNKNOWN;
 
-    // on non-UI thread.
-    private double prevAd2SsPoseTimestamp;
-
-    // on non-UI thread.
-    private double timeToNextUpdateAd2SsPose;
-
-    // on non-UI thread.
-    private double prevAd2DPoseTimestamp;
-
-    // on non-UI thread.
-    private double timeToNextUpdateAd2DPose;
-
     private MainDebugModel debugModel = new MainDebugModel();
+
+    private PoseDebugger debuggerAd2Ss = new PoseDebugger(debugger -> {
+        // on UI-thread.
+        debugModel.ad2SsTranslation.x = debugger.translation.x;
+        debugModel.ad2SsTranslation.y = debugger.translation.y;
+        debugModel.ad2SsTranslation.z = debugger.translation.z;
+        view.updateDebugModel(debugModel);
+    });
+
+    private PoseDebugger debuggerAd2D = new PoseDebugger(debugger -> {
+        // on UI-thread.
+        debugModel.ad2DTranslation.x = debugger.translation.x;
+        debugModel.ad2DTranslation.y = debugger.translation.y;
+        debugModel.ad2DTranslation.z = debugger.translation.z;
+        view.updateDebugModel(debugModel);
+    });
+
+    private PoseDebugger debuggerSs2D = new PoseDebugger(debugger -> {
+        // on UI-thread.
+        debugModel.ss2DTranslation.x = debugger.translation.x;
+        debugModel.ss2DTranslation.y = debugger.translation.y;
+        debugModel.ss2DTranslation.z = debugger.translation.z;
+        view.updateDebugModel(debugModel);
+    });
 
     @Inject
     public MainPresenter() {
@@ -173,21 +185,7 @@ public final class MainPresenter
         if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
             pose.targetFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) {
 
-            double timeDelta = (pose.timestamp - prevAd2SsPoseTimestamp) * SECS_TO_MILLISECS;
-            prevAd2SsPoseTimestamp = pose.timestamp;
-
-            timeToNextUpdateAd2SsPose -= timeDelta;
-
-            if (timeToNextUpdateAd2SsPose < 0) {
-                timeToNextUpdateAd2SsPose = UPDATE_DEBUG_CONSOLE_INTERVAL;
-
-                handlerMain.post(() -> {
-                    debugModel.ad2SsTranslation.x = pose.translation[0];
-                    debugModel.ad2SsTranslation.y = pose.translation[1];
-                    debugModel.ad2SsTranslation.z = pose.translation[2];
-                    view.updateDebugModel(debugModel);
-                });
-            }
+            debuggerAd2Ss.debug(pose);
 
             if (pose.statusCode == TangoPoseData.POSE_VALID) {
                 if (localizationState == LocalizationState.UNKNOWN ||
@@ -216,22 +214,12 @@ public final class MainPresenter
 
         if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
             pose.targetFrame == TangoPoseData.COORDINATE_FRAME_DEVICE) {
+            debuggerAd2D.debug(pose);
+        }
 
-            double timeDelta = (pose.timestamp - prevAd2DPoseTimestamp) * SECS_TO_MILLISECS;
-            prevAd2DPoseTimestamp = pose.timestamp;
-
-            timeToNextUpdateAd2DPose -= timeDelta;
-
-            if (timeToNextUpdateAd2DPose < 0) {
-                timeToNextUpdateAd2DPose = UPDATE_DEBUG_CONSOLE_INTERVAL;
-
-                handlerMain.post(() -> {
-                    debugModel.ad2DTranslation.x = pose.translation[0];
-                    debugModel.ad2DTranslation.y = pose.translation[1];
-                    debugModel.ad2DTranslation.z = pose.translation[2];
-                    view.updateDebugModel(debugModel);
-                });
-            }
+        if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE &&
+            pose.targetFrame == TangoPoseData.COORDINATE_FRAME_DEVICE) {
+            debuggerSs2D.debug(pose);
         }
     }
 
@@ -466,5 +454,49 @@ public final class MainPresenter
         UNKNOWN,
         LOCALIZED,
         NOT_LOCALIZED
+    }
+
+    private class PoseDebugger {
+
+        PoseDebugPrinter printer;
+
+        double prevTimestamp;
+
+        double timeToUpdate;
+
+        final Translation translation = new Translation();
+
+        PoseDebugger(PoseDebugPrinter printer) {
+            this.printer = printer;
+        }
+
+        void debug(TangoPoseData pose) {
+            double timeDelta = (pose.timestamp - prevTimestamp) * SECS_TO_MILLISECS;
+            prevTimestamp = pose.timestamp;
+
+            timeToUpdate -= timeDelta;
+
+            if (timeToUpdate < 0) {
+                timeToUpdate = UPDATE_DEBUG_CONSOLE_INTERVAL;
+                translation.x = pose.translation[0];
+                translation.y = pose.translation[1];
+                translation.z = pose.translation[2];
+                handlerMain.post(() -> printer.print(this));
+            }
+        }
+    }
+
+    private class Translation {
+
+        double x;
+
+        double y;
+
+        double z;
+    }
+
+    private interface PoseDebugPrinter {
+
+        void print(PoseDebugger debugger);
     }
 }
