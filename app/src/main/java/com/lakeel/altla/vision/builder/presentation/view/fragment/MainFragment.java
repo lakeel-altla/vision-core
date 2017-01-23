@@ -39,6 +39,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -103,6 +105,12 @@ public final class MainFragment extends Fragment implements MainView {
 
     @BindView(R.id.text_view_localized_value)
     TextView textViewLocalizedValue;
+
+    @BindView(R.id.text_view_ad2ss_translation)
+    TextView textViewAd2SsTranslation;
+
+    @BindView(R.id.text_view_ad2d_translation)
+    TextView textViewAd2DTranslation;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -258,6 +266,16 @@ public final class MainFragment extends Fragment implements MainView {
     @Override
     public void updateDebugModel(MainDebugModel model) {
         textViewLocalizedValue.setText(Boolean.toString(model.localized));
+        textViewAd2SsTranslation.setText(String.format(Locale.getDefault(),
+                                                       "{ %7.2f, %7.2f, %7.2f }",
+                                                       model.ad2SsTranslation.x,
+                                                       model.ad2SsTranslation.y,
+                                                       model.ad2SsTranslation.z));
+        textViewAd2DTranslation.setText(String.format(Locale.getDefault(),
+                                                      "{ %7.2f, %7.2f, %7.2f }",
+                                                      model.ad2DTranslation.x,
+                                                      model.ad2DTranslation.y,
+                                                      model.ad2DTranslation.z));
     }
 
     @Override

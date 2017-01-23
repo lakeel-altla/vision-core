@@ -47,6 +47,10 @@ public final class MainPresenter
 
     private static final Log LOG = LogFactory.getLog(MainPresenter.class);
 
+    private static final int SECS_TO_MILLISECS = 1000;
+
+    private static final double UPDATE_DEBUG_CONSOLE_INTERVAL = 100;
+
     @Named(Names.ACTIVITY_CONTEXT)
     @Inject
     Context context;
@@ -83,7 +87,20 @@ public final class MainPresenter
 
     private ObjectEditMode objectEditMode = ObjectEditMode.NONE;
 
+    // on non-UI thread.
     private LocalizationState localizationState = LocalizationState.UNKNOWN;
+
+    // on non-UI thread.
+    private double prevAd2SsPoseTimestamp;
+
+    // on non-UI thread.
+    private double timeToNextUpdateAd2SsPose;
+
+    // on non-UI thread.
+    private double prevAd2DPoseTimestamp;
+
+    // on non-UI thread.
+    private double timeToNextUpdateAd2DPose;
 
     private MainDebugModel debugModel = new MainDebugModel();
 
@@ -155,6 +172,23 @@ public final class MainPresenter
 
         if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
             pose.targetFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) {
+
+            double timeDelta = (pose.timestamp - prevAd2SsPoseTimestamp) * SECS_TO_MILLISECS;
+            prevAd2SsPoseTimestamp = pose.timestamp;
+
+            timeToNextUpdateAd2SsPose -= timeDelta;
+
+            if (timeToNextUpdateAd2SsPose < 0) {
+                timeToNextUpdateAd2SsPose = UPDATE_DEBUG_CONSOLE_INTERVAL;
+
+                handlerMain.post(() -> {
+                    debugModel.ad2SsTranslation.x = pose.translation[0];
+                    debugModel.ad2SsTranslation.y = pose.translation[1];
+                    debugModel.ad2SsTranslation.z = pose.translation[2];
+                    view.updateDebugModel(debugModel);
+                });
+            }
+
             if (pose.statusCode == TangoPoseData.POSE_VALID) {
                 if (localizationState == LocalizationState.UNKNOWN ||
                     localizationState == LocalizationState.NOT_LOCALIZED) {
@@ -177,6 +211,26 @@ public final class MainPresenter
                         view.updateDebugModel(debugModel);
                     });
                 }
+            }
+        }
+
+        if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
+            pose.targetFrame == TangoPoseData.COORDINATE_FRAME_DEVICE) {
+
+            double timeDelta = (pose.timestamp - prevAd2DPoseTimestamp) * SECS_TO_MILLISECS;
+            prevAd2DPoseTimestamp = pose.timestamp;
+
+            timeToNextUpdateAd2DPose -= timeDelta;
+
+            if (timeToNextUpdateAd2DPose < 0) {
+                timeToNextUpdateAd2DPose = UPDATE_DEBUG_CONSOLE_INTERVAL;
+
+                handlerMain.post(() -> {
+                    debugModel.ad2DTranslation.x = pose.translation[0];
+                    debugModel.ad2DTranslation.y = pose.translation[1];
+                    debugModel.ad2DTranslation.z = pose.translation[2];
+                    view.updateDebugModel(debugModel);
+                });
             }
         }
     }
