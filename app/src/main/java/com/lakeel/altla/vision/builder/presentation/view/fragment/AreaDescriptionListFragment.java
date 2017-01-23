@@ -8,6 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescription
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -24,14 +25,22 @@ import butterknife.ButterKnife;
 
 public final class AreaDescriptionListFragment extends Fragment implements AreaDescriptionListView {
 
+    private static final String ARG_CURRENT_AREA_DESCRIPTION_ID = "currentAreaDescriptionId";
+
     @Inject
     AreaDescriptionListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    public static AreaDescriptionListFragment newInstance() {
-        return new AreaDescriptionListFragment();
+    private InterationListener interationListener;
+
+    public static AreaDescriptionListFragment newInstance(String currentAreaDescriptionId) {
+        AreaDescriptionListFragment fragment = new AreaDescriptionListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_CURRENT_AREA_DESCRIPTION_ID, currentAreaDescriptionId);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -39,6 +48,18 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
         super.onAttach(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
+        interationListener = InterationListener.class.cast(context);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() == null) throw new IllegalStateException("Arguments must be not null.");
+
+        String currentAreaDescriptionId = getArguments().getString(ARG_CURRENT_AREA_DESCRIPTION_ID, null);
+
+        presenter.onCreate(currentAreaDescriptionId);
     }
 
     @Override
@@ -67,6 +88,18 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        presenter.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        presenter.onPause();
+    }
+
+    @Override
     public void updateItems() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
@@ -77,7 +110,17 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
     }
 
     @Override
+    public void loadAreaDescription(String areaDescriptionId) {
+        interationListener.onLoadAreaDescription(areaDescriptionId);
+    }
+
+    @Override
     public void showSnackbar(@StringRes int resId) {
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public interface InterationListener {
+
+        void onLoadAreaDescription(String areaDescriptionId);
     }
 }

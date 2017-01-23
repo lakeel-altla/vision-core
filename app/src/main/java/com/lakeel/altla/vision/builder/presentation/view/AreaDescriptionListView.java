@@ -8,5 +8,7 @@ public interface AreaDescriptionListView {
 
     void updateItem(int position);
 
+    void loadAreaDescription(String areaDescriptionId);
+
     void showSnackbar(@StringRes int resId);
 }

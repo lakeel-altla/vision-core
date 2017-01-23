@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.activity;
 
+import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.TangoConfig;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -48,12 +50,16 @@ import io.reactivex.disposables.Disposable;
 public final class MainActivity extends AppCompatActivity
         implements ActivityScopeContext,
                    NavigationViewHost,
+                   TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
+                   AreaDescriptionListFragment.InterationListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
+
+    private static final String STATE_CURRENT_AREA_DESCRIPTION_ID = "currentAreaDescriptionId";
 
     @Inject
     TangoWrapper tangoWrapper;
@@ -86,6 +92,8 @@ public final class MainActivity extends AppCompatActivity
 
     private Disposable observeConnectionDisposable;
 
+    private String currentAreaDescriptionId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // NOTE:
@@ -109,6 +117,11 @@ public final class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
+
+        tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
+        if (savedInstanceState != null) {
+            currentAreaDescriptionId = savedInstanceState.getString(STATE_CURRENT_AREA_DESCRIPTION_ID, null);
+        }
 
         showSignInFragment();
     }
@@ -155,6 +168,13 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(STATE_CURRENT_AREA_DESCRIPTION_ID, currentAreaDescriptionId);
+    }
+
+    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -188,6 +208,11 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onTangoReady(Tango tango) {
+        LOG.d("Tango is ready.");
+    }
+
+    @Override
     public void onCloseSignInFragment() {
         showTangoPermissionFragment();
     }
@@ -205,6 +230,17 @@ public final class MainActivity extends AppCompatActivity
                                    .replace(R.id.fragment_container, fragment)
 //                                   .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                                    .commit();
+    }
+
+    @Override
+    public void onLoadAreaDescription(String areaDescriptionId) {
+        currentAreaDescriptionId = areaDescriptionId;
+
+        LOG.d("Reconnecting to Tango service...");
+        tangoWrapper.disconnect();
+        tangoWrapper.connect();
+
+        showMainFragment();
     }
 
     @Override
@@ -254,10 +290,47 @@ public final class MainActivity extends AppCompatActivity
     private void showAreaDescriptionListFragment() {
         toolbar.setVisibility(View.VISIBLE);
 
-        AreaDescriptionListFragment fragment = AreaDescriptionListFragment.newInstance();
+        AreaDescriptionListFragment fragment = AreaDescriptionListFragment.newInstance(currentAreaDescriptionId);
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment)
                                    .commit();
+    }
+
+    private TangoConfig createTangoConfig(Tango tango) {
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+
+        // NOTE:
+        // Low latency integration is necessary to achieve a precise alignment of
+        // virtual objects with the RBG image and produce a good AR effect.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+        // Enable the depth perseption.
+//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+//        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+        // Enable the color camera.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+        // NOTE:
+        // To detect recovery from tracking lost, enable drift collection.
+        //
+        // Corrected drift pose data is available in frame pairs for any target frame
+        // from base frame TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION.
+        // In the official sample java_plane_fitting_example,
+        // it is assumed that the target frame is TangoPoseData.COORDINATE_FRAME_DEVICE in the comment sentence,
+        // but it can also be used as TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR as in the same sample.
+        //
+        // Note that frame pairs based on COORDINATE_FRAME_AREA_DESCRIPTION do not work
+        // unless drift collection is enabled.
+        // Although it seems to work if you enable motion tracking,
+        // setting KEY_BOOLEAN_MOTIONTRACKING to true does not work.
+
+        // TODO: KEY_BOOLEAN_DRIFT_CORRECTION = true does not work with KEY_STRING_AREADESCRIPTION.
+//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+
+        LOG.d("The current area description: %s", currentAreaDescriptionId);
+        if (currentAreaDescriptionId != null) {
+            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, currentAreaDescriptionId);
+        }
+
+        return config;
     }
 
     class NavigationViewHeader implements FirebaseAuth.AuthStateListener {

@@ -1,6 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-import android.support.annotation.NonNull;
+import com.lakeel.altla.vision.ArgumentNullException;
+
+import java.util.Date;
 
 public final class AreaDescriptionModel {
 
@@ -8,10 +10,16 @@ public final class AreaDescriptionModel {
 
     public final String name;
 
-    public boolean synced;
+    public final Date creationDate;
 
-    public AreaDescriptionModel(@NonNull String areaDescriptionId, @NonNull String name) {
+    public boolean current;
+
+    public AreaDescriptionModel(String areaDescriptionId, String name, long creationTime) {
+        if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
+        if (name == null) throw new ArgumentNullException("name");
+
         this.areaDescriptionId = areaDescriptionId;
         this.name = name;
+        this.creationDate = new Date(creationTime);
     }
 }

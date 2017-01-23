@@ -10,10 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<AreaDescriptionModelAdapter.ViewHolder> {
 
@@ -55,6 +57,12 @@ public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<Area
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
+        @BindView(R.id.image_button_load)
+        ImageButton imageButtonLoad;
+
+        @BindView(R.id.image_button_unload)
+        ImageButton imageButtonUnload;
+
         private AreaDescriptionListPresenter.ItemPresenter itemPresenter;
 
         private ViewHolder(View itemView) {
@@ -71,6 +79,19 @@ public final class AreaDescriptionModelAdapter extends RecyclerView.Adapter<Area
         public void showModel(@NonNull AreaDescriptionModel model) {
             textViewName.setText(model.name);
             textViewId.setText(model.areaDescriptionId);
+
+            imageButtonLoad.setVisibility(!model.current ? View.VISIBLE : View.GONE);
+            imageButtonUnload.setVisibility(model.current ? View.VISIBLE : View.GONE);
+        }
+
+        @OnClick(R.id.image_button_load)
+        void onClickImageButtonLoad() {
+            itemPresenter.onClickImageButtonLoad(getAdapterPosition());
+        }
+
+        @OnClick(R.id.image_button_unload)
+        void onClickImageButtonUnload() {
+            itemPresenter.onClickImageButtonUnload(getAdapterPosition());
         }
 
         private void onBind(int position) {
