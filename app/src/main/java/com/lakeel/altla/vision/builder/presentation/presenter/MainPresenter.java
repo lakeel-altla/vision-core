@@ -1,14 +1,17 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
+import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
+import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
@@ -19,6 +22,8 @@ import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
@@ -38,7 +43,7 @@ import io.reactivex.disposables.Disposable;
  * Defines the presenter for {@link MainView}.
  */
 public final class MainPresenter
-        implements OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
+        implements OnPoseAvailableListener, OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
 
     private static final Log LOG = LogFactory.getLog(MainPresenter.class);
 
@@ -64,6 +69,8 @@ public final class MainPresenter
 
     private final SingleSelection selection = new SingleSelection();
 
+    private final Handler handlerMain = new Handler(Looper.getMainLooper());
+
     private MainView view;
 
     private MainRenderer renderer;
@@ -75,6 +82,10 @@ public final class MainPresenter
     private volatile boolean active = true;
 
     private ObjectEditMode objectEditMode = ObjectEditMode.NONE;
+
+    private LocalizationState localizationState = LocalizationState.UNKNOWN;
+
+    private MainDebugModel debugModel = new MainDebugModel();
 
     @Inject
     public MainPresenter() {
@@ -99,6 +110,8 @@ public final class MainPresenter
         this.view.setRotateObjectMenuVisible(false);
         this.view.setTranslateObjectAxisSelected(Axis.X, true);
         this.view.setRotateObjectAxisSelected(Axis.Y, true);
+
+        this.view.updateDebugModel(debugModel);
     }
 
     public void onStart() {
@@ -119,18 +132,53 @@ public final class MainPresenter
 
     public void onResume() {
         tangoWrapper.addOnTangoReadyListener(renderer::connectToTangoCamera);
+        tangoWrapper.addOnPoseAvailableListener(this);
         tangoWrapper.addOnFrameAvailableListener(this);
         active = true;
     }
 
     public void onPause() {
         active = false;
+        tangoWrapper.removeOnTangoReadyListener(renderer::connectToTangoCamera);
+        tangoWrapper.removeOnPoseAvailableListener(this);
         tangoWrapper.removeOnFrameAvailableListener(this);
         renderer.disconnectFromTangoCamera();
     }
 
     public void onStop() {
         compositeDisposable.clear();
+    }
+
+    @Override
+    public void onPoseAvailable(TangoPoseData pose) {
+        // NOTE: Invoked by Tango's thread that is not UI one.
+
+        if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
+            pose.targetFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) {
+            if (pose.statusCode == TangoPoseData.POSE_VALID) {
+                if (localizationState == LocalizationState.UNKNOWN ||
+                    localizationState == LocalizationState.NOT_LOCALIZED) {
+                    LOG.d("Localized.");
+                    localizationState = LocalizationState.LOCALIZED;
+
+                    handlerMain.post(() -> {
+                        debugModel.localized = true;
+                        view.updateDebugModel(debugModel);
+                    });
+                }
+            } else {
+                if (localizationState == LocalizationState.UNKNOWN ||
+                    localizationState == LocalizationState.LOCALIZED) {
+                    LOG.d("Not localized.");
+                    localizationState = LocalizationState.NOT_LOCALIZED;
+
+                    handlerMain.post(() -> {
+                        debugModel.localized = false;
+                        view.updateDebugModel(debugModel);
+                    });
+                }
+            }
+        }
     }
 
     @Override
@@ -358,5 +406,11 @@ public final class MainPresenter
                 }
             }
         }
+    }
+
+    private enum LocalizationState {
+        UNKNOWN,
+        LOCALIZED,
+        NOT_LOCALIZED
     }
 }

@@ -9,6 +9,7 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
+import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
 import com.lakeel.altla.vision.builder.presentation.view.NavigationViewHost;
@@ -36,6 +37,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import javax.inject.Inject;
 
@@ -95,6 +97,12 @@ public final class MainFragment extends Fragment implements MainView {
 
     @BindView(R.id.button_scale_object)
     Button buttonScaleObject;
+
+    @BindView(R.id.view_group_debug_console)
+    ViewGroup viewGroupDebugConsole;
+
+    @BindView(R.id.text_view_localized_value)
+    TextView textViewLocalizedValue;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -245,6 +253,11 @@ public final class MainFragment extends Fragment implements MainView {
     @Override
     public void showEditTextureFragment(@Nullable String id) {
         interactionListener.onShowEditTextureFragment(id);
+    }
+
+    @Override
+    public void updateDebugModel(MainDebugModel model) {
+        textViewLocalizedValue.setText(Boolean.toString(model.localized));
     }
 
     @Override

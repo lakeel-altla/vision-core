@@ -41,6 +41,11 @@
     <!-- black (50%) -->
     <color name="button_background_default">#88000000</color>
 
+    <!-- white -->
+    <color name="debug_console_text_color">#ffffff</color>
+    <!-- black (50%) -->
+    <color name="debug_console_background">#88000000</color>
+
     <!-- red for test -->
     <color name="test_red">#ff0000</color>
     <!-- green for test -->

@@ -303,26 +303,10 @@ public final class MainActivity extends AppCompatActivity
         // Low latency integration is necessary to achieve a precise alignment of
         // virtual objects with the RBG image and produce a good AR effect.
         config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
-        // Enable the depth perseption.
-//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
-//        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
         // Enable the color camera.
         config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
         // NOTE:
-        // To detect recovery from tracking lost, enable drift collection.
-        //
-        // Corrected drift pose data is available in frame pairs for any target frame
-        // from base frame TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION.
-        // In the official sample java_plane_fitting_example,
-        // it is assumed that the target frame is TangoPoseData.COORDINATE_FRAME_DEVICE in the comment sentence,
-        // but it can also be used as TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR as in the same sample.
-        //
-        // Note that frame pairs based on COORDINATE_FRAME_AREA_DESCRIPTION do not work
-        // unless drift collection is enabled.
-        // Although it seems to work if you enable motion tracking,
-        // setting KEY_BOOLEAN_MOTIONTRACKING to true does not work.
-
-        // TODO: KEY_BOOLEAN_DRIFT_CORRECTION = true does not work with KEY_STRING_AREADESCRIPTION.
+        // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
         LOG.d("The current area description: %s", currentAreaDescriptionId);
