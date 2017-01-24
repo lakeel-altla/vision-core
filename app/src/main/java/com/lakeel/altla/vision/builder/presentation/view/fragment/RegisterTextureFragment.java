@@ -22,7 +22,6 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -97,9 +96,6 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
 
         presenter.onCreateView(this);
 
-        // Set to true to enable handling on onOptionsItemSelected.
-        setHasOptionsMenu(true);
-
         return view;
     }
 
@@ -113,19 +109,6 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     public void onStop() {
         super.onStop();
         presenter.onStop();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                getActivity().getSupportFragmentManager().popBackStack();
-                return true;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -48,7 +49,8 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class MainActivity extends AppCompatActivity
-        implements ActivityScopeContext,
+        implements FragmentManager.OnBackStackChangedListener,
+                   ActivityScopeContext,
                    NavigationViewHost,
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
@@ -86,6 +88,8 @@ public final class MainActivity extends AppCompatActivity
 
     private ActivityComponent activityComponent;
 
+    private ActionBarDrawerToggle drawerToggle;
+
     private NavigationViewHeader navigationViewHeader;
 
     private Disposable observeUserProfileDisposable;
@@ -109,11 +113,18 @@ public final class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        // setDisplayHomeAsUpEnabled(true) will cause the arrow icon to appear instead of the hamburger icon
+        // by calling drawerToggle.setDrawerIndicatorEnabled(false).
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // Use the following constructor to set the Toolbar as the ActionBar of an Activity.
+        drawerToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+
+        updateToolbarHome();
 
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
@@ -184,6 +195,19 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
+                    getSupportFragmentManager().popBackStack();
+                    return true;
+                }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
@@ -200,6 +224,11 @@ public final class MainActivity extends AppCompatActivity
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        updateToolbarHome();
     }
 
     @Override
@@ -228,7 +257,6 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .addToBackStack(null)
                                    .replace(R.id.fragment_container, fragment)
-//                                   .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                                    .commit();
     }
 
@@ -246,6 +274,13 @@ public final class MainActivity extends AppCompatActivity
     @Override
     public void openDrawer() {
         drawerLayout.openDrawer(GravityCompat.START);
+    }
+
+    public void updateToolbarHome() {
+        if (getSupportActionBar() != null) {
+            boolean isHome = (getSupportFragmentManager().getBackStackEntryCount() == 0);
+            drawerToggle.setDrawerIndicatorEnabled(isHome);
+        }
     }
 
     private void onShowAreaDescriptionListFragment() {
