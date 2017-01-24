@@ -179,7 +179,7 @@ public final class RegisterTexturePresenter {
                         LOG.w("Closing file failed.", e);
                     } else {
                         LOG.e("Unexpected error occured.", e);
-                        view.showSnackbar(R.string.snackbar_unexpected_error_occured);
+                        view.showSnackbar(R.string.snackbar_failed);
                     }
                 });
         compositeDisposable.add(disposable);
@@ -211,7 +211,7 @@ public final class RegisterTexturePresenter {
                         LOG.w("Closing file failed.", e);
                     } else {
                         LOG.e("Unexpected error occured.", e);
-                        view.showSnackbar(R.string.snackbar_unexpected_error_occured);
+                        view.showSnackbar(R.string.snackbar_failed);
                     }
                 });
         compositeDisposable.add(disposable);
