@@ -12,7 +12,6 @@ import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
-import com.lakeel.altla.vision.builder.presentation.view.NavigationViewHost;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureModelAdapter;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -32,6 +31,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -200,6 +201,11 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_main, menu);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
 
@@ -232,8 +238,9 @@ public final class MainFragment extends Fragment implements MainView {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                NavigationViewHost.class.cast(getContext()).openDrawer();
+            case R.id.action_load_ad:
+                // TODO
+                LOG.d("action_load_ad");
                 return true;
             default:
                 break;

@@ -13,7 +13,6 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.NavigationViewHost;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
@@ -51,7 +50,6 @@ import io.reactivex.disposables.Disposable;
 public final class MainActivity extends AppCompatActivity
         implements FragmentManager.OnBackStackChangedListener,
                    ActivityScopeContext,
-                   NavigationViewHost,
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
@@ -124,7 +122,7 @@ public final class MainActivity extends AppCompatActivity
         drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
-        updateToolbarHome();
+        updateActionBarHome();
 
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
@@ -200,8 +198,10 @@ public final class MainActivity extends AppCompatActivity
             case android.R.id.home:
                 if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
                     getSupportFragmentManager().popBackStack();
-                    return true;
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START);
                 }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -228,7 +228,7 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackStackChanged() {
-        updateToolbarHome();
+        updateActionBarHome();
     }
 
     @Override
@@ -271,12 +271,7 @@ public final class MainActivity extends AppCompatActivity
         showMainFragment();
     }
 
-    @Override
-    public void openDrawer() {
-        drawerLayout.openDrawer(GravityCompat.START);
-    }
-
-    public void updateToolbarHome() {
+    public void updateActionBarHome() {
         if (getSupportActionBar() != null) {
             boolean isHome = (getSupportFragmentManager().getBackStackEntryCount() == 0);
             drawerToggle.setDrawerIndicatorEnabled(isHome);
