@@ -9,7 +9,7 @@ import android.support.annotation.StringRes;
  */
 public interface SignInView {
 
-    void closeSignInFragment();
+    void closeView();
 
     void startActivityForResult(@NonNull Intent intent, int requestCode);
 

@@ -62,7 +62,7 @@ public final class SignInPresenter {
                 if (!signedInDetected) {
                     LOG.i("Signed in to firebase: %s", user.getUid());
                     if (!signInButtonClicked) {
-                        view.closeSignInFragment();
+                        view.closeView();
                     }
                     signedInDetected = true;
                 } else {
@@ -125,7 +125,7 @@ public final class SignInPresenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(_subscription -> view.showProgressDialog())
                 .doOnTerminate(() -> view.hideProgressDialog())
-                .subscribe(() -> view.closeSignInFragment(),
+                .subscribe(() -> view.closeView(),
                            e -> LOG.e("Failed to sign in to Firebase.", e));
         compositeDisposable.add(disposable);
     }

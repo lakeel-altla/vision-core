@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaDescriptionListFragment extends Fragment implements AreaDescriptionListView {
+public final class LoadAreaDescriptionFragment extends Fragment implements AreaDescriptionListView {
 
     private static final String ARG_CURRENT_AREA_DESCRIPTION_ID = "currentAreaDescriptionId";
 
@@ -35,8 +35,8 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
 
     private InterationListener interationListener;
 
-    public static AreaDescriptionListFragment newInstance(String currentAreaDescriptionId) {
-        AreaDescriptionListFragment fragment = new AreaDescriptionListFragment();
+    public static LoadAreaDescriptionFragment newInstance(String currentAreaDescriptionId) {
+        LoadAreaDescriptionFragment fragment = new LoadAreaDescriptionFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_CURRENT_AREA_DESCRIPTION_ID, currentAreaDescriptionId);
         fragment.setArguments(bundle);

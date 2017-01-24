@@ -26,7 +26,7 @@ public final class TangoPermissionPresenter {
 
     public void onTangoPermissionResult(boolean isCanceled) {
         if (!isCanceled) {
-            view.showMainFragment();
+            view.closeView();
         } else {
             view.showAreaLearningPermissionRequiredSnackbar();
         }

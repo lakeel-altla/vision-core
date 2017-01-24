@@ -239,8 +239,7 @@ public final class MainFragment extends Fragment implements MainView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_load_ad:
-                // TODO
-                LOG.d("action_load_ad");
+                interactionListener.onShowLoadAreaDescriptionFragment();
                 return true;
             default:
                 break;
@@ -448,6 +447,8 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     public interface InteractionListener {
+
+        void onShowLoadAreaDescriptionFragment();
 
         void onShowEditTextureFragment(@Nullable String id);
     }

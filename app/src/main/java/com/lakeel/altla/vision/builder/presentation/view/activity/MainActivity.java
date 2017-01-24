@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.LoadAreaDescriptionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
@@ -54,7 +54,7 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   AreaDescriptionListFragment.InterationListener,
+                   LoadAreaDescriptionFragment.InterationListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -211,12 +211,6 @@ public final class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.nav_scene_builder:
-                onShowMainFragment();
-                break;
-            case R.id.nav_area_description_list:
-                onShowAreaDescriptionListFragment();
-                break;
             case R.id.nav_sign_out:
                 onSignOut();
                 break;
@@ -247,8 +241,17 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowMainFragment() {
+    public void onCloseTangoPermissionFragment() {
         showMainFragment();
+    }
+
+    @Override
+    public void onShowLoadAreaDescriptionFragment() {
+        LoadAreaDescriptionFragment fragment = LoadAreaDescriptionFragment.newInstance(currentAreaDescriptionId);
+        getSupportFragmentManager().beginTransaction()
+                                   .addToBackStack(null)
+                                   .replace(R.id.fragment_container, fragment)
+                                   .commit();
     }
 
     @Override
@@ -271,15 +274,11 @@ public final class MainActivity extends AppCompatActivity
         showMainFragment();
     }
 
-    public void updateActionBarHome() {
+    private void updateActionBarHome() {
         if (getSupportActionBar() != null) {
             boolean isHome = (getSupportFragmentManager().getBackStackEntryCount() == 0);
             drawerToggle.setDrawerIndicatorEnabled(isHome);
         }
-    }
-
-    private void onShowAreaDescriptionListFragment() {
-        showAreaDescriptionListFragment();
     }
 
     private void onSignOut() {
@@ -312,15 +311,6 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.VISIBLE);
 
         MainFragment fragment = MainFragment.newInstance();
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, fragment)
-                                   .commit();
-    }
-
-    private void showAreaDescriptionListFragment() {
-        toolbar.setVisibility(View.VISIBLE);
-
-        AreaDescriptionListFragment fragment = AreaDescriptionListFragment.newInstance(currentAreaDescriptionId);
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment)
                                    .commit();

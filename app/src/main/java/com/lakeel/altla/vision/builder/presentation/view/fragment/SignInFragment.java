@@ -84,7 +84,7 @@ public final class SignInFragment extends Fragment implements SignInView {
     }
 
     @Override
-    public void closeSignInFragment() {
+    public void closeView() {
         listener.onCloseSignInFragment();
     }
 

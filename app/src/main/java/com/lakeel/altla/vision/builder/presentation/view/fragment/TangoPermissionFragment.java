@@ -63,8 +63,8 @@ public final class TangoPermissionFragment extends Fragment implements TangoPerm
     }
 
     @Override
-    public void showMainFragment() {
-        interactionListener.onShowMainFragment();
+    public void closeView() {
+        interactionListener.onCloseTangoPermissionFragment();
     }
 
     @Override
@@ -81,6 +81,6 @@ public final class TangoPermissionFragment extends Fragment implements TangoPerm
 
     public interface InteractionListener {
 
-        void onShowMainFragment();
+        void onCloseTangoPermissionFragment();
     }
 }
