@@ -3,6 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.di.module;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
@@ -30,6 +31,7 @@ public final class GoogleApiModule {
                          .show();
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                .addApi(Places.GEO_DATA_API)
                 .build();
     }
 }

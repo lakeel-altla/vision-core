@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
+import com.google.firebase.database.Exclude;
+
 import com.lakeel.altla.vision.ArgumentNullException;
 
 import java.util.Date;
@@ -8,18 +10,27 @@ public final class AreaDescriptionModel {
 
     public final String areaDescriptionId;
 
-    public final String name;
+    public String name;
 
-    public final Date creationDate;
+    public Date creationDate;
 
-    public boolean current;
+    public String placeId;
 
-    public AreaDescriptionModel(String areaDescriptionId, String name, long creationTime) {
+    public String placeName;
+
+    public String placeAddress;
+
+    public String level;
+
+    @Exclude
+    public boolean fileCached;
+
+    @Exclude
+    public boolean fileUploaded;
+
+    public AreaDescriptionModel(String areaDescriptionId) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
-        if (name == null) throw new ArgumentNullException("name");
 
         this.areaDescriptionId = areaDescriptionId;
-        this.name = name;
-        this.creationDate = new Date(creationTime);
     }
 }

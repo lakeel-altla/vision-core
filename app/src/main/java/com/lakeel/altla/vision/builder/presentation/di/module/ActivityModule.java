@@ -66,7 +66,7 @@ public final class ActivityModule {
     @Provides
     public TangoWrapper provideTangoWrapper(@Named(Names.ACTIVITY_CONTEXT) Context context) {
         TangoWrapper tangoWrapper = new TangoWrapper(context);
-        tangoWrapper.setStartTangoUx(true);
+        tangoWrapper.setStartTangoUx(false);
         tangoWrapper.setCoordinateFramePairs(FRAME_PAIRS);
         return tangoWrapper;
     }

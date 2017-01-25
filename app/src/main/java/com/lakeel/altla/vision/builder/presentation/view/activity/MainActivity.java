@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.LoadAreaDescriptionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -54,7 +55,7 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   LoadAreaDescriptionFragment.InterationListener,
+                   AreaDescriptionListFragment.InterationListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -242,16 +243,8 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onCloseTangoPermissionFragment() {
-        showMainFragment();
-    }
-
-    @Override
-    public void onShowLoadAreaDescriptionFragment() {
-        LoadAreaDescriptionFragment fragment = LoadAreaDescriptionFragment.newInstance(currentAreaDescriptionId);
-        getSupportFragmentManager().beginTransaction()
-                                   .addToBackStack(null)
-                                   .replace(R.id.fragment_container, fragment)
-                                   .commit();
+//        showMainFragment();
+        showAreaDescriptionListFragment();
     }
 
     @Override
@@ -261,17 +254,6 @@ public final class MainActivity extends AppCompatActivity
                                    .addToBackStack(null)
                                    .replace(R.id.fragment_container, fragment)
                                    .commit();
-    }
-
-    @Override
-    public void onLoadAreaDescription(String areaDescriptionId) {
-        currentAreaDescriptionId = areaDescriptionId;
-
-        LOG.d("Reconnecting to Tango service...");
-        tangoWrapper.disconnect();
-        tangoWrapper.connect();
-
-        showMainFragment();
     }
 
     private void updateActionBarHome() {
@@ -292,25 +274,28 @@ public final class MainActivity extends AppCompatActivity
     private void showSignInFragment() {
         toolbar.setVisibility(View.INVISIBLE);
 
-        SignInFragment fragment = SignInFragment.newInstance();
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, fragment)
-                                   .commit();
+        replaceFragment(SignInFragment.newInstance());
     }
 
     private void showTangoPermissionFragment() {
         toolbar.setVisibility(View.INVISIBLE);
 
-        TangoPermissionFragment fragment = TangoPermissionFragment.newInstance();
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, fragment)
-                                   .commit();
+        replaceFragment(TangoPermissionFragment.newInstance());
+    }
+
+    private void showAreaDescriptionListFragment() {
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragment(AreaDescriptionListFragment.newInstance());
     }
 
     private void showMainFragment() {
         toolbar.setVisibility(View.VISIBLE);
 
-        MainFragment fragment = MainFragment.newInstance();
+        replaceFragment(MainFragment.newInstance());
+    }
+
+    private void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment)
                                    .commit();

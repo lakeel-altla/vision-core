@@ -33,7 +33,6 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -236,19 +235,6 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_load_ad:
-                interactionListener.onShowLoadAreaDescriptionFragment();
-                return true;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void setTangoUxLayout(TangoUx tangoUx) {
         tangoUx.setLayout(tangoUxLayout);
     }
@@ -447,8 +433,6 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     public interface InteractionListener {
-
-        void onShowLoadAreaDescriptionFragment();
 
         void onShowEditTextureFragment(@Nullable String id);
     }

@@ -1,41 +1,42 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.google.atap.tangoservice.Tango;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
-import com.lakeel.altla.vision.domain.usecase.FindAllTangoAreaDescriptionsUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsUseCase;
 
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class AreaDescriptionListPresenter implements TangoWrapper.OnTangoReadyListener {
+public final class AreaDescriptionListPresenter {
 
     private static final Log LOG = LogFactory.getLog(AreaDescriptionListPresenter.class);
 
     @Inject
-    FindAllTangoAreaDescriptionsUseCase findAllTangoAreaDescriptionsUseCase;
+    FindAllUserAreaDescriptionsUseCase findAllUserAreaDescriptionsUseCase;
 
     @Inject
-    TangoWrapper tangoWrapper;
+    GoogleApiClient googleApiClient;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<AreaDescriptionModel> items = new ArrayList<>();
-
-    private String currentAreaDescriptionId;
 
     private AreaDescriptionListView view;
 
@@ -43,17 +44,51 @@ public final class AreaDescriptionListPresenter implements TangoWrapper.OnTangoR
     public AreaDescriptionListPresenter() {
     }
 
-    @Override
-    public void onTangoReady(Tango tango) {
-        Disposable disposable = findAllTangoAreaDescriptionsUseCase
-                .execute(tangoWrapper.getTango())
-                .map(tangoAreaDescription -> {
-                    AreaDescriptionModel model = new AreaDescriptionModel(tangoAreaDescription.areaDescriptionId,
-                                                                          tangoAreaDescription.name,
-                                                                          tangoAreaDescription.creationTime);
-                    model.current = (model.areaDescriptionId.equals(currentAreaDescriptionId));
+    public void onCreateView(@NonNull AreaDescriptionListView view) {
+        this.view = view;
+    }
+
+    public void onStart() {
+        items.clear();
+
+        Disposable disposable = findAllUserAreaDescriptionsUseCase
+                .execute()
+                .map(userAreaDescription -> {
+                    LOG.d("name = %s", userAreaDescription.name);
+
+                    AreaDescriptionModel model = new AreaDescriptionModel(userAreaDescription.areaDescriptionId);
+                    model.name = userAreaDescription.name;
+                    model.creationDate = new Date(userAreaDescription.creationTime);
+                    model.placeId = userAreaDescription.placeId;
+                    model.level = String.valueOf(userAreaDescription.level);
                     return model;
                 })
+                // TODO: to use-case
+                .flatMap(model -> Observable.<AreaDescriptionModel>create(e -> {
+                    if (model.placeId != null && model.placeId.length() != 0) {
+                        Places.GeoDataApi.getPlaceById(googleApiClient, model.placeId)
+                                         .setResultCallback(places -> {
+                                             if (places.getStatus().isSuccess()) {
+                                                 Place place = places.get(0);
+
+                                                 model.placeName = place.getName().toString();
+                                                 model.placeAddress = place.getAddress().toString();
+
+                                             } else if (places.getStatus().isCanceled()) {
+                                                 LOG.e("Getting the place was canceled: placeId = %s",
+                                                       model.placeId);
+                                             } else if (places.getStatus().isInterrupted()) {
+                                                 LOG.e("Getting the place was interrupted: placeId = %s",
+                                                       model.placeId);
+                                             }
+                                             e.onNext(model);
+                                             e.onComplete();
+                                         });
+                    } else {
+                        e.onNext(model);
+                        e.onComplete();
+                    }
+                }))
                 .toList()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(models -> {
@@ -66,28 +101,8 @@ public final class AreaDescriptionListPresenter implements TangoWrapper.OnTangoR
         compositeDisposable.add(disposable);
     }
 
-    public void onCreate(String currentAreaDescriptionId) {
-        this.currentAreaDescriptionId = currentAreaDescriptionId;
-    }
-
-    public void onCreateView(@NonNull AreaDescriptionListView view) {
-        this.view = view;
-    }
-
-    public void onStart() {
-        items.clear();
-    }
-
     public void onStop() {
         compositeDisposable.clear();
-    }
-
-    public void onResume() {
-        tangoWrapper.addOnTangoReadyListener(this);
-    }
-
-    public void onPause() {
-        tangoWrapper.removeOnTangoReadyListener(this);
     }
 
     public void onCreateItemView(@NonNull AreaDescriptionListItemView itemView) {
@@ -111,20 +126,6 @@ public final class AreaDescriptionListPresenter implements TangoWrapper.OnTangoR
         public void onBind(int position) {
             AreaDescriptionModel model = items.get(position);
             itemView.showModel(model);
-        }
-
-        public void onClickImageButtonLoad(int position) {
-            AreaDescriptionModel model = items.get(position);
-            if (!model.current) {
-                view.loadAreaDescription(model.areaDescriptionId);
-            }
-        }
-
-        public void onClickImageButtonUnload(int position) {
-            AreaDescriptionModel model = items.get(position);
-            if (model.current) {
-                view.loadAreaDescription(null);
-            }
         }
     }
 }

@@ -10,23 +10,15 @@ import com.lakeel.altla.vision.builder.presentation.di.module.ApplicationModule;
 import com.squareup.leakcanary.LeakCanary;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.Application;
 import android.support.annotation.NonNull;
-import android.support.multidex.MultiDex;
-import android.support.multidex.MultiDexApplication;
 
 /**
  * Defines our application class.
  */
-public final class MyApplication extends MultiDexApplication {
+public final class MyApplication extends Application {
 
     private ApplicationComponent applicationComponent;
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
-    }
 
     @Override
     public void onCreate() {
