@@ -3,6 +3,8 @@ package com.lakeel.altla.vision.domain.usecase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
@@ -14,6 +16,8 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
 public final class FindAllUserAreaDescriptionsUseCase {
+
+    private static final Log LOG = LogFactory.getLog(FindAllUserAreaDescriptionsUseCase.class);
 
     @Inject
     UserAreaDescriptionRepository userAreaDescriptionRepository;
@@ -45,17 +49,6 @@ public final class FindAllUserAreaDescriptionsUseCase {
 
                 e.onComplete();
             }, e::onError);
-        }).flatMap(userAreaDescription -> checkFileUploaded(userId, userAreaDescription))
-          .subscribeOn(Schedulers.io());
-    }
-
-    private Observable<UserAreaDescription> checkFileUploaded(String userId, UserAreaDescription userAreaDescription) {
-        return Observable.create(e -> {
-            userAreaDescriptionFileRepository.exists(userId, userAreaDescription.areaDescriptionId, result -> {
-                userAreaDescription.fileUploaded = result;
-                e.onNext(userAreaDescription);
-                e.onComplete();
-            }, e::onError);
-        });
+        }).subscribeOn(Schedulers.io());
     }
 }
