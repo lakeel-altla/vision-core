@@ -91,12 +91,11 @@ public final class RegisterTexturePresenter {
             LOG.d("onStart(): Loading the existing texture.");
 
             // Load the texture information.
-            LOG.d("Loading the texture: id = %s", model.textureId);
+            LOG.d("Loading the texture: textureId = %s", model.textureId);
 
             Disposable disposable = findUserTextureUseCase
                     // Find the texture entry to get its name.
                     .execute(model.textureId)
-                    .singleOrError()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(userTexture -> {
                         LOG.d("Loaded the texture.");
@@ -106,8 +105,9 @@ public final class RegisterTexturePresenter {
 
                         loadCachedTextureBitmap(userTexture.textureId);
                     }, e -> {
-                        // TODO: How to recover.
-                        LOG.w(String.format("Failed to load the texture: id = %s", model.textureId), e);
+                        LOG.e(String.format("Failed to find the user texture: textureId = %s", model.textureId), e);
+                    }, () -> {
+                        LOG.e("The user texture not found: textureId = %s", model.textureId);
                     });
             compositeDisposable.add(disposable);
         } else {
