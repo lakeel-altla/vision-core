@@ -51,17 +51,6 @@ public final class FindAllUserAreaDescriptionsUseCase {
 
                 e.onComplete();
             }, e::onError);
-        }).flatMap(userAreaDescription -> checkFileUploaded(userId, userAreaDescription))
-          .subscribeOn(Schedulers.io());
-    }
-
-    private Observable<UserAreaDescription> checkFileUploaded(String userId, UserAreaDescription userAreaDescription) {
-        return Observable.create(e -> {
-            userAreaDescriptionFileRepository.exists(userId, userAreaDescription.areaDescriptionId, result -> {
-                userAreaDescription.fileUploaded = result;
-                e.onNext(userAreaDescription);
-                e.onComplete();
-            }, e::onError);
-        });
+        }).subscribeOn(Schedulers.io());
     }
 }
