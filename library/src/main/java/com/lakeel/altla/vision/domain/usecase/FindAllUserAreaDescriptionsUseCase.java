@@ -44,8 +44,6 @@ public final class FindAllUserAreaDescriptionsUseCase {
                     userAreaDescription.fileCached = areaDescriptionCacheRepository.exists(
                             userAreaDescription.areaDescriptionId);
 
-                    LOG.d("name = %s", userAreaDescription.name);
-
                     e.onNext(userAreaDescription);
                 }
 
