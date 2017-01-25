@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
@@ -32,9 +30,6 @@ public final class AreaDescriptionListPresenter {
 
     @Inject
     GetPlaceUseCase getPlaceUseCase;
-
-    @Inject
-    GoogleApiClient googleApiClient;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
