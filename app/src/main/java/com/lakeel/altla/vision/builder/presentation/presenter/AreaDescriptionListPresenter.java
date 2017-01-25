@@ -1,8 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
@@ -10,6 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsUseCase;
+import com.lakeel.altla.vision.domain.usecase.GetPlaceUseCase;
 
 import android.support.annotation.NonNull;
 
@@ -30,6 +29,9 @@ public final class AreaDescriptionListPresenter {
 
     @Inject
     FindAllUserAreaDescriptionsUseCase findAllUserAreaDescriptionsUseCase;
+
+    @Inject
+    GetPlaceUseCase getPlaceUseCase;
 
     @Inject
     GoogleApiClient googleApiClient;
@@ -54,8 +56,6 @@ public final class AreaDescriptionListPresenter {
         Disposable disposable = findAllUserAreaDescriptionsUseCase
                 .execute()
                 .map(userAreaDescription -> {
-                    LOG.d("name = %s", userAreaDescription.name);
-
                     AreaDescriptionModel model = new AreaDescriptionModel(userAreaDescription.areaDescriptionId);
                     model.name = userAreaDescription.name;
                     model.creationDate = new Date(userAreaDescription.creationTime);
@@ -63,40 +63,28 @@ public final class AreaDescriptionListPresenter {
                     model.level = String.valueOf(userAreaDescription.level);
                     return model;
                 })
-                // TODO: to use-case
-                .flatMap(model -> Observable.<AreaDescriptionModel>create(e -> {
-                    if (model.placeId != null && model.placeId.length() != 0) {
-                        Places.GeoDataApi.getPlaceById(googleApiClient, model.placeId)
-                                         .setResultCallback(places -> {
-                                             if (places.getStatus().isSuccess()) {
-                                                 Place place = places.get(0);
-
-                                                 model.placeName = place.getName().toString();
-                                                 model.placeAddress = place.getAddress().toString();
-
-                                             } else if (places.getStatus().isCanceled()) {
-                                                 LOG.e("Getting the place was canceled: placeId = %s",
-                                                       model.placeId);
-                                             } else if (places.getStatus().isInterrupted()) {
-                                                 LOG.e("Getting the place was interrupted: placeId = %s",
-                                                       model.placeId);
-                                             }
-                                             e.onNext(model);
-                                             e.onComplete();
-                                         });
+                .concatMap(model -> {
+                    // Load the place information.
+                    if (model.placeId != null) {
+                        return getPlaceUseCase.execute(model.placeId)
+                                              .map(place -> {
+                                                  model.placeName = place.getName().toString();
+                                                  model.placeAddress = place.getAddress().toString();
+                                                  return model;
+                                              })
+                                              .toObservable();
                     } else {
-                        e.onNext(model);
-                        e.onComplete();
+                        return Observable.just(model);
                     }
-                }))
-                .toList()
+                })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(models -> {
-                    items.clear();
-                    items.addAll(models);
-                    view.updateItems();
+                .subscribe(model -> {
+                    items.add(model);
+                    view.updateItem(items.size() - 1);
                 }, e -> {
-                    LOG.e("Loading area description meta datas failed.", e);
+                    LOG.e("Failed to find all user area descriptions.", e);
+                }, () -> {
+                    LOG.d("Found all user area description.");
                 });
         compositeDisposable.add(disposable);
     }

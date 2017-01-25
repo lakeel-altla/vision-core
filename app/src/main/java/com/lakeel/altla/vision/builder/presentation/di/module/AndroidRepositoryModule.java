@@ -1,10 +1,13 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentBitmapRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentFilenameRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentRepository;
 import com.lakeel.altla.vision.data.repository.android.FileBitmapRepository;
+import com.lakeel.altla.vision.data.repository.android.PlaceRepository;
 import com.lakeel.altla.vision.data.repository.android.TangoAreaDescriptionMetadataRepository;
 import com.lakeel.altla.vision.data.repository.android.TextureCacheRepository;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -63,5 +66,11 @@ public final class AndroidRepositoryModule {
     public AreaDescriptionCacheRepository provideAreaDescriptionCacheRepository(
             @Named(Names.EXTERNAL_STORAGE_ROOT) File rootDirectory) {
         return new AreaDescriptionCacheRepository(rootDirectory);
+    }
+
+    @ActivityScope
+    @Provides
+    public PlaceRepository providePlaceRepository(GoogleApiClient googleApiClient) {
+        return new PlaceRepository(googleApiClient);
     }
 }
