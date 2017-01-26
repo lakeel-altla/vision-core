@@ -8,6 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescrip
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -22,7 +23,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserUserAreaDescriptionListFragment extends Fragment implements UserAreaDescriptionListView {
+public final class UserAreaDescriptionListFragment extends Fragment implements UserAreaDescriptionListView {
 
     @Inject
     UserAreaDescriptionListPresenter presenter;
@@ -32,8 +33,8 @@ public final class UserUserAreaDescriptionListFragment extends Fragment implemen
 
     private InterationListener interationListener;
 
-    public static UserUserAreaDescriptionListFragment newInstance() {
-        return new UserUserAreaDescriptionListFragment();
+    public static UserAreaDescriptionListFragment newInstance() {
+        return new UserAreaDescriptionListFragment();
     }
 
     @Override
@@ -46,7 +47,7 @@ public final class UserUserAreaDescriptionListFragment extends Fragment implemen
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_area_description_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_user_area_description_list, container, false);
         ButterKnife.bind(this, view);
 
         presenter.onCreateView(this);
@@ -84,7 +85,13 @@ public final class UserUserAreaDescriptionListFragment extends Fragment implemen
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void showUserAreaDescription(@NonNull String areaDescriptionId) {
+        interationListener.onShowUserAreaDescriptionFragment(areaDescriptionId);
+    }
+
     public interface InterationListener {
 
+        void onShowUserAreaDescriptionFragment(@NonNull String areaDescriptionId);
     }
 }

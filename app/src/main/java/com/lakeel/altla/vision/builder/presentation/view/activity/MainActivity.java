@@ -13,11 +13,12 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserUserAreaDescriptionListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -55,7 +56,8 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   UserUserAreaDescriptionListFragment.InterationListener,
+                   UserAreaDescriptionListFragment.InterationListener,
+                   UserAreaDescriptionFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -238,22 +240,28 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onCloseSignInFragment() {
-        showTangoPermissionFragment();
+        toolbar.setVisibility(View.INVISIBLE);
+
+        replaceFragment(TangoPermissionFragment.newInstance());
     }
 
     @Override
     public void onCloseTangoPermissionFragment() {
-//        showMainFragment();
-        showAreaDescriptionListFragment();
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragment(UserAreaDescriptionListFragment.newInstance());
+    }
+
+    @Override
+    public void onShowUserAreaDescriptionFragment(@NonNull String areaDescriptionId) {
+        UserAreaDescriptionFragment fragment = UserAreaDescriptionFragment.newInstance(areaDescriptionId);
+        replaceFragmentAndAddToBackStack(fragment);
     }
 
     @Override
     public void onShowEditTextureFragment(@Nullable String id) {
         RegisterTextureFragment fragment = RegisterTextureFragment.newInstance(id);
-        getSupportFragmentManager().beginTransaction()
-                                   .addToBackStack(null)
-                                   .replace(R.id.fragment_container, fragment)
-                                   .commit();
+        replaceFragmentAndAddToBackStack(fragment);
     }
 
     private void updateActionBarHome() {
@@ -277,22 +285,17 @@ public final class MainActivity extends AppCompatActivity
         replaceFragment(SignInFragment.newInstance());
     }
 
-    private void showTangoPermissionFragment() {
-        toolbar.setVisibility(View.INVISIBLE);
-
-        replaceFragment(TangoPermissionFragment.newInstance());
-    }
-
-    private void showAreaDescriptionListFragment() {
-        toolbar.setVisibility(View.VISIBLE);
-
-        replaceFragment(UserUserAreaDescriptionListFragment.newInstance());
-    }
-
     private void showMainFragment() {
         toolbar.setVisibility(View.VISIBLE);
 
         replaceFragment(MainFragment.newInstance());
+    }
+
+    private void replaceFragmentAndAddToBackStack(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                                   .addToBackStack(null)
+                                   .replace(R.id.fragment_container, fragment)
+                                   .commit();
     }
 
     private void replaceFragment(Fragment fragment) {

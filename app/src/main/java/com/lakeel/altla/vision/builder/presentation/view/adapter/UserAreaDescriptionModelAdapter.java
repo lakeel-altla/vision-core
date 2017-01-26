@@ -32,7 +32,7 @@ public final class UserAreaDescriptionModelAdapter
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View view = inflater.inflate(R.layout.item_area_description_model, parent, false);
+        View view = inflater.inflate(R.layout.item_user_area_description_model, parent, false);
         ViewHolderUser holder = new ViewHolderUser(view);
         presenter.onCreateItemView(holder);
         return holder;
@@ -62,14 +62,16 @@ public final class UserAreaDescriptionModelAdapter
         @BindView(R.id.text_view_place_address)
         TextView textViewPlaceAddress;
 
-        @BindView(R.id.text_view_place_level)
-        TextView textViewPlaceLevel;
+        @BindView(R.id.text_view_level)
+        TextView textViewLevel;
 
         private UserAreaDescriptionListPresenter.ItemPresenter itemPresenter;
 
         private ViewHolderUser(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            itemView.setOnClickListener(v -> itemPresenter.onClick(getAdapterPosition()));
         }
 
         @Override
@@ -83,7 +85,7 @@ public final class UserAreaDescriptionModelAdapter
             textViewId.setText(model.areaDescriptionId);
             textViewPlaceName.setText(model.placeName);
             textViewPlaceAddress.setText(model.placeAddress);
-            textViewPlaceLevel.setText(model.level);
+            textViewLevel.setText(model.level);
         }
 
         private void onBind(int position) {

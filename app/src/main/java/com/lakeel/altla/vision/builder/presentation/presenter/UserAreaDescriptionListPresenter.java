@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionModelMapper;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListView;
@@ -11,7 +12,6 @@ import com.lakeel.altla.vision.domain.usecase.GetPlaceUseCase;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,24 +50,12 @@ public final class UserAreaDescriptionListPresenter {
 
         Disposable disposable = findAllUserAreaDescriptionsUseCase
                 .execute()
-                .map(userAreaDescription -> {
-                    UserAreaDescriptionModel model =
-                            new UserAreaDescriptionModel(userAreaDescription.areaDescriptionId);
-                    model.name = userAreaDescription.name;
-                    model.creationDate = new Date(userAreaDescription.creationTime);
-                    model.placeId = userAreaDescription.placeId;
-                    model.level = String.valueOf(userAreaDescription.level);
-                    return model;
-                })
+                .map(UserAreaDescriptionModelMapper::map)
                 .concatMap(model -> {
                     // Load the place information.
                     if (model.placeId != null) {
                         return getPlaceUseCase.execute(model.placeId)
-                                              .map(place -> {
-                                                  model.placeName = place.getName().toString();
-                                                  model.placeAddress = place.getAddress().toString();
-                                                  return model;
-                                              })
+                                              .map(place -> UserAreaDescriptionModelMapper.map(model, place))
                                               .toObservable();
                     } else {
                         return Observable.just(model);
@@ -90,7 +78,8 @@ public final class UserAreaDescriptionListPresenter {
     }
 
     public void onCreateItemView(@NonNull UserAreaDescriptionListItemView itemView) {
-        UserAreaDescriptionListPresenter.ItemPresenter itemPresenter = new UserAreaDescriptionListPresenter.ItemPresenter();
+        UserAreaDescriptionListPresenter.ItemPresenter itemPresenter =
+                new UserAreaDescriptionListPresenter.ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }
@@ -110,6 +99,11 @@ public final class UserAreaDescriptionListPresenter {
         public void onBind(int position) {
             UserAreaDescriptionModel model = items.get(position);
             itemView.showModel(model);
+        }
+
+        public void onClick(int position) {
+            UserAreaDescriptionModel model = items.get(position);
+            view.showUserAreaDescription(model.areaDescriptionId);
         }
     }
 }

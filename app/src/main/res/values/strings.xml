@@ -35,4 +35,9 @@
 
     <string name="hint_edit_texure_name">The texture name.</string>
 
+    <string name="label_id">ID</string>
+    <string name="label_place">Place</string>
+    <string name="label_level">Level</string>
+    <string name="label_name">Name</string>
+
 </resources>
