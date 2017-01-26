@@ -6,7 +6,7 @@ import com.lakeel.altla.vision.ArgumentNullException;
 
 import java.util.Date;
 
-public final class AreaDescriptionModel {
+public final class UserAreaDescriptionModel {
 
     public final String areaDescriptionId;
 
@@ -28,7 +28,7 @@ public final class AreaDescriptionModel {
     @Exclude
     public boolean fileUploaded;
 
-    public AreaDescriptionModel(String areaDescriptionId) {
+    public UserAreaDescriptionModel(String areaDescriptionId) {
         if (areaDescriptionId == null) throw new ArgumentNullException("areaDescriptionId");
 
         this.areaDescriptionId = areaDescriptionId;

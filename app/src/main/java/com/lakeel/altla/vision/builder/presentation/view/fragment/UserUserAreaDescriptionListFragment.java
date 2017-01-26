@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionModelAdapter;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListView;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionModelAdapter;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -22,18 +22,18 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaDescriptionListFragment extends Fragment implements AreaDescriptionListView {
+public final class UserUserAreaDescriptionListFragment extends Fragment implements UserAreaDescriptionListView {
 
     @Inject
-    AreaDescriptionListPresenter presenter;
+    UserAreaDescriptionListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
     private InterationListener interationListener;
 
-    public static AreaDescriptionListFragment newInstance() {
-        return new AreaDescriptionListFragment();
+    public static UserUserAreaDescriptionListFragment newInstance() {
+        return new UserUserAreaDescriptionListFragment();
     }
 
     @Override
@@ -51,7 +51,7 @@ public final class AreaDescriptionListFragment extends Fragment implements AreaD
 
         presenter.onCreateView(this);
 
-        recyclerView.setAdapter(new AreaDescriptionModelAdapter(presenter));
+        recyclerView.setAdapter(new UserAreaDescriptionModelAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         return view;

@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserUserAreaDescriptionListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
@@ -55,7 +55,7 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   AreaDescriptionListFragment.InterationListener,
+                   UserUserAreaDescriptionListFragment.InterationListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -286,7 +286,7 @@ public final class MainActivity extends AppCompatActivity
     private void showAreaDescriptionListFragment() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(AreaDescriptionListFragment.newInstance());
+        replaceFragment(UserUserAreaDescriptionListFragment.newInstance());
     }
 
     private void showMainFragment() {

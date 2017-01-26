@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view;
 
 import android.support.annotation.StringRes;
 
-public interface AreaDescriptionListView {
+public interface UserAreaDescriptionListView {
 
     void updateItems();
 

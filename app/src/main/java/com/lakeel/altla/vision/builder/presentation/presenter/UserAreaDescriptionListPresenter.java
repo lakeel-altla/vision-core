@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionModel;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListItemView;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionListView;
+import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListItemView;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListView;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetPlaceUseCase;
 
@@ -21,9 +21,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class AreaDescriptionListPresenter {
+public final class UserAreaDescriptionListPresenter {
 
-    private static final Log LOG = LogFactory.getLog(AreaDescriptionListPresenter.class);
+    private static final Log LOG = LogFactory.getLog(UserAreaDescriptionListPresenter.class);
 
     @Inject
     FindAllUserAreaDescriptionsUseCase findAllUserAreaDescriptionsUseCase;
@@ -33,15 +33,15 @@ public final class AreaDescriptionListPresenter {
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private final List<AreaDescriptionModel> items = new ArrayList<>();
+    private final List<UserAreaDescriptionModel> items = new ArrayList<>();
 
-    private AreaDescriptionListView view;
+    private UserAreaDescriptionListView view;
 
     @Inject
-    public AreaDescriptionListPresenter() {
+    public UserAreaDescriptionListPresenter() {
     }
 
-    public void onCreateView(@NonNull AreaDescriptionListView view) {
+    public void onCreateView(@NonNull UserAreaDescriptionListView view) {
         this.view = view;
     }
 
@@ -51,7 +51,8 @@ public final class AreaDescriptionListPresenter {
         Disposable disposable = findAllUserAreaDescriptionsUseCase
                 .execute()
                 .map(userAreaDescription -> {
-                    AreaDescriptionModel model = new AreaDescriptionModel(userAreaDescription.areaDescriptionId);
+                    UserAreaDescriptionModel model =
+                            new UserAreaDescriptionModel(userAreaDescription.areaDescriptionId);
                     model.name = userAreaDescription.name;
                     model.creationDate = new Date(userAreaDescription.creationTime);
                     model.placeId = userAreaDescription.placeId;
@@ -88,8 +89,8 @@ public final class AreaDescriptionListPresenter {
         compositeDisposable.clear();
     }
 
-    public void onCreateItemView(@NonNull AreaDescriptionListItemView itemView) {
-        AreaDescriptionListPresenter.ItemPresenter itemPresenter = new AreaDescriptionListPresenter.ItemPresenter();
+    public void onCreateItemView(@NonNull UserAreaDescriptionListItemView itemView) {
+        UserAreaDescriptionListPresenter.ItemPresenter itemPresenter = new UserAreaDescriptionListPresenter.ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }
@@ -100,14 +101,14 @@ public final class AreaDescriptionListPresenter {
 
     public final class ItemPresenter {
 
-        private AreaDescriptionListItemView itemView;
+        private UserAreaDescriptionListItemView itemView;
 
-        private void onCreateItemView(@NonNull AreaDescriptionListItemView itemView) {
+        private void onCreateItemView(@NonNull UserAreaDescriptionListItemView itemView) {
             this.itemView = itemView;
         }
 
         public void onBind(int position) {
-            AreaDescriptionModel model = items.get(position);
+            UserAreaDescriptionModel model = items.get(position);
             itemView.showModel(model);
         }
     }
