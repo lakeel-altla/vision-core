@@ -7,6 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
@@ -73,4 +74,11 @@ public interface ActivityComponent {
      * @param fragment The fragment.
      */
     void inject(UserAreaDescriptionFragment fragment);
+
+    /**
+     * Injects objects into the specified fragment.
+     *
+     * @param fragment The fragment.
+     */
+    void inject(UserAreaDescriptionSceneFragment fragment);
 }
