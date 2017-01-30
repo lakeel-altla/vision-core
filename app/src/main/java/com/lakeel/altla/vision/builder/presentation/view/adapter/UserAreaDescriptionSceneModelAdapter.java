@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionSceneListPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionScenesPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneItemView;
 
 import android.support.annotation.NonNull;
@@ -18,11 +18,11 @@ import butterknife.ButterKnife;
 public final class UserAreaDescriptionSceneModelAdapter
         extends RecyclerView.Adapter<UserAreaDescriptionSceneModelAdapter.ViewHolderAreaDescription> {
 
-    private final UserAreaDescriptionSceneListPresenter presenter;
+    private final UserAreaDescriptionScenesPresenter presenter;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionSceneModelAdapter(@NonNull UserAreaDescriptionSceneListPresenter presenter) {
+    public UserAreaDescriptionSceneModelAdapter(@NonNull UserAreaDescriptionScenesPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -56,7 +56,7 @@ public final class UserAreaDescriptionSceneModelAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        private UserAreaDescriptionSceneListPresenter.ItemPresenter itemPresenter;
+        private UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter;
 
         private ViewHolderAreaDescription(View itemView) {
             super(itemView);
@@ -64,7 +64,7 @@ public final class UserAreaDescriptionSceneModelAdapter
         }
 
         @Override
-        public void setItemPresenter(@NonNull UserAreaDescriptionSceneListPresenter.ItemPresenter itemPresenter) {
+        public void setItemPresenter(@NonNull UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter) {
             this.itemPresenter = itemPresenter;
         }
 

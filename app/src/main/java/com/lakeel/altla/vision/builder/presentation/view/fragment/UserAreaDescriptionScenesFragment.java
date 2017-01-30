@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionSceneListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneView;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionScenesPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionScenesView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionSceneModelAdapter;
 
 import android.content.Context;
@@ -21,12 +21,12 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionSceneFragment extends Fragment implements UserAreaDescriptionSceneView {
+public final class UserAreaDescriptionScenesFragment extends Fragment implements UserAreaDescriptionScenesView {
 
     private static final String ARG_AREA_DESCRIPTION_ID = "areaDescriptionId";
 
     @Inject
-    UserAreaDescriptionSceneListPresenter presenter;
+    UserAreaDescriptionScenesPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -34,8 +34,8 @@ public final class UserAreaDescriptionSceneFragment extends Fragment implements 
     private InteractionListener interactionListener;
 
     @NonNull
-    public static UserAreaDescriptionSceneFragment newInstance(@NonNull String areaDescriptionId) {
-        UserAreaDescriptionSceneFragment fragment = new UserAreaDescriptionSceneFragment();
+    public static UserAreaDescriptionScenesFragment newInstance(@NonNull String areaDescriptionId) {
+        UserAreaDescriptionScenesFragment fragment = new UserAreaDescriptionScenesFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_AREA_DESCRIPTION_ID, areaDescriptionId);
         fragment.setArguments(bundle);

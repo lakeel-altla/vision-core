@@ -18,7 +18,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextur
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionsFragment;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -56,7 +56,7 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   UserAreaDescriptionListFragment.InterationListener,
+                   UserAreaDescriptionsFragment.InterationListener,
                    UserAreaDescriptionFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
@@ -249,7 +249,7 @@ public final class MainActivity extends AppCompatActivity
     public void onCloseTangoPermissionFragment() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(UserAreaDescriptionListFragment.newInstance());
+        replaceFragment(UserAreaDescriptionsFragment.newInstance());
     }
 
     @Override

@@ -2,7 +2,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment">
+             tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionsFragment">
 
     <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"

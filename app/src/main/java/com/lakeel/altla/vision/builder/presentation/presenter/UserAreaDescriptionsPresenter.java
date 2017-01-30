@@ -4,8 +4,8 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionModelMapper;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListItemView;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListView;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionsView;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetPlaceUseCase;
 
@@ -21,9 +21,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class UserAreaDescriptionListPresenter {
+public final class UserAreaDescriptionsPresenter {
 
-    private static final Log LOG = LogFactory.getLog(UserAreaDescriptionListPresenter.class);
+    private static final Log LOG = LogFactory.getLog(UserAreaDescriptionsPresenter.class);
 
     @Inject
     FindAllUserAreaDescriptionsUseCase findAllUserAreaDescriptionsUseCase;
@@ -35,13 +35,13 @@ public final class UserAreaDescriptionListPresenter {
 
     private final List<UserAreaDescriptionModel> items = new ArrayList<>();
 
-    private UserAreaDescriptionListView view;
+    private UserAreaDescriptionsView view;
 
     @Inject
-    public UserAreaDescriptionListPresenter() {
+    public UserAreaDescriptionsPresenter() {
     }
 
-    public void onCreateView(@NonNull UserAreaDescriptionListView view) {
+    public void onCreateView(@NonNull UserAreaDescriptionsView view) {
         this.view = view;
     }
 
@@ -77,9 +77,9 @@ public final class UserAreaDescriptionListPresenter {
         compositeDisposable.clear();
     }
 
-    public void onCreateItemView(@NonNull UserAreaDescriptionListItemView itemView) {
-        UserAreaDescriptionListPresenter.ItemPresenter itemPresenter =
-                new UserAreaDescriptionListPresenter.ItemPresenter();
+    public void onCreateItemView(@NonNull UserAreaDescriptionItemView itemView) {
+        UserAreaDescriptionsPresenter.ItemPresenter itemPresenter =
+                new UserAreaDescriptionsPresenter.ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }
@@ -90,9 +90,9 @@ public final class UserAreaDescriptionListPresenter {
 
     public final class ItemPresenter {
 
-        private UserAreaDescriptionListItemView itemView;
+        private UserAreaDescriptionItemView itemView;
 
-        private void onCreateItemView(@NonNull UserAreaDescriptionListItemView itemView) {
+        private void onCreateItemView(@NonNull UserAreaDescriptionItemView itemView) {
             this.itemView = itemView;
         }
 

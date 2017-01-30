@@ -15,7 +15,7 @@ import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
-import com.lakeel.altla.vision.builder.presentation.view.TextureModelListItemView;
+import com.lakeel.altla.vision.builder.presentation.view.TextureModelItemView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
@@ -298,7 +298,7 @@ public final class MainPresenter
         return models.size();
     }
 
-    public void onCreateItemView(@NonNull TextureModelListItemView itemView) {
+    public void onCreateItemView(@NonNull TextureModelItemView itemView) {
         ModelItemPresenter itemPresenter = new ModelItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
@@ -346,9 +346,9 @@ public final class MainPresenter
 
     public final class ModelItemPresenter {
 
-        private TextureModelListItemView itemView;
+        private TextureModelItemView itemView;
 
-        public void onCreateItemView(@NonNull TextureModelListItemView itemView) {
+        public void onCreateItemView(@NonNull TextureModelItemView itemView) {
             this.itemView = itemView;
         }
 

@@ -5,7 +5,7 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionSceneModelMapper;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneItemView;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneView;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionScenesView;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsSceneUseCase;
 
 import android.support.annotation.NonNull;
@@ -19,9 +19,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class UserAreaDescriptionSceneListPresenter {
+public final class UserAreaDescriptionScenesPresenter {
 
-    private static final Log LOG = LogFactory.getLog(UserAreaDescriptionSceneListPresenter.class);
+    private static final Log LOG = LogFactory.getLog(UserAreaDescriptionScenesPresenter.class);
 
     @Inject
     FindAllUserAreaDescriptionsSceneUseCase findAllUserAreaDescriptionsSceneUseCase;
@@ -32,17 +32,17 @@ public final class UserAreaDescriptionSceneListPresenter {
 
     private String areaDescriptionId;
 
-    private UserAreaDescriptionSceneView view;
+    private UserAreaDescriptionScenesView view;
 
     @Inject
-    public UserAreaDescriptionSceneListPresenter() {
+    public UserAreaDescriptionScenesPresenter() {
     }
 
     public void onCreate(@NonNull String areaDescriptionId) {
         this.areaDescriptionId = areaDescriptionId;
     }
 
-    public void onCreateView(@NonNull UserAreaDescriptionSceneView view) {
+    public void onCreateView(@NonNull UserAreaDescriptionScenesView view) {
         this.view = view;
     }
 
@@ -68,8 +68,8 @@ public final class UserAreaDescriptionSceneListPresenter {
     }
 
     public void onCreateItemView(@NonNull UserAreaDescriptionSceneItemView itemView) {
-        UserAreaDescriptionSceneListPresenter.ItemPresenter itemPresenter =
-                new UserAreaDescriptionSceneListPresenter.ItemPresenter();
+        UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter =
+                new UserAreaDescriptionScenesPresenter.ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }

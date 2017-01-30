@@ -6,7 +6,7 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.TextureModelListItemView;
+import com.lakeel.altla.vision.builder.presentation.view.TextureModelItemView;
 
 import android.content.ClipData;
 import android.support.annotation.NonNull;
@@ -66,7 +66,7 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
         return presenter.getModelCount();
     }
 
-    public final class ViewHolderTexture extends RecyclerView.ViewHolder implements TextureModelListItemView {
+    public final class ViewHolderTexture extends RecyclerView.ViewHolder implements TextureModelItemView {
 
         @BindView(R.id.view_top)
         View viewTop;

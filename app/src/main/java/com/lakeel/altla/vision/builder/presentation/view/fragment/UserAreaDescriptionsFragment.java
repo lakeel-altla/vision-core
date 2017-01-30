@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListView;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionsPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionsView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionModelAdapter;
 
 import android.content.Context;
@@ -23,18 +23,18 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionListFragment extends Fragment implements UserAreaDescriptionListView {
+public final class UserAreaDescriptionsFragment extends Fragment implements UserAreaDescriptionsView {
 
     @Inject
-    UserAreaDescriptionListPresenter presenter;
+    UserAreaDescriptionsPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
     private InterationListener interationListener;
 
-    public static UserAreaDescriptionListFragment newInstance() {
-        return new UserAreaDescriptionListFragment();
+    public static UserAreaDescriptionsFragment newInstance() {
+        return new UserAreaDescriptionsFragment();
     }
 
     @Override

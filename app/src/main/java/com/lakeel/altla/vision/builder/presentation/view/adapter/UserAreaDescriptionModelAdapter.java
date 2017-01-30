@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListItemView;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionsPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -18,11 +18,11 @@ import butterknife.ButterKnife;
 public final class UserAreaDescriptionModelAdapter
         extends RecyclerView.Adapter<UserAreaDescriptionModelAdapter.ViewHolderUser> {
 
-    private final UserAreaDescriptionListPresenter presenter;
+    private final UserAreaDescriptionsPresenter presenter;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionModelAdapter(@NonNull UserAreaDescriptionListPresenter presenter) {
+    public UserAreaDescriptionModelAdapter(@NonNull UserAreaDescriptionsPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -48,7 +48,7 @@ public final class UserAreaDescriptionModelAdapter
         return presenter.getItemCount();
     }
 
-    final class ViewHolderUser extends RecyclerView.ViewHolder implements UserAreaDescriptionListItemView {
+    final class ViewHolderUser extends RecyclerView.ViewHolder implements UserAreaDescriptionItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;
@@ -65,7 +65,7 @@ public final class UserAreaDescriptionModelAdapter
         @BindView(R.id.text_view_level)
         TextView textViewLevel;
 
-        private UserAreaDescriptionListPresenter.ItemPresenter itemPresenter;
+        private UserAreaDescriptionsPresenter.ItemPresenter itemPresenter;
 
         private ViewHolderUser(View itemView) {
             super(itemView);
@@ -75,7 +75,7 @@ public final class UserAreaDescriptionModelAdapter
         }
 
         @Override
-        public void setItemPresenter(@NonNull UserAreaDescriptionListPresenter.ItemPresenter itemPresenter) {
+        public void setItemPresenter(@NonNull UserAreaDescriptionsPresenter.ItemPresenter itemPresenter) {
             this.itemPresenter = itemPresenter;
         }
 
