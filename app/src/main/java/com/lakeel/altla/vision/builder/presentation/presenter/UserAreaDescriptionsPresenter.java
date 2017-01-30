@@ -78,8 +78,7 @@ public final class UserAreaDescriptionsPresenter {
     }
 
     public void onCreateItemView(@NonNull UserAreaDescriptionItemView itemView) {
-        UserAreaDescriptionsPresenter.ItemPresenter itemPresenter =
-                new UserAreaDescriptionsPresenter.ItemPresenter();
+        ItemPresenter itemPresenter = new ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }
@@ -103,7 +102,7 @@ public final class UserAreaDescriptionsPresenter {
 
         public void onClick(int position) {
             UserAreaDescriptionModel model = items.get(position);
-            view.showUserAreaDescription(model.areaDescriptionId);
+            view.showUserAreaDescriptionScenes(model.areaDescriptionId);
         }
     }
 }

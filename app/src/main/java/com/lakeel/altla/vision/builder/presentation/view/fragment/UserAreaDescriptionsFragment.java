@@ -86,12 +86,12 @@ public final class UserAreaDescriptionsFragment extends Fragment implements User
     }
 
     @Override
-    public void showUserAreaDescription(@NonNull String areaDescriptionId) {
-        interationListener.onShowUserAreaDescriptionFragment(areaDescriptionId);
+    public void showUserAreaDescriptionScenes(@NonNull String areaDescriptionId) {
+        interationListener.onShowUserAreaDescriptionScenesFragment(areaDescriptionId);
     }
 
     public interface InterationListener {
 
-        void onShowUserAreaDescriptionFragment(@NonNull String areaDescriptionId);
+        void onShowUserAreaDescriptionScenesFragment(@NonNull String areaDescriptionId);
     }
 }

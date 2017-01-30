@@ -11,5 +11,5 @@ public interface UserAreaDescriptionsView {
 
     void showSnackbar(@StringRes int resId);
 
-    void showUserAreaDescription(@NonNull String areaDescriptionId);
+    void showUserAreaDescriptionScenes(@NonNull String areaDescriptionId);
 }

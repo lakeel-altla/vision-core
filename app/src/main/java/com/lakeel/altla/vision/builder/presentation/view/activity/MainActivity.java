@@ -17,7 +17,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionScenesFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionsFragment;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
@@ -57,7 +57,7 @@ public final class MainActivity extends AppCompatActivity
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
                    UserAreaDescriptionsFragment.InterationListener,
-                   UserAreaDescriptionFragment.InteractionListener,
+                   UserAreaDescriptionScenesFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -253,8 +253,8 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserAreaDescriptionFragment(@NonNull String areaDescriptionId) {
-        UserAreaDescriptionFragment fragment = UserAreaDescriptionFragment.newInstance(areaDescriptionId);
+    public void onShowUserAreaDescriptionScenesFragment(@NonNull String areaDescriptionId) {
+        UserAreaDescriptionScenesFragment fragment = UserAreaDescriptionScenesFragment.newInstance(areaDescriptionId);
         replaceFragmentAndAddToBackStack(fragment);
     }
 

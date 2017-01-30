@@ -52,13 +52,12 @@ public final class UserAreaDescriptionScenesPresenter {
         Disposable disposable = findAllUserAreaDescriptionsSceneUseCase
                 .execute(areaDescriptionId)
                 .map(UserAreaDescriptionSceneModelMapper::map)
-                .toList()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(models -> {
-                    items.addAll(models);
-                    view.updateItems();
+                .subscribe(model -> {
+                    items.add(model);
+                    view.updateItem(items.size() - 1);
                 }, e -> {
-                    LOG.e("Failed to find all user scenes.");
+                    LOG.e("Failed to find all user scenes.", e);
                 });
         compositeDisposable.add(disposable);
     }
@@ -68,8 +67,7 @@ public final class UserAreaDescriptionScenesPresenter {
     }
 
     public void onCreateItemView(@NonNull UserAreaDescriptionSceneItemView itemView) {
-        UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter =
-                new UserAreaDescriptionScenesPresenter.ItemPresenter();
+        ItemPresenter itemPresenter = new ItemPresenter();
         itemPresenter.onCreateItemView(itemView);
         itemView.setItemPresenter(itemPresenter);
     }

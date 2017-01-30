@@ -39,5 +39,6 @@
     <string name="label_place">Place</string>
     <string name="label_level">Level</string>
     <string name="label_name">Name</string>
+    <string name="action_new_scene">New scene...</string>
 
 </resources>

@@ -13,6 +13,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -65,6 +68,8 @@ public final class UserAreaDescriptionScenesFragment extends Fragment implements
         if (areaDescriptionId == null) {
             throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_DESCRIPTION_ID));
         }
+
+        presenter.onCreate(areaDescriptionId);
     }
 
     @Override
@@ -77,7 +82,14 @@ public final class UserAreaDescriptionScenesFragment extends Fragment implements
         recyclerView.setAdapter(new UserAreaDescriptionSceneModelAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        setHasOptionsMenu(true);
+
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_user_area_description_scenes, menu);
     }
 
     @Override
@@ -90,6 +102,17 @@ public final class UserAreaDescriptionScenesFragment extends Fragment implements
     public void onStop() {
         super.onStop();
         presenter.onStop();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_new_scene:
+                // TODO
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
