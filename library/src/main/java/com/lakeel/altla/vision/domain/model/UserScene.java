@@ -2,22 +2,15 @@ package com.lakeel.altla.vision.domain.model;
 
 import com.google.firebase.database.Exclude;
 
-public final class UserAreaDescription {
+public final class UserScene {
 
     @Exclude
     public String userId;
 
     @Exclude
-    public String areaDescriptionId;
+    public String sceneId;
 
     public String name;
 
     public long creationTime;
-
-    public boolean fileUploaded;
-
-    public String areaId;
-
-    @Exclude
-    public boolean fileCached;
 }
