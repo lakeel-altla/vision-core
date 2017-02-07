@@ -40,5 +40,6 @@
     <string name="label_level">Level</string>
     <string name="label_name">Name</string>
     <string name="action_new_scene">New scene...</string>
+    <string name="title_user_area_list">User Areas</string>
 
 </resources>
