@@ -18,16 +18,12 @@ public final class UserAreaDescriptionModelMapper {
     public static UserAreaDescriptionModel map(@NonNull UserAreaDescription userAreaDescription) {
         UserAreaDescriptionModel model = new UserAreaDescriptionModel(userAreaDescription.areaDescriptionId);
         model.name = userAreaDescription.name;
-        model.creationDate = new Date(userAreaDescription.creationTime);
-        model.placeId = userAreaDescription.placeId;
-        model.level = String.valueOf(userAreaDescription.level);
+        model.creationDate = new Date(userAreaDescription.createdAt);
         return model;
     }
 
     @NonNull
     public static UserAreaDescriptionModel map(@NonNull UserAreaDescriptionModel model, @NonNull Place place) {
-        model.placeName = place.getName().toString();
-        model.placeAddress = place.getAddress().toString();
         return model;
     }
 }

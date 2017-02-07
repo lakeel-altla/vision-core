@@ -6,13 +6,11 @@ import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionMo
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionView;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
-import com.lakeel.altla.vision.domain.usecase.GetPlaceUseCase;
 
 import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.reactivex.Maybe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -23,9 +21,6 @@ public final class UserAreaDescriptionPresenter {
 
     @Inject
     FindUserAreaDescriptionUseCase findUserAreaDescriptionUseCase;
-
-    @Inject
-    GetPlaceUseCase getPlaceUseCase;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -51,16 +46,6 @@ public final class UserAreaDescriptionPresenter {
         Disposable disposable = findUserAreaDescriptionUseCase
                 .execute(areaDescriptionId)
                 .map(UserAreaDescriptionModelMapper::map)
-                .concatMap(model -> {
-                    // Load the place information.
-                    if (model.placeId != null) {
-                        return getPlaceUseCase.execute(model.placeId)
-                                              .map(place -> UserAreaDescriptionModelMapper.map(model, place))
-                                              .toMaybe();
-                    } else {
-                        return Maybe.just(model);
-                    }
-                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(model -> {
                     this.model = model;

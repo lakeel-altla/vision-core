@@ -33,15 +33,6 @@ public final class UserAreaDescriptionFragment extends Fragment implements UserA
     @BindView(R.id.text_view_name)
     TextView textViewName;
 
-    @BindView(R.id.text_view_place_name)
-    TextView textViewPlaceName;
-
-    @BindView(R.id.text_view_place_address)
-    TextView textViewPlaceAddress;
-
-    @BindView(R.id.text_view_level)
-    TextView textViewLevel;
-
     private InteractionListener interactionListener;
 
     public static UserAreaDescriptionFragment newInstance(String areaDescriptionId) {
@@ -104,9 +95,6 @@ public final class UserAreaDescriptionFragment extends Fragment implements UserA
     public void showModel(@NonNull UserAreaDescriptionModel model) {
         textViewId.setText(model.areaDescriptionId);
         textViewName.setText(model.name);
-        textViewPlaceName.setText(model.placeName);
-        textViewPlaceAddress.setText(model.placeAddress);
-        textViewLevel.setText(model.level);
     }
 
     public interface InteractionListener {

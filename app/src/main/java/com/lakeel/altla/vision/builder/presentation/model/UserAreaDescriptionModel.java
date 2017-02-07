@@ -14,14 +14,6 @@ public final class UserAreaDescriptionModel {
 
     public Date creationDate;
 
-    public String placeId;
-
-    public String placeName;
-
-    public String placeAddress;
-
-    public String level;
-
     @Exclude
     public boolean fileCached;
 

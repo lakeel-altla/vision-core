@@ -56,15 +56,6 @@ public final class UserAreaDescriptionModelAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        @BindView(R.id.text_view_place_name)
-        TextView textViewPlaceName;
-
-        @BindView(R.id.text_view_place_address)
-        TextView textViewPlaceAddress;
-
-        @BindView(R.id.text_view_level)
-        TextView textViewLevel;
-
         private UserAreaDescriptionsPresenter.ItemPresenter itemPresenter;
 
         private ViewHolderUser(View itemView) {
@@ -83,9 +74,6 @@ public final class UserAreaDescriptionModelAdapter
         public void showModel(@NonNull UserAreaDescriptionModel model) {
             textViewName.setText(model.name);
             textViewId.setText(model.areaDescriptionId);
-            textViewPlaceName.setText(model.placeName);
-            textViewPlaceAddress.setText(model.placeAddress);
-            textViewLevel.setText(model.level);
         }
 
         private void onBind(int position) {
