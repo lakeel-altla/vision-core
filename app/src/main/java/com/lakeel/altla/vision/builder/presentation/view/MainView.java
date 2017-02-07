@@ -19,29 +19,31 @@ public interface MainView {
 
     void setSurfaceRenderer(ISurfaceRenderer renderer);
 
-    void setTextureModelPaneVisible(boolean visible);
+    void onUpdateTextureModelPaneVisible(boolean visible);
 
-    void updateTextureModelPane();
+    void onTextureItemInserted(int position);
 
-    void setObjectMenuVisible(boolean visible);
+    void onTextureItemsUpdated();
 
-    void setTranslateObjectSelected(boolean selected);
+    void onUpdateObjectMenuVisible(boolean visible);
 
-    void setTranslateObjectMenuVisible(boolean visible);
+    void onUpdateTranslateObjectSelected(boolean selected);
 
-    void setTranslateObjectAxisSelected(Axis axis, boolean selected);
+    void onUpdateTranslateObjectMenuVisible(boolean visible);
 
-    void setRotateObjectSelected(boolean selected);
+    void onUpdateTranslateObjectAxisSelected(Axis axis, boolean selected);
 
-    void setRotateObjectMenuVisible(boolean visible);
+    void onUpdateRotateObjectSelected(boolean selected);
 
-    void setRotateObjectAxisSelected(Axis axis, boolean selected);
+    void onUpdateRotateObjectMenuVisible(boolean visible);
 
-    void setScaleObjectSelected(boolean selected);
+    void onUpdateRotateObjectAxisSelected(Axis axis, boolean selected);
 
-    void showEditTextureFragment(@Nullable String id);
+    void onUpdateScaleObjectSelected(boolean selected);
 
-    void updateDebugModel(MainDebugModel model);
+    void onShowEditTextureView(@Nullable String id);
 
-    void showSnackbar(@StringRes int resId);
+    void onDebugModelUpdated(MainDebugModel model);
+
+    void onSnackbar(@StringRes int resId);
 }

@@ -7,11 +7,11 @@ import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionScenesFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionsFragment;
 import com.lakeel.altla.vision.di.ActivityScope;
 
 import dagger.Subcomponent;
@@ -66,7 +66,7 @@ public interface ActivityComponent {
      *
      * @param fragment The fragment.
      */
-    void inject(UserAreaDescriptionsFragment fragment);
+    void inject(UserAreaDescriptionListFragment fragment);
 
     /**
      * Injects objects into the specified fragment.
@@ -80,5 +80,5 @@ public interface ActivityComponent {
      *
      * @param fragment The fragment.
      */
-    void inject(UserAreaDescriptionScenesFragment fragment);
+    void inject(UserAreaDescriptionSceneListFragment fragment);
 }

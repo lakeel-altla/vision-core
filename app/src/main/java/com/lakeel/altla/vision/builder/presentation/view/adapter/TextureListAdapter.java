@@ -1,12 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
+import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.TextureModelItemView;
+import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
 
 import android.content.ClipData;
 import android.support.annotation.NonNull;
@@ -25,15 +23,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnLongClick;
 
-public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModelAdapter.ViewHolderTexture> {
-
-    private static final Log LOG = LogFactory.getLog(TextureModelAdapter.class);
+public final class TextureListAdapter extends RecyclerView.Adapter<TextureListAdapter.ViewHolderTexture> {
 
     private static final ClipData CLIP_DATA_DUMMY = ClipData.newPlainText("", "");
 
     private final MainPresenter presenter;
 
-    public TextureModelAdapter(MainPresenter presenter) {
+    public TextureListAdapter(@NonNull MainPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -45,15 +41,13 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View view = inflater.inflate(R.layout.item_texture_model, parent, false);
-        ViewHolderTexture holder = new ViewHolderTexture(view);
-        presenter.onCreateItemView(holder);
-        return holder;
+        View itemView = inflater.inflate(R.layout.item_texture_model, parent, false);
+        return new ViewHolderTexture(itemView);
     }
 
     @Override
     public void onBindViewHolder(ViewHolderTexture holder, int position) {
-        holder.onBind(position);
+        holder.itemPresenter.onBind(position);
     }
 
     @Override
@@ -63,10 +57,10 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
 
     @Override
     public int getItemCount() {
-        return presenter.getModelCount();
+        return presenter.getTextureItemCount();
     }
 
-    public final class ViewHolderTexture extends RecyclerView.ViewHolder implements TextureModelItemView {
+    public final class ViewHolderTexture extends RecyclerView.ViewHolder implements TextureItemView {
 
         @BindView(R.id.view_top)
         View viewTop;
@@ -88,13 +82,16 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
 
         private final View.DragShadowBuilder dragShadowBuilder;
 
-        private MainPresenter.ModelItemPresenter itemPresenter;
+        private final MainPresenter.TextureItemPresenter itemPresenter;
 
         private MaterialDialog materialDialog;
 
         private ViewHolderTexture(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            itemPresenter = presenter.createTextureItemPresenter();
+            itemPresenter.onCreateItemView(this);
 
             dragShadowBuilder = new View.DragShadowBuilder(imageViewTexture);
 
@@ -123,17 +120,8 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
             viewGroupTextureDetail.setVisibility(View.GONE);
         }
 
-        public void onBind(int position) {
-            itemPresenter.onBind(position);
-        }
-
         @Override
-        public void setItemPresenter(@NonNull MainPresenter.ModelItemPresenter itemPresenter) {
-            this.itemPresenter = itemPresenter;
-        }
-
-        @Override
-        public void showModel(@NonNull TextureModel model) {
+        public void onModelUpdated(@NonNull TextureItemModel model) {
             textViewTextureName.setText(model.name);
 
             if (model.bitmap == null) {
@@ -150,23 +138,23 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
         }
 
         @Override
-        public void showProgress(int max, int progress) {
+        public void onShowProgress(int max, int progress) {
             progressBarLoadTexture.setMax(max);
             progressBarLoadTexture.setProgress(progress);
         }
 
         @Override
-        public void hideProgress() {
+        public void onHideProgress() {
             progressBarLoadTexture.setVisibility(View.GONE);
         }
 
         @Override
-        public void startDrag() {
+        public void onStartDrag() {
             imageViewTexture.startDrag(CLIP_DATA_DUMMY, dragShadowBuilder, null, 0);
         }
 
         @Override
-        public void setSelected(int selectedPosition, boolean selected) {
+        public void onSelect(int selectedPosition, boolean selected) {
             if (selectedPosition == getAdapterPosition()) {
                 viewTop.setSelected(selected);
 
@@ -179,7 +167,7 @@ public final class TextureModelAdapter extends RecyclerView.Adapter<TextureModel
         }
 
         @Override
-        public void showDeleteTextureConfirmationDialog() {
+        public void onShowDeleteTextureConfirmationDialog() {
             if (materialDialog != null && materialDialog.isShowing()) {
                 // Skip to protect against double taps.
                 return;

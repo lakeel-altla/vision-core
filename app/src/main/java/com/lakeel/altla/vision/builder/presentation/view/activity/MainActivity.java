@@ -17,8 +17,8 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionScenesFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -56,8 +56,8 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   UserAreaDescriptionsFragment.InterationListener,
-                   UserAreaDescriptionScenesFragment.InteractionListener,
+                   UserAreaDescriptionListFragment.InterationListener,
+                   UserAreaDescriptionSceneListFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -239,27 +239,28 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCloseSignInFragment() {
+    public void onCloseSignInView() {
         toolbar.setVisibility(View.INVISIBLE);
 
         replaceFragment(TangoPermissionFragment.newInstance());
     }
 
     @Override
-    public void onCloseTangoPermissionFragment() {
+    public void onCloseTangoPermissionView() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(UserAreaDescriptionsFragment.newInstance());
+        replaceFragment(UserAreaDescriptionListFragment.newInstance());
     }
 
     @Override
-    public void onShowUserAreaDescriptionScenesFragment(@NonNull String areaDescriptionId) {
-        UserAreaDescriptionScenesFragment fragment = UserAreaDescriptionScenesFragment.newInstance(areaDescriptionId);
+    public void onShowUserAreaDescriptionScenesView(@NonNull String areaDescriptionId) {
+        UserAreaDescriptionSceneListFragment
+                fragment = UserAreaDescriptionSceneListFragment.newInstance(areaDescriptionId);
         replaceFragmentAndAddToBackStack(fragment);
     }
 
     @Override
-    public void onShowEditTextureFragment(@Nullable String id) {
+    public void onShowEditTextureView(@Nullable String id) {
         RegisterTextureFragment fragment = RegisterTextureFragment.newInstance(id);
         replaceFragmentAndAddToBackStack(fragment);
     }

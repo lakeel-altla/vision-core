@@ -3,8 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPoseData;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
 import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
@@ -13,13 +11,14 @@ import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
-import com.lakeel.altla.vision.builder.presentation.model.TextureModel;
+import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
-import com.lakeel.altla.vision.builder.presentation.view.TextureModelItemView;
+import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
+import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.content.Context;
 import android.os.Handler;
@@ -36,16 +35,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 /**
  * Defines the presenter for {@link MainView}.
  */
-public final class MainPresenter
+public final class MainPresenter extends BasePresenter<MainView>
         implements OnPoseAvailableListener, OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
-
-    private static final Log LOG = LogFactory.getLog(MainPresenter.class);
 
     private static final int SECS_TO_MILLISECS = 1000;
 
@@ -67,15 +63,11 @@ public final class MainPresenter
     @Inject
     TangoWrapper tangoWrapper;
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final List<TextureItemModel> textureItems = new ArrayList<>();
 
-    private final List<TextureModel> models = new ArrayList<>();
-
-    private final SingleSelection selection = new SingleSelection();
+    private final SingleTextureSelection singleTextureSelection = new SingleTextureSelection();
 
     private final Handler handlerMain = new Handler(Looper.getMainLooper());
-
-    private MainView view;
 
     private MainRenderer renderer;
 
@@ -97,7 +89,7 @@ public final class MainPresenter
         debugModel.ad2SsTranslation.x = debugger.translation.x;
         debugModel.ad2SsTranslation.y = debugger.translation.y;
         debugModel.ad2SsTranslation.z = debugger.translation.z;
-        view.updateDebugModel(debugModel);
+        getView().onDebugModelUpdated(debugModel);
     });
 
     private PoseDebugger debuggerAd2D = new PoseDebugger(debugger -> {
@@ -105,7 +97,7 @@ public final class MainPresenter
         debugModel.ad2DTranslation.x = debugger.translation.x;
         debugModel.ad2DTranslation.y = debugger.translation.y;
         debugModel.ad2DTranslation.z = debugger.translation.z;
-        view.updateDebugModel(debugModel);
+        getView().onDebugModelUpdated(debugModel);
     });
 
     private PoseDebugger debuggerSs2D = new PoseDebugger(debugger -> {
@@ -113,69 +105,74 @@ public final class MainPresenter
         debugModel.ss2DTranslation.x = debugger.translation.x;
         debugModel.ss2DTranslation.y = debugger.translation.y;
         debugModel.ss2DTranslation.z = debugger.translation.z;
-        view.updateDebugModel(debugModel);
+        getView().onDebugModelUpdated(debugModel);
     });
 
     @Inject
     public MainPresenter() {
     }
 
-    public void onCreateView(@NonNull MainView view) {
-        LOG.v("onCreateView");
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
 
-        this.view = view;
-
-        this.view.setTangoUxLayout(tangoWrapper.getTangoUx());
+        getView().setTangoUxLayout(tangoWrapper.getTangoUx());
 
         renderer = new MainRenderer(context);
         renderer.setOnPickedObjectChangedListener(this);
-        this.view.setSurfaceRenderer(renderer);
+        getView().setSurfaceRenderer(renderer);
 
-        this.view.setTextureModelPaneVisible(false);
-        this.view.setObjectMenuVisible(false);
-        this.view.setTranslateObjectSelected(false);
-        this.view.setRotateObjectSelected(false);
-        this.view.setTranslateObjectMenuVisible(false);
-        this.view.setRotateObjectMenuVisible(false);
-        this.view.setTranslateObjectAxisSelected(Axis.X, true);
-        this.view.setRotateObjectAxisSelected(Axis.Y, true);
+        getView().onUpdateTextureModelPaneVisible(false);
+        getView().onUpdateObjectMenuVisible(false);
+        getView().onUpdateTranslateObjectSelected(false);
+        getView().onUpdateRotateObjectSelected(false);
+        getView().onUpdateTranslateObjectMenuVisible(false);
+        getView().onUpdateRotateObjectMenuVisible(false);
+        getView().onUpdateTranslateObjectAxisSelected(Axis.X, true);
+        getView().onUpdateRotateObjectAxisSelected(Axis.Y, true);
 
-        this.view.updateDebugModel(debugModel);
+        getView().onDebugModelUpdated(debugModel);
     }
 
-    public void onStart() {
-        models.clear();
+    @Override
+    protected void onStartOverride() {
+        super.onStartOverride();
+
+        textureItems.clear();
+        getView().onTextureItemsUpdated();
 
         Disposable disposable = findAllUserTexturesUseCase
                 .execute()
+                .map(userTexture -> new TextureItemModel(userTexture.textureId, userTexture.name))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(userTexture -> {
-                    TextureModel model = new TextureModel(userTexture.textureId, userTexture.name);
-                    models.add(model);
-                    view.updateTextureModelPane();
+                .subscribe(model -> {
+                    textureItems.add(model);
+                    getView().onTextureItemInserted(textureItems.size() - 1);
                 }, e -> {
-                    LOG.e("Failed to find all user textures.", e);
+                    getLog().e("Failed.", e);
                 });
-        compositeDisposable.add(disposable);
+        manageDisposable(disposable);
     }
 
-    public void onResume() {
+    @Override
+    protected void onResumeOverride() {
+        super.onResumeOverride();
+
         tangoWrapper.addOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.addOnPoseAvailableListener(this);
         tangoWrapper.addOnFrameAvailableListener(this);
         active = true;
     }
 
-    public void onPause() {
+    @Override
+    protected void onPauseOverride() {
+        super.onPauseOverride();
+
         active = false;
         tangoWrapper.removeOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.removeOnPoseAvailableListener(this);
         tangoWrapper.removeOnFrameAvailableListener(this);
         renderer.disconnectFromTangoCamera();
-    }
-
-    public void onStop() {
-        compositeDisposable.clear();
     }
 
     @Override
@@ -190,23 +187,23 @@ public final class MainPresenter
             if (pose.statusCode == TangoPoseData.POSE_VALID) {
                 if (localizationState == LocalizationState.UNKNOWN ||
                     localizationState == LocalizationState.NOT_LOCALIZED) {
-                    LOG.d("Localized.");
+                    getLog().d("Localized.");
                     localizationState = LocalizationState.LOCALIZED;
 
                     handlerMain.post(() -> {
                         debugModel.localized = true;
-                        view.updateDebugModel(debugModel);
+                        getView().onDebugModelUpdated(debugModel);
                     });
                 }
             } else {
                 if (localizationState == LocalizationState.UNKNOWN ||
                     localizationState == LocalizationState.LOCALIZED) {
-                    LOG.d("Not localized.");
+                    getLog().d("Not localized.");
                     localizationState = LocalizationState.NOT_LOCALIZED;
 
                     handlerMain.post(() -> {
                         debugModel.localized = false;
-                        view.updateDebugModel(debugModel);
+                        getView().onDebugModelUpdated(debugModel);
                     });
                 }
             }
@@ -233,81 +230,80 @@ public final class MainPresenter
     @Override
     public void onPickedObjectChanged(String oldName, String newName) {
         hasPickedObject = (newName != null);
-        view.setObjectMenuVisible(hasPickedObject);
+        getView().onUpdateObjectMenuVisible(hasPickedObject);
     }
 
     public void onClickFabToggleModelPane() {
         isModelPaneVisible = !isModelPaneVisible;
-        view.setTextureModelPaneVisible(isModelPaneVisible);
+        getView().onUpdateTextureModelPaneVisible(isModelPaneVisible);
     }
 
     public void onClickImageButtonAddModel() {
-        view.showEditTextureFragment(null);
+        getView().onShowEditTextureView(null);
     }
 
     public void onTouchButtonTranslateObject() {
         objectEditMode = ObjectEditMode.TRANSLATE;
         renderer.setObjectEditMode(objectEditMode);
 
-        view.setTranslateObjectSelected(true);
-        view.setTranslateObjectMenuVisible(true);
-        view.setRotateObjectSelected(false);
-        view.setRotateObjectMenuVisible(false);
-        view.setScaleObjectSelected(false);
+        getView().onUpdateTranslateObjectSelected(true);
+        getView().onUpdateTranslateObjectMenuVisible(true);
+        getView().onUpdateRotateObjectSelected(false);
+        getView().onUpdateRotateObjectMenuVisible(false);
+        getView().onUpdateScaleObjectSelected(false);
     }
 
     public void onTouchButtonRotateObject() {
         objectEditMode = ObjectEditMode.ROTATE;
         renderer.setObjectEditMode(objectEditMode);
 
-        view.setTranslateObjectSelected(false);
-        view.setTranslateObjectMenuVisible(false);
-        view.setRotateObjectSelected(true);
-        view.setRotateObjectMenuVisible(true);
-        view.setScaleObjectSelected(false);
+        getView().onUpdateTranslateObjectSelected(false);
+        getView().onUpdateTranslateObjectMenuVisible(false);
+        getView().onUpdateRotateObjectSelected(true);
+        getView().onUpdateRotateObjectMenuVisible(true);
+        getView().onUpdateScaleObjectSelected(false);
     }
 
     public void onTouchButtonTranslateObjectAxis(Axis axis) {
         renderer.setTranslateObjectAxis(axis);
 
-        view.setTranslateObjectAxisSelected(Axis.X, axis == Axis.X);
-        view.setTranslateObjectAxisSelected(Axis.Y, axis == Axis.Y);
-        view.setTranslateObjectAxisSelected(Axis.Z, axis == Axis.Z);
+        getView().onUpdateTranslateObjectAxisSelected(Axis.X, axis == Axis.X);
+        getView().onUpdateTranslateObjectAxisSelected(Axis.Y, axis == Axis.Y);
+        getView().onUpdateTranslateObjectAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
     public void onTouchButtonRotateObjectAxis(Axis axis) {
         renderer.setRotateObjectAxis(axis);
 
-        view.setRotateObjectAxisSelected(Axis.X, axis == Axis.X);
-        view.setRotateObjectAxisSelected(Axis.Y, axis == Axis.Y);
-        view.setRotateObjectAxisSelected(Axis.Z, axis == Axis.Z);
+        getView().onUpdateRotateObjectAxisSelected(Axis.X, axis == Axis.X);
+        getView().onUpdateRotateObjectAxisSelected(Axis.Y, axis == Axis.Y);
+        getView().onUpdateRotateObjectAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
     public void onTouchButtonScaleObject() {
         objectEditMode = ObjectEditMode.SCALE;
         renderer.setObjectEditMode(objectEditMode);
 
-        view.setTranslateObjectSelected(false);
-        view.setTranslateObjectMenuVisible(false);
-        view.setRotateObjectSelected(false);
-        view.setRotateObjectMenuVisible(false);
-        view.setScaleObjectSelected(true);
+        getView().onUpdateTranslateObjectSelected(false);
+        getView().onUpdateTranslateObjectMenuVisible(false);
+        getView().onUpdateRotateObjectSelected(false);
+        getView().onUpdateRotateObjectMenuVisible(false);
+        getView().onUpdateScaleObjectSelected(true);
     }
 
-    public int getModelCount() {
-        return models.size();
+    public int getTextureItemCount() {
+        return textureItems.size();
     }
 
-    public void onCreateItemView(@NonNull TextureModelItemView itemView) {
-        ModelItemPresenter itemPresenter = new ModelItemPresenter();
-        itemPresenter.onCreateItemView(itemView);
-        itemView.setItemPresenter(itemPresenter);
-        selection.addItemPresenter(itemPresenter);
+    public TextureItemPresenter createTextureItemPresenter() {
+        TextureItemPresenter itemPresenter = new TextureItemPresenter();
+        singleTextureSelection.addItemPresenter(itemPresenter);
+        return itemPresenter;
     }
 
     public void onDropModel() {
-        if (0 <= selection.selectedPosition) {
-            TextureModel model = models.get(selection.selectedPosition);
+        if (0 <= singleTextureSelection.selectedPosition) {
+            TextureItemModel model = textureItems.get(singleTextureSelection.selectedPosition);
             renderer.addPlaneBitmap(model.bitmap);
         }
     }
@@ -344,95 +340,97 @@ public final class MainPresenter
         return false;
     }
 
-    public final class ModelItemPresenter {
+    public final class TextureItemPresenter {
 
-        private TextureModelItemView itemView;
+        private TextureItemView itemView;
 
-        public void onCreateItemView(@NonNull TextureModelItemView itemView) {
+        public void onCreateItemView(@NonNull TextureItemView itemView) {
             this.itemView = itemView;
         }
 
         public void onBind(int position) {
-            TextureModel model = models.get(position);
-            itemView.showModel(model);
+            TextureItemModel model = textureItems.get(position);
+            itemView.onModelUpdated(model);
         }
 
         public void onLoadBitmap(int position) {
-            TextureModel model = models.get(position);
+            TextureItemModel model = textureItems.get(position);
 
             Disposable disposable = findUserTextureBitmapUseCase
                     .execute(model.textureId, (totalBytes, bytesTransferred) -> {
                         // Update the progress bar.
-                        itemView.showProgress((int) totalBytes, (int) bytesTransferred);
+                        itemView.onShowProgress((int) totalBytes, (int) bytesTransferred);
                     })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doFinally(() -> itemView.hideProgress())
+                    .doFinally(() -> itemView.onHideProgress())
                     .subscribe(bitmap -> {
                         // Set the bitmap into the model.
                         model.bitmap = bitmap;
                         // Redraw.
-                        itemView.showModel(model);
+                        itemView.onModelUpdated(model);
                     }, e -> {
                         // TODO: How to recover.
-                        LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", model.textureId),
-                              e);
+                        getLog().w(String.format("Failed to load the user texture bitmap: textureId = %s",
+                                                 model.textureId),
+                                   e);
                     });
-            compositeDisposable.add(disposable);
+            manageDisposable(disposable);
         }
 
         public void onClickViewTop(int position) {
-            selection.setSelectedPosition(position);
+            singleTextureSelection.setSelectedPosition(position);
         }
 
         public void onLongClickViewTop(int position) {
-            selection.setSelectedPosition(position);
-            itemView.startDrag();
+            singleTextureSelection.setSelectedPosition(position);
+            itemView.onStartDrag();
         }
 
         public void onClickImageButtonEditTexture(int position) {
-            TextureModel model = models.get(position);
-            view.showEditTextureFragment(model.textureId);
+            TextureItemModel model = textureItems.get(position);
+            getView().onShowEditTextureView(model.textureId);
         }
 
         public void onClickImageButtonDeleteTexture(int position) {
-            itemView.showDeleteTextureConfirmationDialog();
+            itemView.onShowDeleteTextureConfirmationDialog();
         }
 
         public void onDelete(int position) {
-            TextureModel model = models.get(position);
+            TextureItemModel model = textureItems.get(position);
 
             Disposable disposable = deleteUserTextureUseCase
                     .execute(model.textureId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(() -> {
-                        models.remove(position);
-                        view.updateTextureModelPane();
-                        view.showSnackbar(R.string.snackbar_done);
+                        textureItems.remove(position);
+                        getView().onTextureItemsUpdated();
+                        getView().onSnackbar(R.string.snackbar_done);
                     }, e -> {
-                        LOG.e(String.format("Failed to delete the user texture: textureId = %s", model.textureId), e);
+                        getLog().e(String.format("Failed to delete the user texture: textureId = %s", model.textureId),
+                                   e);
                     });
-            compositeDisposable.add(disposable);
+            manageDisposable(disposable);
         }
 
         void setSelected(int selectedPosition, boolean selected) {
-            itemView.setSelected(selectedPosition, selected);
+            itemView.onSelect(selectedPosition, selected);
         }
     }
 
-    private final class SingleSelection {
+    private final class SingleTextureSelection {
 
         int selectedPosition = -1;
 
-        Set<ModelItemPresenter> itemPresenters = new HashSet<>();
+        Set<TextureItemPresenter> itemPresenters = new HashSet<>();
 
-        void addItemPresenter(ModelItemPresenter itemPresenter) {
+        void addItemPresenter(TextureItemPresenter itemPresenter) {
             itemPresenters.add(itemPresenter);
         }
 
         void setSelectedPosition(int selectedPosition) {
             if (0 <= this.selectedPosition) {
                 // Deselect the previous selection.
-                for (ModelItemPresenter itemPresenter : itemPresenters) {
+                for (TextureItemPresenter itemPresenter : itemPresenters) {
                     itemPresenter.setSelected(this.selectedPosition, false);
                 }
             }
@@ -443,7 +441,7 @@ public final class MainPresenter
             } else if (0 <= selectedPosition) {
                 // Select the new position.
                 this.selectedPosition = selectedPosition;
-                for (ModelItemPresenter itemPresenter : itemPresenters) {
+                for (TextureItemPresenter itemPresenter : itemPresenters) {
                     itemPresenter.setSelected(this.selectedPosition, true);
                 }
             }

@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.mapper;
 
 import com.google.android.gms.location.places.Place;
 
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionItemModel;
 import com.lakeel.altla.vision.domain.model.UserAreaDescription;
 
 import android.support.annotation.NonNull;
@@ -15,15 +15,15 @@ public final class UserAreaDescriptionModelMapper {
     }
 
     @NonNull
-    public static UserAreaDescriptionModel map(@NonNull UserAreaDescription userAreaDescription) {
-        UserAreaDescriptionModel model = new UserAreaDescriptionModel(userAreaDescription.areaDescriptionId);
+    public static UserAreaDescriptionItemModel map(@NonNull UserAreaDescription userAreaDescription) {
+        UserAreaDescriptionItemModel model = new UserAreaDescriptionItemModel(userAreaDescription.areaDescriptionId);
         model.name = userAreaDescription.name;
         model.creationDate = new Date(userAreaDescription.createdAt);
         return model;
     }
 
     @NonNull
-    public static UserAreaDescriptionModel map(@NonNull UserAreaDescriptionModel model, @NonNull Place place) {
+    public static UserAreaDescriptionItemModel map(@NonNull UserAreaDescriptionItemModel model, @NonNull Place place) {
         return model;
     }
 }

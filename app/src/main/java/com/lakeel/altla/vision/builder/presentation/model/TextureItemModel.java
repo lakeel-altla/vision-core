@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import android.graphics.Bitmap;
 
-public final class TextureModel {
+public final class TextureItemModel {
 
     public final String textureId;
 
@@ -10,7 +10,7 @@ public final class TextureModel {
 
     public Bitmap bitmap;
 
-    public TextureModel(String textureId, String name) {
+    public TextureItemModel(String textureId, String name) {
         this.textureId = textureId;
         this.name = name;
     }

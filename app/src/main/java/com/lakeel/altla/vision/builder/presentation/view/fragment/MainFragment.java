@@ -4,15 +4,14 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tango.ux.TangoUxLayout;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.MainView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureModelAdapter;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureListAdapter;
+import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 import org.rajawali3d.view.ISurface;
@@ -20,11 +19,11 @@ import org.rajawali3d.view.TextureView;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -49,9 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class MainFragment extends Fragment implements MainView {
-
-    private static final Log LOG = LogFactory.getLog(MainFragment.class);
+public final class MainFragment extends AbstractFragment<MainView, MainPresenter> implements MainView {
 
     private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
 
@@ -126,8 +123,18 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    protected MainPresenter getPresenter() {
+        return presenter;
+    }
+
+    @Override
+    protected MainView getViewInterface() {
+        return this;
+    }
+
+    @Override
+    protected void onAttachOverride(@NonNull Context context) {
+        super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
         interactionListener = InteractionListener.class.cast(context);
@@ -135,40 +142,47 @@ public final class MainFragment extends Fragment implements MainView {
         gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
-                LOG.d("onDown");
+                getLog().d("onDown");
                 // Must return true to receive motion events on onScroll.
                 return true;
             }
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                LOG.d("onScroll");
+                getLog().d("onScroll");
                 return presenter.onScroll(e1, e2, distanceX, distanceY);
             }
 
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                LOG.d("onSingleTapUp");
+                getLog().d("onSingleTapUp");
                 return presenter.onSingleTapUp(e);
             }
         });
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    protected void onDetachOverride() {
+        super.onDetachOverride();
+
         interactionListener = null;
     }
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_main, container, false);
+    }
+
+    @Override
+    protected void onBindView(@NonNull View view) {
+        super.onBindView(view);
+
         ButterKnife.bind(this, view);
 
-        presenter.onCreateView(this);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        recyclerView.setAdapter(new TextureModelAdapter(presenter));
+        recyclerView.setAdapter(new TextureListAdapter(presenter));
 
         textureView.setFrameRate(60d);
         textureView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
@@ -195,8 +209,6 @@ public final class MainFragment extends Fragment implements MainView {
         textureView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
         setHasOptionsMenu(true);
-
-        return view;
     }
 
     @Override
@@ -205,32 +217,16 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onResumeOverride() {
+        super.onResumeOverride();
 
-        presenter.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        presenter.onStop();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        presenter.onResume();
         textureView.onResume();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    protected void onPauseOverride() {
+        super.onPauseOverride();
 
-        presenter.onPause();
         textureView.onPause();
     }
 
@@ -245,7 +241,7 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void setTextureModelPaneVisible(boolean visible) {
+    public void onUpdateTextureModelPaneVisible(boolean visible) {
         if (visible) {
             viewGroupModelPane.setVisibility(View.VISIBLE);
             fabToggleModelPane.setImageResource(R.drawable.ic_expand_more_black_24dp);
@@ -256,12 +252,22 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void showEditTextureFragment(@Nullable String id) {
-        interactionListener.onShowEditTextureFragment(id);
+    public void onTextureItemInserted(int position) {
+        recyclerView.getAdapter().notifyItemInserted(position);
     }
 
     @Override
-    public void updateDebugModel(MainDebugModel model) {
+    public void onTextureItemsUpdated() {
+        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    @Override
+    public void onShowEditTextureView(@Nullable String id) {
+        interactionListener.onShowEditTextureView(id);
+    }
+
+    @Override
+    public void onDebugModelUpdated(MainDebugModel model) {
         textViewLocalizedValue.setText(Boolean.toString(model.localized));
         textViewAd2SsTranslation.setText(String.format(Locale.getDefault(),
                                                        FORMAT_TRANSLATION,
@@ -281,12 +287,7 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void updateTextureModelPane() {
-        recyclerView.getAdapter().notifyDataSetChanged();
-    }
-
-    @Override
-    public void setObjectMenuVisible(boolean visible) {
+    public void onUpdateObjectMenuVisible(boolean visible) {
         if (visible) {
             viewGroupObjectMenu.setVisibility(View.VISIBLE);
         } else {
@@ -295,42 +296,42 @@ public final class MainFragment extends Fragment implements MainView {
     }
 
     @Override
-    public void setTranslateObjectSelected(boolean selected) {
+    public void onUpdateTranslateObjectSelected(boolean selected) {
         buttonTranslateObject.setPressed(selected);
     }
 
     @Override
-    public void setTranslateObjectMenuVisible(boolean visible) {
+    public void onUpdateTranslateObjectMenuVisible(boolean visible) {
         viewGroupTranslateObjectMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setTranslateObjectAxisSelected(Axis axis, boolean selected) {
+    public void onUpdateTranslateObjectAxisSelected(Axis axis, boolean selected) {
         buttonsTranslateObjectAxes[axis.getValue()].setPressed(selected);
     }
 
     @Override
-    public void setRotateObjectSelected(boolean selected) {
+    public void onUpdateRotateObjectSelected(boolean selected) {
         buttonRotateObject.setPressed(selected);
     }
 
     @Override
-    public void setRotateObjectMenuVisible(boolean visible) {
+    public void onUpdateRotateObjectMenuVisible(boolean visible) {
         viewGroupRotateObjectMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setRotateObjectAxisSelected(Axis axis, boolean selected) {
+    public void onUpdateRotateObjectAxisSelected(Axis axis, boolean selected) {
         buttonsRotateObjectAxes[axis.getValue()].setPressed(selected);
     }
 
     @Override
-    public void setScaleObjectSelected(boolean selected) {
+    public void onUpdateScaleObjectSelected(boolean selected) {
         buttonScaleObject.setPressed(selected);
     }
 
     @Override
-    public void showSnackbar(@StringRes int resId) {
+    public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
@@ -434,6 +435,6 @@ public final class MainFragment extends Fragment implements MainView {
 
     public interface InteractionListener {
 
-        void onShowEditTextureFragment(@Nullable String id);
+        void onShowEditTextureView(@Nullable String id);
     }
 }

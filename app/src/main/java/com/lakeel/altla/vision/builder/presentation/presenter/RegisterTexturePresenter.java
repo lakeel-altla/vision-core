@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.EditTextureModel;
 import com.lakeel.altla.vision.builder.presentation.view.RegisterTextureView;
@@ -10,9 +8,11 @@ import com.lakeel.altla.vision.domain.usecase.FindDocumentFilenameUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserTextureUseCase;
+import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -23,12 +23,11 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class RegisterTexturePresenter {
+public final class RegisterTexturePresenter extends BasePresenter<RegisterTextureView> {
 
-    private static final Log LOG = LogFactory.getLog(RegisterTexturePresenter.class);
+    private static final String ARG_TEXTURE_ID = "textureId";
 
     @Inject
     FindUserTextureUseCase findUserTextureUseCase;
@@ -45,10 +44,6 @@ public final class RegisterTexturePresenter {
     @Inject
     SaveUserTextureUseCase saveUserTextureUseCase;
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-
-    private RegisterTextureView view;
-
     private long prevBytesTransferred;
 
     private final EditTextureModel model = new EditTextureModel();
@@ -59,27 +54,37 @@ public final class RegisterTexturePresenter {
     public RegisterTexturePresenter() {
     }
 
-    public void onCreate(@Nullable String id) {
-        LOG.d("onCreate(): id = %s", id);
-
-        model.textureId = id;
+    @NonNull
+    public static Bundle createArguments(@Nullable String textureId) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_TEXTURE_ID, textureId);
+        return bundle;
     }
 
-    public void onCreateView(@NonNull RegisterTextureView view) {
-        this.view = view;
+    @Override
+    public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
+        super.onCreate(arguments, savedInstanceState);
 
-        view.setTextureVisible(false);
-        view.setLoadTextureProgressVisible(false);
+        if (arguments != null) {
+            model.textureId = arguments.getString(ARG_TEXTURE_ID, null);
+        }
     }
 
-    public void onStart() {
-        LOG.d("onStart()");
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
 
-        view.showModel(model);
+        getView().onUpdateTextureVisible(false);
+        getView().onUpdateLoadTextureProgressVisible(false);
+    }
+
+    @Override
+    protected void onStartOverride() {
+        super.onStartOverride();
+
+        getView().onModelUpdated(model);
 
         if (localTextureSelected) {
-            LOG.d("onStart(): Loading the selected local bitmap.");
-
             localTextureSelected = false;
 
             if (model.name == null || model.name.length() == 0) {
@@ -88,41 +93,28 @@ public final class RegisterTexturePresenter {
                 loadLocalTextureBitmap();
             }
         } else if (model.textureId != null) {
-            LOG.d("onStart(): Loading the existing texture.");
-
-            // Load the texture information.
-            LOG.d("Loading the texture: textureId = %s", model.textureId);
-
             Disposable disposable = findUserTextureUseCase
                     // Find the texture entry to get its name.
                     .execute(model.textureId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(userTexture -> {
-                        LOG.d("Loaded the texture.");
-
                         model.name = userTexture.name;
-                        view.showModel(model);
+                        getView().onModelUpdated(model);
 
                         loadCachedTextureBitmap(userTexture.textureId);
                     }, e -> {
-                        LOG.e(String.format("Failed to find the user texture: textureId = %s", model.textureId), e);
+                        getLog().e(String.format("Failed: textureId = %s", model.textureId), e);
                     }, () -> {
-                        LOG.e("The user texture not found: textureId = %s", model.textureId);
+                        getLog().e("The user texture not found: textureId = %s", model.textureId);
                     });
-            compositeDisposable.add(disposable);
+            manageDisposable(disposable);
         } else {
-            LOG.d("onStart(): Just onStart().");
-
-            view.setTextureVisible(true);
+            getView().onUpdateTextureVisible(true);
         }
     }
 
-    public void onStop() {
-        compositeDisposable.clear();
-    }
-
     public void onClickButtonSelectDocument() {
-        view.showLocalTexturePicker();
+        getView().onShowLocalTexturePicker();
     }
 
     public void onLocalTextureSelected(@NonNull Uri uri) {
@@ -138,55 +130,54 @@ public final class RegisterTexturePresenter {
     }
 
     private void loadCachedTextureBitmap(String textureId) {
-        view.setTextureVisible(false);
+        getView().onUpdateTextureVisible(false);
 
         Disposable disposable = findUserTextureBitmapUseCase
                 .execute(textureId, null)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
-                .doFinally(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> getView().onUpdateLoadTextureProgressVisible(true))
+                .doFinally(() -> getView().onUpdateLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
                     model.bitmap = bitmap;
 
-                    view.setTextureVisible(true);
-                    view.showModel(model);
+                    getView().onUpdateTextureVisible(true);
+                    getView().onModelUpdated(model);
                 }, e -> {
                     // TODO: How to recover.
-                    LOG.w(String.format("Failed to load the user texture bitmap: textureId = %s", textureId), e);
+                    getLog().w(String.format("Failed to load the user texture bitmap: textureId = %s", textureId), e);
                 });
-
-        compositeDisposable.add(disposable);
+        manageDisposable(disposable);
     }
 
     private void loadLocalTextureBitmap() {
-        view.setTextureVisible(false);
+        getView().onUpdateTextureVisible(false);
 
         Disposable disposable = findDocumentBitmapUseCase
                 .execute(model.localUri)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
-                .doFinally(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> getView().onUpdateLoadTextureProgressVisible(true))
+                .doFinally(() -> getView().onUpdateLoadTextureProgressVisible(false))
                 .subscribe(bitmap -> {
                     model.bitmap = bitmap;
 
-                    view.setTextureVisible(true);
-                    view.showModel(model);
+                    getView().onUpdateTextureVisible(true);
+                    getView().onModelUpdated(model);
                 }, e -> {
                     if (e instanceof FileNotFoundException) {
-                        LOG.w(String.format("The image could not be found: uri = %s", model.localUri), e);
-                        view.showSnackbar(R.string.snackbar_image_file_not_found);
+                        getLog().w(String.format("The image could not be found: uri = %s", model.localUri), e);
+                        getView().onSnackbar(R.string.snackbar_image_file_not_found);
                     } else if (e instanceof IOException) {
-                        LOG.w("Closing file failed.", e);
+                        getLog().w("Closing file failed.", e);
                     } else {
-                        LOG.e("Unexpected error occured.", e);
-                        view.showSnackbar(R.string.snackbar_failed);
+                        getLog().e("Unexpected error occured.", e);
+                        getView().onSnackbar(R.string.snackbar_failed);
                     }
                 });
-        compositeDisposable.add(disposable);
+        manageDisposable(disposable);
     }
 
     private void loadLocalTextureBitmapAndName() {
-        view.setTextureVisible(false);
+        getView().onUpdateTextureVisible(false);
 
         Disposable disposable = Single
                 .just(new LocalBitmap(model.localUri))
@@ -195,26 +186,26 @@ public final class RegisterTexturePresenter {
                 // Load the filename as a texture name if needed.
                 .flatMap(this::loadLocalFilename)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(_disposable -> view.setLoadTextureProgressVisible(true))
-                .doFinally(() -> view.setLoadTextureProgressVisible(false))
+                .doOnSubscribe(_disposable -> getView().onUpdateLoadTextureProgressVisible(true))
+                .doFinally(() -> getView().onUpdateLoadTextureProgressVisible(false))
                 .subscribe(localBitmap -> {
                     model.bitmap = localBitmap.bitmap;
                     model.name = localBitmap.name;
 
-                    view.setTextureVisible(true);
-                    view.showModel(model);
+                    getView().onUpdateTextureVisible(true);
+                    getView().onModelUpdated(model);
                 }, e -> {
                     if (e instanceof FileNotFoundException) {
-                        LOG.w(String.format("The image could not be found: uri = %s", model.localUri), e);
-                        view.showSnackbar(R.string.snackbar_image_file_not_found);
+                        getLog().w(String.format("The image could not be found: uri = %s", model.localUri), e);
+                        getView().onSnackbar(R.string.snackbar_image_file_not_found);
                     } else if (e instanceof IOException) {
-                        LOG.w("Closing file failed.", e);
+                        getLog().w("Closing file failed.", e);
                     } else {
-                        LOG.e("Unexpected error occured.", e);
-                        view.showSnackbar(R.string.snackbar_failed);
+                        getLog().e("Unexpected error occured.", e);
+                        getView().onSnackbar(R.string.snackbar_failed);
                     }
                 });
-        compositeDisposable.add(disposable);
+        manageDisposable(disposable);
     }
 
     private Single<LocalBitmap> loadLocalBitmap(LocalBitmap localBitmap) {
@@ -242,21 +233,21 @@ public final class RegisterTexturePresenter {
                     long increment = bytesTransferred - prevBytesTransferred;
                     prevBytesTransferred = bytesTransferred;
 
-                    view.setUploadProgressDialogProgress(totalBytes, increment);
+                    getView().onUpdateUploadProgressDialogProgress(totalBytes, increment);
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(_disposable -> view.showUploadProgressDialog())
-                .doFinally(() -> view.hideUploadProgressDialog())
+                .doOnSubscribe(_disposable -> getView().onShowUploadProgressDialog())
+                .doFinally(() -> getView().onHideUploadProgressDialog())
                 .subscribe(textureId -> {
                     // Update ID of the model.
                     model.textureId = textureId;
 
-                    view.showSnackbar(R.string.snackbar_done);
+                    getView().onSnackbar(R.string.snackbar_done);
                 }, e -> {
-                    LOG.e("Failed to save the user texture.", e);
-                    view.showSnackbar(R.string.snackbar_failed);
+                    getLog().e(String.format("Failed: textureId = %s", model.textureId), e);
+                    getView().onSnackbar(R.string.snackbar_failed);
                 });
-        compositeDisposable.add(disposable);
+        manageDisposable(disposable);
     }
 
     public void afterNameChanged(String filename) {

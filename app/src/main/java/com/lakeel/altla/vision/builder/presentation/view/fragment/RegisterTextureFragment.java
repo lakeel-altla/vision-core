@@ -1,12 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.EditTextureModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.RegisterTexturePresenter;
 import com.lakeel.altla.vision.builder.presentation.view.RegisterTextureView;
+import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -19,7 +18,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,13 +32,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
-public final class RegisterTextureFragment extends Fragment implements RegisterTextureView {
-
-    private static final Log LOG = LogFactory.getLog(RegisterTextureFragment.class);
+public final class RegisterTextureFragment extends AbstractFragment<RegisterTextureView, RegisterTexturePresenter>
+        implements RegisterTextureView {
 
     private static final int REQUEST_CODE_ACTION_OPEN_DOCUMENT = 0;
-
-    private static final String PARAM_ID = "id";
 
     @Inject
     RegisterTexturePresenter presenter;
@@ -60,55 +55,42 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     private ProgressDialog progressDialog;
 
     @NonNull
-    public static RegisterTextureFragment newInstance(@Nullable String id) {
+    public static RegisterTextureFragment newInstance(@Nullable String textureId) {
         RegisterTextureFragment fragment = new RegisterTextureFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString(PARAM_ID, id);
+        Bundle bundle = RegisterTexturePresenter.createArguments(textureId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    protected RegisterTexturePresenter getPresenter() {
+        return presenter;
+    }
+
+    @Override
+    protected RegisterTextureView getViewInterface() {
+        return this;
+    }
+
+    @Override
+    protected void onAttachOverride(@NonNull Context context) {
+        super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
     }
 
+    @Nullable
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        String id = null;
-
-        final Bundle arguments = getArguments();
-        if (arguments != null) {
-            id = arguments.getString(PARAM_ID);
-        }
-
-        presenter.onCreate(id);
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_register_texture, container, false);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_register_texture, container, false);
+    protected void onBindView(@NonNull View view) {
+        super.onBindView(view);
+
         ButterKnife.bind(this, view);
-
-        presenter.onCreateView(this);
-
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        presenter.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        presenter.onStop();
     }
 
     @Override
@@ -126,7 +108,7 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     }
 
     @Override
-    public void showLocalTexturePicker() {
+    public void onShowLocalTexturePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setType("image/*");
@@ -135,13 +117,13 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     }
 
     @Override
-    public void showModel(EditTextureModel model) {
+    public void onModelUpdated(EditTextureModel model) {
         imageViewTexture.setImageBitmap(model.bitmap);
         textInputEditTextName.setText(model.name);
     }
 
     @Override
-    public void showUploadProgressDialog() {
+    public void onShowUploadProgressDialog() {
         // When displaying the progress rate, it is impossible to reset the progress rate,
         // so the instance can not be cached.
         progressDialog = new ProgressDialog(getContext());
@@ -154,7 +136,7 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     }
 
     @Override
-    public void setUploadProgressDialogProgress(long max, long diff) {
+    public void onUpdateUploadProgressDialogProgress(long max, long diff) {
         if (progressDialog != null) {
             progressDialog.setMax((int) max);
             progressDialog.incrementProgressBy((int) diff);
@@ -162,24 +144,24 @@ public final class RegisterTextureFragment extends Fragment implements RegisterT
     }
 
     @Override
-    public void hideUploadProgressDialog() {
+    public void onHideUploadProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.hide();
         }
     }
 
     @Override
-    public void setTextureVisible(boolean visible) {
+    public void onUpdateTextureVisible(boolean visible) {
         imageViewTexture.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setLoadTextureProgressVisible(boolean visible) {
+    public void onUpdateLoadTextureProgressVisible(boolean visible) {
         progressBarLoadTexture.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void showSnackbar(@StringRes int resId) {
+    public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 

@@ -9,13 +9,13 @@ import android.support.annotation.StringRes;
  */
 public interface SignInView {
 
-    void closeView();
+    void onCloseSignInView();
 
-    void startActivityForResult(@NonNull Intent intent, int requestCode);
+    void onStartActivityForResult(@NonNull Intent intent, int requestCode);
 
-    void showSnackbar(@StringRes int resId);
+    void onSnackbar(@StringRes int resId);
 
-    void showProgressDialog();
+    void onShowProgressDialog();
 
-    void hideProgressDialog();
+    void onHideProgressDialog();
 }

@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionScenesPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionSceneListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneItemView;
 
 import android.support.annotation.NonNull;
@@ -15,14 +15,14 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionSceneModelAdapter
-        extends RecyclerView.Adapter<UserAreaDescriptionSceneModelAdapter.ViewHolderAreaDescription> {
+public final class UserAreaDescriptionSceneListAdapter
+        extends RecyclerView.Adapter<UserAreaDescriptionSceneListAdapter.ViewHolderAreaDescription> {
 
-    private final UserAreaDescriptionScenesPresenter presenter;
+    private final UserAreaDescriptionSceneListPresenter presenter;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionSceneModelAdapter(@NonNull UserAreaDescriptionScenesPresenter presenter) {
+    public UserAreaDescriptionSceneListAdapter(@NonNull UserAreaDescriptionSceneListPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -33,14 +33,12 @@ public final class UserAreaDescriptionSceneModelAdapter
         }
 
         View view = inflater.inflate(R.layout.item_user_scene_model, parent, false);
-        ViewHolderAreaDescription holder = new ViewHolderAreaDescription(view);
-        presenter.onCreateItemView(holder);
-        return holder;
+        return new ViewHolderAreaDescription(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolderAreaDescription holder, int position) {
-        holder.onBind(position);
+        holder.itemPresenter.onBind(position);
     }
 
     @Override
@@ -56,26 +54,20 @@ public final class UserAreaDescriptionSceneModelAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        private UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter;
+        private final UserAreaDescriptionSceneListPresenter.ItemPresenter itemPresenter;
 
         private ViewHolderAreaDescription(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            itemPresenter = presenter.createItemPresenter();
+            itemPresenter.onCreateItemView(this);
         }
 
         @Override
-        public void setItemPresenter(@NonNull UserAreaDescriptionScenesPresenter.ItemPresenter itemPresenter) {
-            this.itemPresenter = itemPresenter;
-        }
-
-        @Override
-        public void showModel(@NonNull UserAreaDescriptionSceneModel model) {
+        public void onModelUpdated(@NonNull UserAreaDescriptionSceneModel model) {
             textViewName.setText(model.name);
             textViewId.setText(model.sceneId);
-        }
-
-        private void onBind(int position) {
-            itemPresenter.onBind(position);
         }
     }
 }

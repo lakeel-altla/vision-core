@@ -1,10 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionItemModel;
 
 import android.support.annotation.NonNull;
 
 public interface UserAreaDescriptionView {
 
-    void showModel(@NonNull UserAreaDescriptionModel model);
+    void onModelUpdated(@NonNull UserAreaDescriptionItemModel model);
 }

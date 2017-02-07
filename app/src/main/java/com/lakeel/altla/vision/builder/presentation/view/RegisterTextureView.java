@@ -6,19 +6,19 @@ import android.support.annotation.StringRes;
 
 public interface RegisterTextureView {
 
-    void showLocalTexturePicker();
+    void onShowLocalTexturePicker();
 
-    void setTextureVisible(boolean visible);
+    void onUpdateTextureVisible(boolean visible);
 
-    void setLoadTextureProgressVisible(boolean visible);
+    void onUpdateLoadTextureProgressVisible(boolean visible);
 
-    void showModel(EditTextureModel model);
+    void onModelUpdated(EditTextureModel model);
 
-    void showUploadProgressDialog();
+    void onShowUploadProgressDialog();
 
-    void setUploadProgressDialogProgress(long max, long diff);
+    void onUpdateUploadProgressDialogProgress(long max, long diff);
 
-    void hideUploadProgressDialog();
+    void onHideUploadProgressDialog();
 
-    void showSnackbar(@StringRes int resId);
+    void onSnackbar(@StringRes int resId);
 }

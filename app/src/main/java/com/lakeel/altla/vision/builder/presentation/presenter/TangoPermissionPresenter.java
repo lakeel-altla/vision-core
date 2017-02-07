@@ -1,34 +1,32 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.presentation.view.TangoPermissionView;
-
-import android.support.annotation.NonNull;
+import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import javax.inject.Inject;
 
-public final class TangoPermissionPresenter {
-
-    private TangoPermissionView view;
+public final class TangoPermissionPresenter extends BasePresenter<TangoPermissionView> {
 
     @Inject
     public TangoPermissionPresenter() {
     }
 
-    public void onCreateView(@NonNull TangoPermissionView view) {
-        this.view = view;
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
 
         onConfirmPermission();
     }
 
     public void onConfirmPermission() {
-        view.startTangoPermissionActivity();
+        getView().onShowTangoPermissionActivity();
     }
 
     public void onTangoPermissionResult(boolean isCanceled) {
         if (!isCanceled) {
-            view.closeView();
+            getView().onCloseTangoPermissionView();
         } else {
-            view.showAreaLearningPermissionRequiredSnackbar();
+            getView().onShowAreaLearningPermissionRequiredSnackbar();
         }
     }
 }
