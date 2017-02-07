@@ -9,9 +9,9 @@ import android.support.annotation.NonNull;
 
 import java.util.Date;
 
-public final class UserAreaDescriptionModelMapper {
+public final class UserAreaDescriptionItemModelMapper {
 
-    private UserAreaDescriptionModelMapper() {
+    private UserAreaDescriptionItemModelMapper() {
     }
 
     @NonNull

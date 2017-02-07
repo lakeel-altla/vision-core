@@ -9,8 +9,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -35,13 +34,11 @@ public interface ActivityComponent {
 
     void inject(UserAreaListFragment fragment);
 
+    void inject(UserAreaDescriptionListInAreaFragment fragment);
+
     void inject(MainFragment fragment);
 
     void inject(RegisterTextureFragment fragment);
-
-    void inject(UserAreaDescriptionListFragment fragment);
-
-    void inject(UserAreaDescriptionFragment fragment);
 
     void inject(UserAreaDescriptionSceneListFragment fragment);
 }

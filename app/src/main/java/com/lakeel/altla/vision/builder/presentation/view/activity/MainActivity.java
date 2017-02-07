@@ -17,7 +17,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
@@ -57,8 +57,8 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    UserAreaListFragment.InteractionListener,
+                   UserAreaDescriptionListInAreaFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   UserAreaDescriptionListFragment.InterationListener,
                    UserAreaDescriptionSceneListFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
@@ -214,7 +214,6 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.nav_sign_out:
                 onSignOut();
@@ -256,20 +255,14 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowUserAreaDescriptionsInAreaView(@NonNull String areaId) {
-        // TODO
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragmentAndAddToBackStack(UserAreaDescriptionListInAreaFragment.newInstance(areaId));
     }
 
     @Override
-    public void onShowUserAreaDescriptionScenesView(@NonNull String areaDescriptionId) {
-        UserAreaDescriptionSceneListFragment
-                fragment = UserAreaDescriptionSceneListFragment.newInstance(areaDescriptionId);
-        replaceFragmentAndAddToBackStack(fragment);
-    }
-
-    @Override
-    public void onShowEditTextureView(@Nullable String id) {
-        RegisterTextureFragment fragment = RegisterTextureFragment.newInstance(id);
-        replaceFragmentAndAddToBackStack(fragment);
+    public void onShowEditTextureView(@Nullable String textureId) {
+        replaceFragmentAndAddToBackStack(RegisterTextureFragment.newInstance(textureId));
     }
 
     private void updateActionBarHome() {
@@ -302,13 +295,13 @@ public final class MainActivity extends AppCompatActivity
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                                    .addToBackStack(null)
-                                   .replace(R.id.fragment_container, fragment)
+                                   .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
     }
 
     private void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, fragment)
+                                   .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
     }
 
