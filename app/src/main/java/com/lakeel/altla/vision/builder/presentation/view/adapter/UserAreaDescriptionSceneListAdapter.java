@@ -32,7 +32,7 @@ public final class UserAreaDescriptionSceneListAdapter
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View view = inflater.inflate(R.layout.item_user_scene_model, parent, false);
+        View view = inflater.inflate(R.layout.item_user_scene, parent, false);
         return new ViewHolderAreaDescription(view);
     }
 

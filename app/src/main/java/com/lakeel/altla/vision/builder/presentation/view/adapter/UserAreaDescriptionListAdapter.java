@@ -32,7 +32,7 @@ public final class UserAreaDescriptionListAdapter
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View view = inflater.inflate(R.layout.item_user_area_description_model, parent, false);
+        View view = inflater.inflate(R.layout.item_user_area_description, parent, false);
         return new ViewHolderUser(view);
     }
 

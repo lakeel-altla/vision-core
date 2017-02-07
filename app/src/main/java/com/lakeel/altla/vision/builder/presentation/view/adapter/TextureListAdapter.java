@@ -41,7 +41,7 @@ public final class TextureListAdapter extends RecyclerView.Adapter<TextureListAd
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View itemView = inflater.inflate(R.layout.item_texture_model, parent, false);
+        View itemView = inflater.inflate(R.layout.item_texture, parent, false);
         return new ViewHolderTexture(itemView);
     }
 
