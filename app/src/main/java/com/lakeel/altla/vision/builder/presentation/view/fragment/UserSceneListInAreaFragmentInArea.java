@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionSceneListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneListView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionSceneListAdapter;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneListInAreaPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneListInAreaView;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.UserSceneListInAreaAdapter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -25,12 +25,12 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionSceneListFragment
-        extends AbstractFragment<UserAreaDescriptionSceneListView, UserAreaDescriptionSceneListPresenter>
-        implements UserAreaDescriptionSceneListView {
+public final class UserSceneListInAreaFragmentInArea
+        extends AbstractFragment<UserSceneListInAreaView, UserSceneListInAreaPresenter>
+        implements UserSceneListInAreaView {
 
     @Inject
-    UserAreaDescriptionSceneListPresenter presenter;
+    UserSceneListInAreaPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -38,20 +38,20 @@ public final class UserAreaDescriptionSceneListFragment
     private InteractionListener interactionListener;
 
     @NonNull
-    public static UserAreaDescriptionSceneListFragment newInstance(@NonNull String areaDescriptionId) {
-        UserAreaDescriptionSceneListFragment fragment = new UserAreaDescriptionSceneListFragment();
-        Bundle bundle = UserAreaDescriptionSceneListPresenter.createArguments(areaDescriptionId);
+    public static UserSceneListInAreaFragmentInArea newInstance(@NonNull String areaId) {
+        UserSceneListInAreaFragmentInArea fragment = new UserSceneListInAreaFragmentInArea();
+        Bundle bundle = UserSceneListInAreaPresenter.createArguments(areaId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserAreaDescriptionSceneListPresenter getPresenter() {
+    protected UserSceneListInAreaPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserAreaDescriptionSceneListView getViewInterface() {
+    protected UserSceneListInAreaView getViewInterface() {
         return this;
     }
 
@@ -74,7 +74,7 @@ public final class UserAreaDescriptionSceneListFragment
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_scene_list, container, false);
+        return inflater.inflate(R.layout.fragment_user_scene_list_in_area, container, false);
     }
 
     @Override
@@ -83,7 +83,7 @@ public final class UserAreaDescriptionSceneListFragment
 
         ButterKnife.bind(this, view);
 
-        recyclerView.setAdapter(new UserAreaDescriptionSceneListAdapter(presenter));
+        recyclerView.setAdapter(new UserSceneListInAreaAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         setHasOptionsMenu(true);
@@ -97,8 +97,8 @@ public final class UserAreaDescriptionSceneListFragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_new_scene:
-                // TODO
+            case R.id.action_create:
+                presenter.onActionCreate();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -113,6 +113,11 @@ public final class UserAreaDescriptionSceneListFragment
     @Override
     public void onItemInserted(int position) {
         recyclerView.getAdapter().notifyItemChanged(position);
+    }
+
+    @Override
+    public void onItemSelected(@NonNull String areaId) {
+        // TODO
     }
 
     public interface InteractionListener {

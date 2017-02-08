@@ -100,7 +100,8 @@ public final class UserAreaDescriptionListInAreaFragment
 
     @Override
     public void onItemSelected(@NonNull String areaDescriptionId) {
-        // TODO
+        // TODO: 
+
     }
 
     @Override
@@ -115,5 +116,6 @@ public final class UserAreaDescriptionListInAreaFragment
 
     public interface InteractionListener {
 
+        void onShowUserSceneListInAreaView(@NonNull String areaId);
     }
 }

@@ -1,9 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneItemModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionSceneListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneItemView;
+import com.lakeel.altla.vision.builder.presentation.model.UserSceneItemModel;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneListInAreaPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneItemView;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -15,29 +15,29 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionSceneListAdapter
-        extends RecyclerView.Adapter<UserAreaDescriptionSceneListAdapter.ViewHolderAreaDescription> {
+public final class UserSceneListInAreaAdapter
+        extends RecyclerView.Adapter<UserSceneListInAreaAdapter.ViewHolder> {
 
-    private final UserAreaDescriptionSceneListPresenter presenter;
+    private final UserSceneListInAreaPresenter presenter;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionSceneListAdapter(@NonNull UserAreaDescriptionSceneListPresenter presenter) {
+    public UserSceneListInAreaAdapter(@NonNull UserSceneListInAreaPresenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
-    public ViewHolderAreaDescription onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
 
         View view = inflater.inflate(R.layout.item_user_scene, parent, false);
-        return new ViewHolderAreaDescription(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderAreaDescription holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         holder.itemPresenter.onBind(position);
     }
 
@@ -46,7 +46,7 @@ public final class UserAreaDescriptionSceneListAdapter
         return presenter.getItemCount();
     }
 
-    final class ViewHolderAreaDescription extends RecyclerView.ViewHolder implements UserAreaDescriptionSceneItemView {
+    final class ViewHolder extends RecyclerView.ViewHolder implements UserSceneItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;
@@ -54,9 +54,9 @@ public final class UserAreaDescriptionSceneListAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        private final UserAreaDescriptionSceneListPresenter.ItemPresenter itemPresenter;
+        private final UserSceneListInAreaPresenter.ItemPresenter itemPresenter;
 
-        private ViewHolderAreaDescription(View itemView) {
+        private ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
 
@@ -65,7 +65,7 @@ public final class UserAreaDescriptionSceneListAdapter
         }
 
         @Override
-        public void onModelUpdated(@NonNull UserAreaDescriptionSceneItemModel model) {
+        public void onModelUpdated(@NonNull UserSceneItemModel model) {
             textViewName.setText(model.name);
             textViewId.setText(model.sceneId);
         }

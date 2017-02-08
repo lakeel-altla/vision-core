@@ -18,8 +18,8 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextur
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionSceneListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -59,7 +59,7 @@ public final class MainActivity extends AppCompatActivity
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    MainFragment.InteractionListener,
-                   UserAreaDescriptionSceneListFragment.InteractionListener,
+                   UserSceneListInAreaFragmentInArea.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -258,6 +258,13 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.VISIBLE);
 
         replaceFragmentAndAddToBackStack(UserAreaDescriptionListInAreaFragment.newInstance(areaId));
+    }
+
+    @Override
+    public void onShowUserSceneListInAreaView(@NonNull String areaId) {
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragmentAndAddToBackStack(UserSceneListInAreaFragmentInArea.newInstance(areaId));
     }
 
     @Override
