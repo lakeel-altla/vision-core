@@ -6,12 +6,13 @@ import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseRepository
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
 
 import dagger.Subcomponent;
@@ -31,6 +32,8 @@ public interface ActivityComponent {
     void inject(SignInFragment fragment);
 
     void inject(TangoPermissionFragment fragment);
+
+    void inject(ProjectFragment fragment);
 
     void inject(UserAreaListFragment fragment);
 

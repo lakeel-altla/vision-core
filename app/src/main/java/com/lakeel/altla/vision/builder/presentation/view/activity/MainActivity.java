@@ -14,6 +14,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
@@ -56,6 +57,7 @@ public final class MainActivity extends AppCompatActivity
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
+                   ProjectFragment.InteractionListener,
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    MainFragment.InteractionListener,
@@ -250,11 +252,18 @@ public final class MainActivity extends AppCompatActivity
     public void onCloseTangoPermissionView() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(UserAreaListFragment.newInstance());
+        replaceFragment(ProjectFragment.newInstance());
     }
 
     @Override
-    public void onShowUserAreaDescriptionsInAreaView(@NonNull String areaId) {
+    public void onShowUserAreaListView() {
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragmentAndAddToBackStack(UserAreaListFragment.newInstance());
+    }
+
+    @Override
+    public void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId) {
         toolbar.setVisibility(View.VISIBLE);
 
         replaceFragmentAndAddToBackStack(UserAreaDescriptionListInAreaFragment.newInstance(areaId));
@@ -265,6 +274,48 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.VISIBLE);
 
         replaceFragmentAndAddToBackStack(UserSceneListInAreaFragmentInArea.newInstance(areaId));
+    }
+
+    @Override
+    public void onShowSceneEditView(@NonNull String sceneId) {
+        toolbar.setVisibility(View.VISIBLE);
+
+        // TODO
+    }
+
+    @Override
+    public void onUserAreaSelected(@NonNull String areaId) {
+        getSupportFragmentManager().popBackStack();
+
+        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
+        if (fragment != null) {
+            fragment.onUserAreaSelected(areaId);
+        }
+    }
+
+    @Override
+    public void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId) {
+        getSupportFragmentManager().popBackStack();
+
+        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
+        if (fragment != null) {
+            fragment.onUserAreaDescriptionSelected(areaDescriptionId);
+        }
+    }
+
+    @Override
+    public void onShowUserSceneCreateView() {
+        // TODO
+    }
+
+    @Override
+    public void onUserSceneSelected(@NonNull String sceneId) {
+        getSupportFragmentManager().popBackStack();
+
+        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
+        if (fragment != null) {
+            fragment.onUserSceneSelected(sceneId);
+        }
     }
 
     @Override
@@ -297,6 +348,10 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.VISIBLE);
 
         replaceFragment(MainFragment.newInstance());
+    }
+
+    private Fragment findFragment(Class<?> clazz) {
+        return getSupportFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {

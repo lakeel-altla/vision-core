@@ -43,5 +43,10 @@
     <string name="title_user_area_list">User Areas</string>
 
     <string name="action_create">Create</string>
+    <string name="label_area">Area</string>
+    <string name="label_area_description">Area Description</string>
+    <string name="label_scene">Scene</string>
+    <string name="button_edit">Edit</string>
+    <string name="title_project">Project</string>
 
 </resources>

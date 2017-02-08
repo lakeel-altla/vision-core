@@ -8,5 +8,7 @@ public interface UserSceneListInAreaView {
 
     void onItemInserted(int position);
 
-    void onItemSelected(@NonNull String areaId);
+    void onItemSelected(@NonNull String sceneId);
+
+    void onShowUserSceneCreateView();
 }

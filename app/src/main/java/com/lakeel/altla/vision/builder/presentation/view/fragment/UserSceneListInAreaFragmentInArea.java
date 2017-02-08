@@ -91,7 +91,7 @@ public final class UserSceneListInAreaFragmentInArea
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_area_description_scenes, menu);
+        inflater.inflate(R.menu.fragment_user_scene_list_in_area, menu);
     }
 
     @Override
@@ -116,11 +116,19 @@ public final class UserSceneListInAreaFragmentInArea
     }
 
     @Override
-    public void onItemSelected(@NonNull String areaId) {
-        // TODO
+    public void onItemSelected(@NonNull String sceneId) {
+        interactionListener.onUserSceneSelected(sceneId);
+    }
+
+    @Override
+    public void onShowUserSceneCreateView() {
+        interactionListener.onShowUserSceneCreateView();
     }
 
     public interface InteractionListener {
 
+        void onShowUserSceneCreateView();
+
+        void onUserSceneSelected(@NonNull String sceneId);
     }
 }

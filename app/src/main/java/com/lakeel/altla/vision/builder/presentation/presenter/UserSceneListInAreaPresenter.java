@@ -84,7 +84,7 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
     }
 
     public void onActionCreate() {
-
+        getView().onShowUserSceneCreateView();
     }
 
     public final class ItemPresenter {

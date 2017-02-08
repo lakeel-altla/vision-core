@@ -100,8 +100,8 @@ public final class UserAreaDescriptionListInAreaFragment
 
     @Override
     public void onItemSelected(@NonNull String areaDescriptionId) {
-        // TODO: 
-
+        // TODO: import AD
+        interactionListener.onUserAreaDescriptionSelected(areaDescriptionId);
     }
 
     @Override
@@ -116,6 +116,6 @@ public final class UserAreaDescriptionListInAreaFragment
 
     public interface InteractionListener {
 
-        void onShowUserSceneListInAreaView(@NonNull String areaId);
+        void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId);
     }
 }
