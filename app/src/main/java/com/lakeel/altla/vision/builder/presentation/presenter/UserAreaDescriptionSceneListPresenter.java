@@ -1,8 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionSceneModelMapper;
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneModel;
+import com.lakeel.altla.vision.builder.presentation.mapper.UserAreaDescriptionSceneItemModelMapper;
+import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionSceneItemModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionSceneListView;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserAreaDescriptionsSceneUseCase;
@@ -27,7 +27,7 @@ public final class UserAreaDescriptionSceneListPresenter extends BasePresenter<U
     @Inject
     FindAllUserAreaDescriptionsSceneUseCase findAllUserAreaDescriptionsSceneUseCase;
 
-    private final List<UserAreaDescriptionSceneModel> items = new ArrayList<>();
+    private final List<UserAreaDescriptionSceneItemModel> items = new ArrayList<>();
 
     private String areaDescriptionId;
 
@@ -63,7 +63,7 @@ public final class UserAreaDescriptionSceneListPresenter extends BasePresenter<U
 
         Disposable disposable = findAllUserAreaDescriptionsSceneUseCase
                 .execute(areaDescriptionId)
-                .map(UserAreaDescriptionSceneModelMapper::map)
+                .map(UserAreaDescriptionSceneItemModelMapper::map)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(model -> {
                     items.add(model);
@@ -92,7 +92,7 @@ public final class UserAreaDescriptionSceneListPresenter extends BasePresenter<U
         }
 
         public void onBind(int position) {
-            UserAreaDescriptionSceneModel model = items.get(position);
+            UserAreaDescriptionSceneItemModel model = items.get(position);
             itemView.onModelUpdated(model);
         }
     }

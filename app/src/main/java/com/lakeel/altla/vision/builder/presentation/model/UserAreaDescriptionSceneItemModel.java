@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-public final class UserAreaDescriptionSceneModel {
+public final class UserAreaDescriptionSceneItemModel {
 
     public String sceneId;
 
