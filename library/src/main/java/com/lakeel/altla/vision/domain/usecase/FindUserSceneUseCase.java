@@ -8,10 +8,10 @@ import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Maybe;
 import io.reactivex.schedulers.Schedulers;
 
-public final class FindUserScenesByAreaIdUseCase {
+public final class FindUserSceneUseCase {
 
     @Inject
     UserSceneRepository userSceneRepository;
@@ -20,19 +20,20 @@ public final class FindUserScenesByAreaIdUseCase {
     CurrentUserResolver currentUserResolver;
 
     @Inject
-    public FindUserScenesByAreaIdUseCase() {
+    public FindUserSceneUseCase() {
     }
 
     @NonNull
-    public Observable<UserScene> execute(@NonNull String areaId) {
+    public Maybe<UserScene> execute(@NonNull String sceneId) {
         String userId = currentUserResolver.getUserId();
 
-        return Observable.<UserScene>create(e -> {
-            userSceneRepository.findByAreaId(userId, areaId, userScenes -> {
-                for (UserScene userScene : userScenes) {
-                    e.onNext(userScene);
+        return Maybe.<UserScene>create(e -> {
+            userSceneRepository.find(userId, sceneId, userScene -> {
+                if (userScene != null) {
+                    e.onSuccess(userScene);
+                } else {
+                    e.onComplete();
                 }
-                e.onComplete();
             }, e::onError);
         }).subscribeOn(Schedulers.io());
     }
