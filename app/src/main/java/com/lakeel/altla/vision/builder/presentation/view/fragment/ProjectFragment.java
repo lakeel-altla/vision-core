@@ -130,6 +130,13 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     public void onUpdateViewsDependOnUserAreaEnabled(boolean enabled) {
         imageButtonSelectAreaDescription.setEnabled(enabled);
         imageButtonSelectScene.setEnabled(enabled);
+
+        int enabledTint = getResources().getColor(R.color.tint_image_button_enabled);
+        int disabledTint = getResources().getColor(R.color.tint_image_button_disabled);
+        int tint = enabled ? enabledTint : disabledTint;
+
+        imageButtonSelectAreaDescription.setColorFilter(tint);
+        imageButtonSelectScene.setColorFilter(tint);
     }
 
     @Override

@@ -41,8 +41,9 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        getView().onUpdateViewsDependOnUserAreaEnabled(false);
-        getView().onUpdateEditButtonEnabled(false);
+        getView().onModelUpdated(model);
+        getView().onUpdateViewsDependOnUserAreaEnabled(areaId != null);
+        getView().onUpdateEditButtonEnabled(canEdit());
     }
 
     public void onClickImageButtonSelectArea() {

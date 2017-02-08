@@ -10,6 +10,7 @@
     <string name="button_rotate_object_in_x_axis">X-axis</string>
     <string name="button_rotate_object_in_y_axis">Y-axis</string>
     <string name="button_rotate_object_in_z_axis">Z-axis</string>
+    <string name="button_edit">Edit</string>
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
@@ -39,14 +40,13 @@
     <string name="label_place">Place</string>
     <string name="label_level">Level</string>
     <string name="label_name">Name</string>
-
-    <string name="title_user_area_list">User Areas</string>
-
-    <string name="action_create">Create</string>
     <string name="label_area">Area</string>
     <string name="label_area_description">Area Description</string>
     <string name="label_scene">Scene</string>
-    <string name="button_edit">Edit</string>
+
     <string name="title_project">Project</string>
+    <string name="title_user_area_list">User Areas</string>
+
+    <string name="action_create">Create</string>
 
 </resources>

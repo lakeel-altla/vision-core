@@ -11,7 +11,9 @@
     <!-- white -->
     <color name="tint_image_button_texture_pane">#ffffff</color>
     <!-- royalblue -->
-    <color name="tint_image_button_area_description_model">#4169e1</color>
+    <color name="tint_image_button_enabled">#4169e1</color>
+    <!-- white (75%)  -->
+    <color name="tint_image_button_disabled">#ccffffff</color>
 
     <!-- black (50%) -->
     <color name="background_model_pane">#88000000</color>

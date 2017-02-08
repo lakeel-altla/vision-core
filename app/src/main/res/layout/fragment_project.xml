@@ -22,7 +22,7 @@
         <ImageButton android:id="@+id/image_button_select_area"
                      android:src="@drawable/ic_map_black_24dp"
                      android:background="?android:attr/actionBarItemBackground"
-                     android:tint="@color/tint_image_button_area_description_model"
+                     android:tint="@color/tint_image_button_enabled"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
@@ -47,11 +47,12 @@
         <ImageButton android:id="@+id/image_button_select_area_description"
                      android:src="@drawable/ic_cube_black_24dp"
                      android:background="?android:attr/actionBarItemBackground"
-                     android:tint="@color/tint_image_button_area_description_model"
+                     android:tint="@color/tint_image_button_enabled"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
         <LinearLayout android:orientation="vertical"
+                      android:layout_gravity="center_vertical"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content">
 
@@ -82,7 +83,7 @@
         <ImageButton android:id="@+id/image_button_select_scene"
                      android:src="@drawable/ic_image_black_24dp"
                      android:background="?android:attr/actionBarItemBackground"
-                     android:tint="@color/tint_image_button_area_description_model"
+                     android:tint="@color/tint_image_button_enabled"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
