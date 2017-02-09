@@ -12,6 +12,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneCreateFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
 
@@ -38,6 +39,8 @@ public interface ActivityComponent {
     void inject(UserAreaListFragment fragment);
 
     void inject(UserAreaDescriptionListInAreaFragment fragment);
+
+    void inject(UserSceneCreateFragment fragment);
 
     void inject(MainFragment fragment);
 

@@ -121,13 +121,13 @@ public final class UserSceneListInAreaFragmentInArea
     }
 
     @Override
-    public void onShowUserSceneCreateView() {
-        interactionListener.onShowUserSceneCreateView();
+    public void onShowUserSceneCreateView(@NonNull String areaId) {
+        interactionListener.onShowUserSceneCreateView(areaId);
     }
 
     public interface InteractionListener {
 
-        void onShowUserSceneCreateView();
+        void onShowUserSceneCreateView(@NonNull String areaId);
 
         void onUserSceneSelected(@NonNull String sceneId);
     }
