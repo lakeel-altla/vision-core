@@ -1,16 +1,23 @@
 package com.lakeel.altla.vision.domain.model;
 
-import com.google.firebase.database.Exclude;
+import android.support.annotation.NonNull;
 
 public final class UserScene {
 
-    @Exclude
-    public String userId;
+    public final String userId;
 
-    @Exclude
-    public String sceneId;
+    public final String sceneId;
 
     public String name;
 
-    public long creationTime;
+    public String areaId;
+
+    public long createdAt;
+
+    public long updatedAt;
+
+    public UserScene(@NonNull String userId, @NonNull String sceneId) {
+        this.userId = userId;
+        this.sceneId = sceneId;
+    }
 }
