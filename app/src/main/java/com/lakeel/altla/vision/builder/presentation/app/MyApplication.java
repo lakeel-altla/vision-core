@@ -41,6 +41,9 @@ public final class MyApplication extends Application {
 
         // Altla Log
         LogFactory.setDebug(BuildConfig.DEBUG);
+
+        // Enable the offline feature of Firebase Database.
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
     /**
