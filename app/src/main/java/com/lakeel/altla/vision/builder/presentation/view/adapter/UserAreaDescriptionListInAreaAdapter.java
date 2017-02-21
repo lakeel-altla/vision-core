@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaDescriptionItemModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListInAreaPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 
@@ -85,9 +84,13 @@ public final class UserAreaDescriptionListInAreaAdapter
         }
 
         @Override
-        public void onModelUpdated(@NonNull UserAreaDescriptionItemModel model) {
-            textViewName.setText(model.name);
-            textViewId.setText(model.areaDescriptionId);
+        public void onUpdateAreaDescriptionId(@NonNull String areaDescriptionId) {
+            textViewId.setText(areaDescriptionId);
+        }
+
+        @Override
+        public void onUpdateName(@NonNull String name) {
+            textViewName.setText(name);
         }
     }
 }

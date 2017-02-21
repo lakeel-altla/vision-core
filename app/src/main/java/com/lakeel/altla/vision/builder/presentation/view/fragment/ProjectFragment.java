@@ -35,9 +35,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     @BindView(R.id.text_view_area_description_name)
     TextView textViewAreaDescriptionName;
 
-    @BindView(R.id.text_view_area_description_id)
-    TextView textViewAreaDescriptionId;
-
     @BindView(R.id.text_view_scene_name)
     TextView textViewSceneName;
 

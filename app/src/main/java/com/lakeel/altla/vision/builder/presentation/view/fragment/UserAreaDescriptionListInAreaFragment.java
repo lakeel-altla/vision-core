@@ -85,7 +85,7 @@ public final class UserAreaDescriptionListInAreaFragment
         recyclerView.setAdapter(new UserAreaDescriptionListInAreaAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        getActivity().setTitle(null);
+        getActivity().setTitle(R.string.title_user_area_description_list_in_area);
     }
 
     @Override
@@ -94,7 +94,22 @@ public final class UserAreaDescriptionListInAreaFragment
     }
 
     @Override
-    public void onItemsUpdated() {
+    public void onItemChanged(int position) {
+        recyclerView.getAdapter().notifyItemChanged(position);
+    }
+
+    @Override
+    public void onItemRemoved(int position) {
+        recyclerView.getAdapter().notifyItemRemoved(position);
+    }
+
+    @Override
+    public void onItemMoved(int fromPosition, int toPosition) {
+        recyclerView.getAdapter().notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void onDataSetChanged() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
@@ -102,11 +117,6 @@ public final class UserAreaDescriptionListInAreaFragment
     public void onItemSelected(@NonNull String areaDescriptionId) {
         // TODO: import AD
         interactionListener.onUserAreaDescriptionSelected(areaDescriptionId);
-    }
-
-    @Override
-    public void onUpdateTitle(String title) {
-        getActivity().setTitle(title);
     }
 
     @Override

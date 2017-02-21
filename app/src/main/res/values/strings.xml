@@ -11,6 +11,7 @@
     <string name="button_rotate_object_in_y_axis">Y-axis</string>
     <string name="button_rotate_object_in_z_axis">Z-axis</string>
     <string name="button_edit">Edit</string>
+    <string name="button_create">Create</string>
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
@@ -35,6 +36,7 @@
     <string name="dialog_content_confirm_delete_texture">Delete this texture?</string>
 
     <string name="hint_edit_texure_name">The texture name.</string>
+    <string name="hint_edit_name">Input the scene name</string>
 
     <string name="label_id">ID</string>
     <string name="label_place">Place</string>
@@ -45,10 +47,9 @@
     <string name="label_scene">Scene</string>
 
     <string name="title_project">Project</string>
-    <string name="title_user_area_list">User Areas</string>
+    <string name="title_user_area_list">Select a User Area</string>
+    <string name="title_user_area_description_list_in_area">Select a User Area Description</string>
 
     <string name="action_create">Create</string>
-    <string name="hint_edit_name">Input the scene name</string>
-    <string name="button_create">Create</string>
 
 </resources>
