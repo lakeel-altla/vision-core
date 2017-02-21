@@ -19,10 +19,24 @@ public final class UserSceneListInAreaAdapter
 
     private final UserSceneListInAreaPresenter presenter;
 
+    private RecyclerView recyclerView;
+
     private LayoutInflater inflater;
 
     public UserSceneListInAreaAdapter(@NonNull UserSceneListInAreaPresenter presenter) {
         this.presenter = presenter;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.recyclerView = null;
     }
 
     @Override
@@ -31,8 +45,14 @@ public final class UserSceneListInAreaAdapter
             inflater = LayoutInflater.from(parent.getContext());
         }
 
-        View view = inflater.inflate(R.layout.item_user_scene, parent, false);
-        return new ViewHolder(view);
+        View itemView = inflater.inflate(R.layout.item_user_scene, parent, false);
+        itemView.setOnClickListener(v -> {
+            if (recyclerView != null) {
+                int position = recyclerView.getChildAdapterPosition(v);
+                presenter.onClickItem(position);
+            }
+        });
+        return new ViewHolder(itemView);
     }
 
     @Override

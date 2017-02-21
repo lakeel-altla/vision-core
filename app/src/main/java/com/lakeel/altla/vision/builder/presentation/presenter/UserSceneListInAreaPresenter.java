@@ -127,6 +127,11 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
         return model;
     }
 
+    public void onClickItem(int position) {
+        ItemModel model = items.get(position);
+        getView().onItemSelected(model.sceneId);
+    }
+
     public final class ItemPresenter {
 
         private UserSceneItemView itemView;
