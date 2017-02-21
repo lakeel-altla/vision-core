@@ -15,6 +15,4 @@ public interface UserSceneListInAreaView {
     void onDataSetChanged();
 
     void onItemSelected(@NonNull String sceneId);
-
-    void onShowUserSceneCreateView(@NonNull String areaId);
 }

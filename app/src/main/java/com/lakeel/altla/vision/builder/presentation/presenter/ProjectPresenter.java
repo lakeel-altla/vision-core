@@ -106,7 +106,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onClickButtonEdit() {
-        getView().onShowUserSceneEditView(model.sceneId);
+        // TODO
     }
 
     public void onUserAreaSelected(@NonNull String areaId) {

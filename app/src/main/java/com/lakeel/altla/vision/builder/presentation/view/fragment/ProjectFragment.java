@@ -138,11 +138,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     }
 
     @Override
-    public void onShowUserSceneEditView(@NonNull String sceneId) {
-        interactionListener.onShowSceneEditView(sceneId);
-    }
-
-    @Override
     public void onUpdateEditButtonEnabled(boolean enabled) {
         buttonStart.setEnabled(enabled);
     }
@@ -192,7 +187,5 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
         void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
 
         void onShowUserSceneListInAreaView(@NonNull String areaId);
-
-        void onShowSceneEditView(@NonNull String sceneId);
     }
 }

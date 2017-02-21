@@ -20,7 +20,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneCreateFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
@@ -62,7 +61,6 @@ public final class MainActivity extends AppCompatActivity
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneListInAreaFragmentInArea.InteractionListener,
-                   UserSceneCreateFragment.InteractionListener,
                    MainFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
@@ -279,13 +277,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowSceneEditView(@NonNull String sceneId) {
-        toolbar.setVisibility(View.VISIBLE);
-
-        // TODO
-    }
-
-    @Override
     public void onUserAreaSelected(@NonNull String areaId) {
         getSupportFragmentManager().popBackStack();
 
@@ -306,13 +297,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserSceneCreateView(@NonNull String areaId) {
-        toolbar.setVisibility(View.VISIBLE);
-
-        replaceFragmentAndAddToBackStack(UserSceneCreateFragment.newInstance(areaId));
-    }
-
-    @Override
     public void onUserSceneSelected(@NonNull String sceneId) {
         getSupportFragmentManager().popBackStack();
 
@@ -320,11 +304,6 @@ public final class MainActivity extends AppCompatActivity
         if (fragment != null) {
             fragment.onUserSceneSelected(sceneId);
         }
-    }
-
-    @Override
-    public void onCloseUserSceneCreateView() {
-        getSupportFragmentManager().popBackStack();
     }
 
     @Override

@@ -14,9 +14,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -85,24 +82,6 @@ public final class UserSceneListInAreaFragmentInArea
 
         recyclerView.setAdapter(new UserSceneListInAreaAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_scene_list_in_area, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_create:
-                presenter.onActionCreate();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override
@@ -135,14 +114,7 @@ public final class UserSceneListInAreaFragmentInArea
         interactionListener.onUserSceneSelected(sceneId);
     }
 
-    @Override
-    public void onShowUserSceneCreateView(@NonNull String areaId) {
-        interactionListener.onShowUserSceneCreateView(areaId);
-    }
-
     public interface InteractionListener {
-
-        void onShowUserSceneCreateView(@NonNull String areaId);
 
         void onUserSceneSelected(@NonNull String sceneId);
     }

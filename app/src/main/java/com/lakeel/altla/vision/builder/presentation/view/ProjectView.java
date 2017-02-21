@@ -21,7 +21,5 @@ public interface ProjectView {
 
     void onShowUserSceneListInAreaView(@NonNull String areaId);
 
-    void onShowUserSceneEditView(@NonNull String sceneId);
-
     void onUpdateEditButtonEnabled(boolean enabled);
 }

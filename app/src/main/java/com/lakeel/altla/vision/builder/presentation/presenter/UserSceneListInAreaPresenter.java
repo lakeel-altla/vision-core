@@ -106,10 +106,6 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
         return new ItemPresenter();
     }
 
-    public void onActionCreate() {
-        getView().onShowUserSceneCreateView(areaId);
-    }
-
     @NonNull
     private EventModel map(@NonNull DataListEvent<UserScene> event) {
         EventModel model = new EventModel();
