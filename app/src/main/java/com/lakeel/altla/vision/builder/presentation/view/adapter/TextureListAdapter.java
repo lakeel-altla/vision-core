@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneEditPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
 
 import android.content.ClipData;
@@ -27,9 +27,9 @@ public final class TextureListAdapter extends RecyclerView.Adapter<TextureListAd
 
     private static final ClipData CLIP_DATA_DUMMY = ClipData.newPlainText("", "");
 
-    private final MainPresenter presenter;
+    private final UserSceneEditPresenter presenter;
 
-    public TextureListAdapter(@NonNull MainPresenter presenter) {
+    public TextureListAdapter(@NonNull UserSceneEditPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -82,7 +82,7 @@ public final class TextureListAdapter extends RecyclerView.Adapter<TextureListAd
 
         private final View.DragShadowBuilder dragShadowBuilder;
 
-        private final MainPresenter.TextureItemPresenter itemPresenter;
+        private final UserSceneEditPresenter.TextureItemPresenter itemPresenter;
 
         private MaterialDialog materialDialog;
 

@@ -11,9 +11,10 @@ import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
+import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
 import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
-import com.lakeel.altla.vision.builder.presentation.view.MainView;
 import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneEditView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
@@ -21,6 +22,7 @@ import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -38,14 +40,20 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Defines the presenter for {@link MainView}.
+ * Defines the presenter for {@link UserSceneEditView}.
  */
-public final class MainPresenter extends BasePresenter<MainView>
+public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditView>
         implements OnPoseAvailableListener, OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
 
     private static final int SECS_TO_MILLISECS = 1000;
 
     private static final double UPDATE_DEBUG_CONSOLE_INTERVAL = 100;
+
+    private static final String ARG_AREA_ID = "areaId";
+
+    private static final String ARG_AREA_DESCRIPTION_ID = "areaDescriptionId";
+
+    private static final String ARG_SCENE_ID = "sceneId";
 
     @Named(Names.ACTIVITY_CONTEXT)
     @Inject
@@ -109,7 +117,15 @@ public final class MainPresenter extends BasePresenter<MainView>
     });
 
     @Inject
-    public MainPresenter() {
+    public UserSceneEditPresenter() {
+    }
+
+    public static Bundle createArguments(@NonNull SceneEditModel sceneEditModel) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_AREA_ID, sceneEditModel.areaId);
+        bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneEditModel.areaDescriptionId);
+        bundle.putString(ARG_SCENE_ID, sceneEditModel.sceneId);
+        return bundle;
     }
 
     @Override

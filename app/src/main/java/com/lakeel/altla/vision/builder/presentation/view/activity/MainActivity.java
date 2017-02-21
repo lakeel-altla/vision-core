@@ -13,13 +13,14 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.MainFragment;
+import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
@@ -61,7 +62,7 @@ public final class MainActivity extends AppCompatActivity
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneListInAreaFragmentInArea.InteractionListener,
-                   MainFragment.InteractionListener,
+                   UserSceneEditFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -277,6 +278,13 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onShowUserSceneEditView(@NonNull SceneEditModel sceneEditModel) {
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragment(UserSceneEditFragment.newInstance(sceneEditModel));
+    }
+
+    @Override
     public void onUserAreaSelected(@NonNull String areaId) {
         getSupportFragmentManager().popBackStack();
 
@@ -330,12 +338,6 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.INVISIBLE);
 
         replaceFragment(SignInFragment.newInstance());
-    }
-
-    private void showMainFragment() {
-        toolbar.setVisibility(View.VISIBLE);
-
-        replaceFragment(MainFragment.newInstance());
     }
 
     private Fragment findFragment(Class<?> clazz) {

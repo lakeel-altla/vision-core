@@ -8,8 +8,9 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.MainPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.MainView;
+import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneEditPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneEditView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureListAdapter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -24,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -48,12 +50,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class MainFragment extends AbstractFragment<MainView, MainPresenter> implements MainView {
+public final class UserSceneEditFragment extends AbstractFragment<UserSceneEditView, UserSceneEditPresenter>
+        implements UserSceneEditView {
 
     private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
 
     @Inject
-    MainPresenter presenter;
+    UserSceneEditPresenter presenter;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -118,17 +121,20 @@ public final class MainFragment extends AbstractFragment<MainView, MainPresenter
 
     private InteractionListener interactionListener;
 
-    public static MainFragment newInstance() {
-        return new MainFragment();
+    public static Fragment newInstance(@NonNull SceneEditModel sceneEditModel) {
+        UserSceneEditFragment fragment = new UserSceneEditFragment();
+        Bundle bundle = UserSceneEditPresenter.createArguments(sceneEditModel);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
-    protected MainPresenter getPresenter() {
+    protected UserSceneEditPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected MainView getViewInterface() {
+    protected UserSceneEditView getViewInterface() {
         return this;
     }
 
@@ -172,7 +178,7 @@ public final class MainFragment extends AbstractFragment<MainView, MainPresenter
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_user_scene_edit, container, false);
     }
 
     @Override
@@ -213,7 +219,7 @@ public final class MainFragment extends AbstractFragment<MainView, MainPresenter
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_main, menu);
+        inflater.inflate(R.menu.fragment_user_scene_edit, menu);
     }
 
     @Override

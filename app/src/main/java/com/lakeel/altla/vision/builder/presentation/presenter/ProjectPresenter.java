@@ -1,12 +1,13 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.vision.builder.presentation.model.ProjectModel;
+import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
 import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserSceneUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.parceler.Parcel;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -31,7 +32,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     @Inject
     FindUserSceneUseCase findUserSceneUseCase;
 
-    private ProjectModel model = new ProjectModel();
+    private Model model = new Model();
 
     @Inject
     public ProjectPresenter() {
@@ -42,7 +43,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         super.onCreate(arguments, savedInstanceState);
 
         if (savedInstanceState == null) {
-            model = new ProjectModel();
+            model = new Model();
         } else {
             model = Parcels.unwrap(savedInstanceState.getParcelable(STATE_MODEL));
             if (model == null) {
@@ -106,7 +107,8 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onClickButtonEdit() {
-        // TODO
+        SceneEditModel sceneEditModel = new SceneEditModel(model.areaId, model.areaDescriptionId, model.sceneId);
+        getView().onShowUserSceneEditView(sceneEditModel);
     }
 
     public void onUserAreaSelected(@NonNull String areaId) {
@@ -188,5 +190,27 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
 
     private boolean canEdit() {
         return model.areaId != null && model.areaDescriptionId != null && model.sceneId != null;
+    }
+
+    @Parcel
+    public static final class Model {
+
+        String areaId;
+
+        String areaName;
+
+        boolean isAreaNameDirty;
+
+        String areaDescriptionId;
+
+        String areaDescriptionName;
+
+        boolean isAreaDescriptionNameDirty;
+
+        String sceneId;
+
+        String sceneName;
+
+        boolean isSceneNameDirty;
     }
 }
