@@ -1,11 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserAreaItemModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaItemView;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,12 +93,28 @@ public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaList
         }
 
         @Override
-        public void onModelUpdated(@NonNull UserAreaItemModel model) {
-            textViewName.setText(model.name);
-            textViewId.setText(model.areaId);
-            textViewPlaceName.setText(model.placeName);
-            textViewPlaceAddress.setText(model.placeAddress);
-            textViewLevel.setText(model.level);
+        public void onUpdateAreaId(@NonNull String areaId) {
+            textViewId.setText(areaId);
+        }
+
+        @Override
+        public void onUpdateName(@NonNull String name) {
+            textViewName.setText(name);
+        }
+
+        @Override
+        public void onUpdatePlaceName(@Nullable String placeName) {
+            textViewPlaceName.setText(placeName);
+        }
+
+        @Override
+        public void onUpdatePladeAddress(@Nullable String placeAddress) {
+            textViewPlaceAddress.setText(placeAddress);
+        }
+
+        @Override
+        public void onUpdateLevel(int level) {
+            textViewLevel.setText(String.valueOf(level));
         }
     }
 }
