@@ -1,11 +1,14 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.tango.OnFrameAvailableListener;
 import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
+import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -26,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -77,6 +81,12 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
 
     private final Handler handlerMain = new Handler(Looper.getMainLooper());
 
+    private String areaId;
+
+    private String areaDescriptionId;
+
+    private String sceneId;
+
     private MainRenderer renderer;
 
     private boolean isModelPaneVisible;
@@ -120,12 +130,40 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
     public UserSceneEditPresenter() {
     }
 
+    @NonNull
     public static Bundle createArguments(@NonNull SceneEditModel sceneEditModel) {
         Bundle bundle = new Bundle();
         bundle.putString(ARG_AREA_ID, sceneEditModel.areaId);
         bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneEditModel.areaDescriptionId);
         bundle.putString(ARG_SCENE_ID, sceneEditModel.sceneId);
         return bundle;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
+        super.onCreate(arguments, savedInstanceState);
+
+        if (arguments == null) throw new ArgumentNullException("arguments");
+
+        String areaId = arguments.getString(ARG_AREA_ID);
+        if (areaId == null) {
+            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
+        }
+        this.areaId = areaId;
+
+        String areaDescriptionId = arguments.getString(ARG_AREA_DESCRIPTION_ID);
+        if (areaDescriptionId == null) {
+            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_DESCRIPTION_ID));
+        }
+        this.areaDescriptionId = areaDescriptionId;
+
+        String sceneId = arguments.getString(ARG_SCENE_ID);
+        if (sceneId == null) {
+            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_SCENE_ID));
+        }
+        this.sceneId = sceneId;
+
+        tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
     }
 
     @Override
@@ -177,6 +215,7 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
         tangoWrapper.addOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.addOnPoseAvailableListener(this);
         tangoWrapper.addOnFrameAvailableListener(this);
+        tangoWrapper.connect();
         active = true;
     }
 
@@ -188,6 +227,7 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
         tangoWrapper.removeOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.removeOnPoseAvailableListener(this);
         tangoWrapper.removeOnFrameAvailableListener(this);
+        tangoWrapper.disconnect();
         renderer.disconnectFromTangoCamera();
     }
 
@@ -354,6 +394,26 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
             return true;
         }
         return false;
+    }
+
+    private TangoConfig createTangoConfig(Tango tango) {
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+
+        // NOTE:
+        // Low latency integration is necessary to achieve a precise alignment of
+        // virtual objects with the RBG image and produce a good AR effect.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+        // Enable the color camera.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+        // NOTE:
+        // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
+//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+
+        if (areaDescriptionId != null) {
+            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaDescriptionId);
+        }
+
+        return config;
     }
 
     public final class TextureItemPresenter {

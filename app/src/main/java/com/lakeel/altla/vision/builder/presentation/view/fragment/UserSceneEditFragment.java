@@ -121,6 +121,7 @@ public final class UserSceneEditFragment extends AbstractFragment<UserSceneEditV
 
     private InteractionListener interactionListener;
 
+    @NonNull
     public static Fragment newInstance(@NonNull SceneEditModel sceneEditModel) {
         UserSceneEditFragment fragment = new UserSceneEditFragment();
         Bundle bundle = UserSceneEditPresenter.createArguments(sceneEditModel);

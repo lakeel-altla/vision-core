@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view.activity;
 
 import com.google.atap.tangoservice.Tango;
-import com.google.atap.tangoservice.TangoConfig;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -67,11 +66,6 @@ public final class MainActivity extends AppCompatActivity
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
-    private static final String STATE_CURRENT_AREA_DESCRIPTION_ID = "currentAreaDescriptionId";
-
-    @Inject
-    TangoWrapper tangoWrapper;
-
     @Inject
     ObserveUserProfileUseCase observeUserProfileUseCase;
 
@@ -101,8 +95,6 @@ public final class MainActivity extends AppCompatActivity
     private Disposable observeUserProfileDisposable;
 
     private Disposable observeConnectionDisposable;
-
-    private String currentAreaDescriptionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,11 +127,6 @@ public final class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
 
-        tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
-        if (savedInstanceState != null) {
-            currentAreaDescriptionId = savedInstanceState.getString(STATE_CURRENT_AREA_DESCRIPTION_ID, null);
-        }
-
         showSignInFragment();
     }
 
@@ -168,27 +155,6 @@ public final class MainActivity extends AppCompatActivity
         compositeDisposable.clear();
 
         FirebaseAuth.getInstance().removeAuthStateListener(navigationViewHeader);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        tangoWrapper.connect();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        tangoWrapper.disconnect();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putString(STATE_CURRENT_AREA_DESCRIPTION_ID, currentAreaDescriptionId);
     }
 
     @Override
@@ -355,27 +321,6 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
-    }
-
-    private TangoConfig createTangoConfig(Tango tango) {
-        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-
-        // NOTE:
-        // Low latency integration is necessary to achieve a precise alignment of
-        // virtual objects with the RBG image and produce a good AR effect.
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
-        // Enable the color camera.
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
-        // NOTE:
-        // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
-//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
-
-        LOG.d("The current area description: %s", currentAreaDescriptionId);
-        if (currentAreaDescriptionId != null) {
-            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, currentAreaDescriptionId);
-        }
-
-        return config;
     }
 
     class NavigationViewHeader implements FirebaseAuth.AuthStateListener {
