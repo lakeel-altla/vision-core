@@ -1,33 +1,32 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.builder.presentation.mapper.UserSceneItemModelMapper;
-import com.lakeel.altla.vision.builder.presentation.model.UserSceneItemModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneListInAreaView;
-import com.lakeel.altla.vision.domain.usecase.FindUserScenesByAreaIdUseCase;
+import com.lakeel.altla.vision.domain.helper.DataListEvent;
+import com.lakeel.altla.vision.domain.model.UserScene;
+import com.lakeel.altla.vision.domain.usecase.ObserveUserScenesByAreaIdUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
+import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneListInAreaView> {
+public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneListInAreaView>
+        implements DataList.OnItemListener {
 
     private static final String ARG_AREA_ID = "areaId";
 
     @Inject
-    FindUserScenesByAreaIdUseCase findUserScenesByAreaIdUseCase;
+    ObserveUserScenesByAreaIdUseCase observeUserScenesByAreaIdUseCase;
 
-    private final List<UserSceneItemModel> items = new ArrayList<>();
+    private final DataList<ItemModel> items = new DataList<>(this);
 
     private String areaId;
 
@@ -61,17 +60,41 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
 
         items.clear();
 
-        Disposable disposable = findUserScenesByAreaIdUseCase
+        Disposable disposable = observeUserScenesByAreaIdUseCase
                 .execute(areaId)
-                .map(UserSceneItemModelMapper::map)
+                .map(this::map)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(model -> {
-                    items.add(model);
-                    getView().onItemInserted(items.size() - 1);
+                    items.change(model.type, model.item, model.previousSceneId);
                 }, e -> {
-                    getLog().e(String.format("Failed: areaId = %s", areaId), e);
+                    getLog().e("Failed.", e);
                 });
         manageDisposable(disposable);
+    }
+
+    @Override
+    public void onItemInserted(int index) {
+        getView().onItemInserted(index);
+    }
+
+    @Override
+    public void onItemChanged(int index) {
+        getView().onItemChanged(index);
+    }
+
+    @Override
+    public void onItemRemoved(int index) {
+        getView().onItemRemoved(index);
+    }
+
+    @Override
+    public void onItemMoved(int from, int to) {
+        getView().onItemMoved(from, to);
+    }
+
+    @Override
+    public void onDataSetChanged() {
+        getView().onDataSetChanged();
     }
 
     public int getItemCount() {
@@ -87,6 +110,23 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
         getView().onShowUserSceneCreateView(areaId);
     }
 
+    @NonNull
+    private EventModel map(@NonNull DataListEvent<UserScene> event) {
+        EventModel model = new EventModel();
+        model.type = event.getType();
+        model.item = map(event.getData());
+        model.previousSceneId = event.getPreviousChildName();
+        return model;
+    }
+
+    @NonNull
+    private ItemModel map(@NonNull UserScene userScene) {
+        ItemModel model = new ItemModel();
+        model.sceneId = userScene.sceneId;
+        model.name = userScene.name;
+        return model;
+    }
+
     public final class ItemPresenter {
 
         private UserSceneItemView itemView;
@@ -96,8 +136,30 @@ public final class UserSceneListInAreaPresenter extends BasePresenter<UserSceneL
         }
 
         public void onBind(int position) {
-            UserSceneItemModel model = items.get(position);
-            itemView.onModelUpdated(model);
+            ItemModel model = items.get(position);
+            itemView.onUpdateSceneId(model.sceneId);
+            itemView.onUpdateName(model.name);
+        }
+    }
+
+    private final class EventModel {
+
+        DataListEvent.Type type;
+
+        String previousSceneId;
+
+        ItemModel item;
+    }
+
+    private final class ItemModel implements DataList.Item {
+
+        String sceneId;
+
+        String name;
+
+        @Override
+        public String getId() {
+            return sceneId;
         }
     }
 }

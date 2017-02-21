@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserSceneItemModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneListInAreaPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneItemView;
 
@@ -65,9 +64,13 @@ public final class UserSceneListInAreaAdapter
         }
 
         @Override
-        public void onModelUpdated(@NonNull UserSceneItemModel model) {
-            textViewName.setText(model.name);
-            textViewId.setText(model.sceneId);
+        public void onUpdateSceneId(@NonNull String sceneId) {
+            textViewId.setText(sceneId);
+        }
+
+        @Override
+        public void onUpdateName(@NonNull String name) {
+            textViewName.setText(name);
         }
     }
 }

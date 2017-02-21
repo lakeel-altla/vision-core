@@ -79,12 +79,38 @@ public class UserAreaDescriptionListInAreaPresenter extends BasePresenter<UserAr
         manageDisposable(disposable);
     }
 
+    @Override
+    public void onItemInserted(int index) {
+        getView().onItemInserted(index);
+    }
+
+    @Override
+    public void onItemChanged(int index) {
+        getView().onItemChanged(index);
+    }
+
+    @Override
+    public void onItemRemoved(int index) {
+        getView().onItemRemoved(index);
+    }
+
+    @Override
+    public void onItemMoved(int from, int to) {
+        getView().onItemMoved(from, to);
+    }
+
+    @Override
+    public void onDataSetChanged() {
+        getView().onDataSetChanged();
+    }
+
     public int getItemCount() {
         getLog().d("getItemCount: %d", items.size());
 
         return items.size();
     }
 
+    @NonNull
     public ItemPresenter createItemPresenter() {
         return new ItemPresenter();
     }
@@ -109,31 +135,6 @@ public class UserAreaDescriptionListInAreaPresenter extends BasePresenter<UserAr
         model.areaDescriptionId = userAreaDescription.areaDescriptionId;
         model.name = userAreaDescription.name;
         return model;
-    }
-
-    @Override
-    public void onItemInserted(int index) {
-        getView().onItemInserted(index);
-    }
-
-    @Override
-    public void onItemChanged(int index) {
-        getView().onItemChanged(index);
-    }
-
-    @Override
-    public void onItemRemoved(int index) {
-        getView().onItemRemoved(index);
-    }
-
-    @Override
-    public void onItemMoved(int from, int to) {
-        getView().onItemMoved(from, to);
-    }
-
-    @Override
-    public void onDataSetChanged() {
-        getView().onDataSetChanged();
     }
 
     public final class ItemPresenter {
