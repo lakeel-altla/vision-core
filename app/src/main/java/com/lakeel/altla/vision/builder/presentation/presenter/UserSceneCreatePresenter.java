@@ -78,13 +78,14 @@ public class UserSceneCreatePresenter extends BasePresenter<UserSceneCreateView>
 
         processing = true;
 
-        UserScene userScene = new UserScene();
-        userScene.userId = currentUserResolver.getUserId();
+        String userId = currentUserResolver.getUserId();
+        String sceneId = UUID.randomUUID().toString();
+
+        UserScene userScene = new UserScene(userId, sceneId);
         userScene.areaId = areaId;
-        userScene.sceneId = UUID.randomUUID().toString();
         userScene.name = name;
-        // TODO: server time?
-        userScene.createdAt = System.currentTimeMillis();
+        userScene.createdAt = -1;
+        userScene.updatedAt = -1;
 
         Disposable disposable = saveUserSceneUseCase
                 .execute(userScene)

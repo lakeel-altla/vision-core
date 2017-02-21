@@ -1,8 +1,5 @@
 apply plugin: 'com.android.application'
 
-// android-apt for Butter Knife
-apply plugin: 'com.neenbedankt.android-apt'
-
 // retrolambda
 apply plugin: 'me.tatarka.retrolambda'
 
@@ -46,8 +43,7 @@ repositories {
 }
 
 dependencies {
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    apt 'com.google.dagger:dagger-compiler:2.7'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
 
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:appcompat-v7:25.1.0'
@@ -56,6 +52,12 @@ dependencies {
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'org.parceler:parceler-api:1.1.6'
+    annotationProcessor 'org.parceler:parceler:1.1.6'
 
     debugCompile project(path: ':vision-core', configuration: 'debug')
     debugCompile project(path: ':tango-rajawali', configuration: 'debug')

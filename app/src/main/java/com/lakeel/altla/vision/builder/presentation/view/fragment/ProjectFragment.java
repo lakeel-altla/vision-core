@@ -2,13 +2,13 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.ProjectModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.ProjectPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -99,6 +99,33 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     }
 
     @Override
+    public void onUpdateAreaName(@Nullable String areaName) {
+        textViewAreaName.setText(areaName);
+    }
+
+    @Override
+    public void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName) {
+        textViewAreaDescriptionName.setText(areaDescriptionName);
+    }
+
+    @Override
+    public void onUpdateSceneName(@Nullable String sceneName) {
+        textViewSceneName.setText(sceneName);
+    }
+
+    @Override
+    public void onUpdateAreaDescriptionPickerEnabled(boolean enabled) {
+        imageButtonSelectAreaDescription.setEnabled(enabled);
+        imageButtonSelectAreaDescription.setColorFilter(resolveImageButtonTint(enabled));
+    }
+
+    @Override
+    public void onUpdateScenePickerEnabled(boolean enabled) {
+        imageButtonSelectScene.setEnabled(enabled);
+        imageButtonSelectScene.setColorFilter(resolveImageButtonTint(enabled));
+    }
+
+    @Override
     public void onShowUserAreaListView() {
         interactionListener.onShowUserAreaListView();
     }
@@ -116,27 +143,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     @Override
     public void onShowUserSceneEditView(@NonNull String sceneId) {
         interactionListener.onShowSceneEditView(sceneId);
-    }
-
-    @Override
-    public void onModelUpdated(@NonNull ProjectModel model) {
-        textViewAreaName.setText(model.areaName);
-        textViewAreaDescriptionName.setText(model.areaDescriptionName);
-        textViewAreaDescriptionId.setText(model.areaDescriptionId);
-        textViewSceneName.setText(model.sceneName);
-    }
-
-    @Override
-    public void onUpdateViewsDependOnUserAreaEnabled(boolean enabled) {
-        imageButtonSelectAreaDescription.setEnabled(enabled);
-        imageButtonSelectScene.setEnabled(enabled);
-
-        int enabledTint = getResources().getColor(R.color.tint_image_button_enabled);
-        int disabledTint = getResources().getColor(R.color.tint_image_button_disabled);
-        int tint = enabled ? enabledTint : disabledTint;
-
-        imageButtonSelectAreaDescription.setColorFilter(tint);
-        imageButtonSelectScene.setColorFilter(tint);
     }
 
     @Override
@@ -174,6 +180,12 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
 
     public void onUserSceneSelected(@NonNull String sceneId) {
         presenter.onUserSceneSelected(sceneId);
+    }
+
+    @ColorInt
+    private int resolveImageButtonTint(boolean enabled) {
+        int resId = enabled ? R.color.tint_image_button_enabled : R.color.tint_image_button_disabled;
+        return getResources().getColor(resId);
     }
 
     public interface InteractionListener {
