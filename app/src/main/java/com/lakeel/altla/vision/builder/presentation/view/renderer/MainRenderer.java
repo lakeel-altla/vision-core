@@ -10,6 +10,9 @@ import com.lakeel.altla.vision.builder.presentation.graphics.BitmapPlaneFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
@@ -22,6 +25,7 @@ import org.rajawali3d.util.OnObjectPickedListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -42,6 +46,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     private static final float SCALE_OBJECT_SIZE_SCALE = 0.5f;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    private final UserActorImageTarget userActorImageTarget = new UserActorImageTarget();
 
     private final Queue<Bitmap> planeBitmapQueue = new LinkedList<>();
 
@@ -339,10 +345,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
     }
 
-    public void addPlaneBitmap(@NonNull Bitmap bitmap) {
-        synchronized (planeBitmapQueue) {
-            planeBitmapQueue.offer(bitmap);
-        }
+    public void addUserActorImage(@NonNull UserActorImageModel userActorImageModel) {
+        Picasso.with(getContext())
+               .load(userActorImageModel.uri)
+               .into(userActorImageTarget);
     }
 
     public void tryPickObject(float x, float y) {
@@ -387,5 +393,24 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     public interface OnPickedObjectChangedListener {
 
         void onPickedObjectChanged(String oldName, String newName);
+    }
+
+    private final class UserActorImageTarget implements Target {
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            synchronized (planeBitmapQueue) {
+                planeBitmapQueue.offer(bitmap);
+            }
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            LOG.e("Failed to load the bitmap.");
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        }
     }
 }

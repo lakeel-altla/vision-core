@@ -7,7 +7,6 @@ import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 /**
@@ -18,12 +17,6 @@ public interface UserSceneBuildView {
     void setTangoUxLayout(TangoUx tangoUx);
 
     void setSurfaceRenderer(ISurfaceRenderer renderer);
-
-    void onUpdateTextureModelPaneVisible(boolean visible);
-
-    void onTextureItemInserted(int position);
-
-    void onTextureItemsUpdated();
 
     void onUpdateObjectMenuVisible(boolean visible);
 
@@ -40,8 +33,6 @@ public interface UserSceneBuildView {
     void onUpdateRotateObjectAxisSelected(Axis axis, boolean selected);
 
     void onUpdateScaleObjectSelected(boolean selected);
-
-    void onShowEditTextureView(@Nullable String id);
 
     void onDebugModelUpdated(MainDebugModel model);
 

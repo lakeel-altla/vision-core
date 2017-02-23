@@ -9,22 +9,19 @@ import com.lakeel.altla.tango.OnFrameAvailableListener;
 import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
-import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
-import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserTextureBitmapUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,16 +29,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Defines the presenter for {@link UserSceneBuildView}.
@@ -64,20 +53,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     Context context;
 
     @Inject
-    FindAllUserTexturesUseCase findAllUserTexturesUseCase;
-
-    @Inject
-    FindUserTextureBitmapUseCase findUserTextureBitmapUseCase;
-
-    @Inject
-    DeleteUserTextureUseCase deleteUserTextureUseCase;
-
-    @Inject
     TangoWrapper tangoWrapper;
-
-    private final List<TextureItemModel> textureItems = new ArrayList<>();
-
-    private final SingleTextureSelection singleTextureSelection = new SingleTextureSelection();
 
     private final Handler handlerMain = new Handler(Looper.getMainLooper());
 
@@ -176,7 +152,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         renderer.setOnPickedObjectChangedListener(this);
         getView().setSurfaceRenderer(renderer);
 
-        getView().onUpdateTextureModelPaneVisible(false);
         getView().onUpdateObjectMenuVisible(false);
         getView().onUpdateTranslateObjectSelected(false);
         getView().onUpdateRotateObjectSelected(false);
@@ -191,21 +166,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     @Override
     protected void onStartOverride() {
         super.onStartOverride();
-
-        textureItems.clear();
-        getView().onTextureItemsUpdated();
-
-        Disposable disposable = findAllUserTexturesUseCase
-                .execute()
-                .map(userTexture -> new TextureItemModel(userTexture.textureId, userTexture.name))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(model -> {
-                    textureItems.add(model);
-                    getView().onTextureItemInserted(textureItems.size() - 1);
-                }, e -> {
-                    getLog().e("Failed.", e);
-                });
-        manageDisposable(disposable);
     }
 
     @Override
@@ -289,15 +249,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().onUpdateObjectMenuVisible(hasPickedObject);
     }
 
-    public void onClickFabToggleModelPane() {
-        isModelPaneVisible = !isModelPaneVisible;
-        getView().onUpdateTextureModelPaneVisible(isModelPaneVisible);
-    }
-
-    public void onClickImageButtonAddModel() {
-        getView().onShowEditTextureView(null);
-    }
-
     public void onTouchButtonTranslateObject() {
         objectEditMode = ObjectEditMode.TRANSLATE;
         renderer.setObjectEditMode(objectEditMode);
@@ -347,21 +298,25 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().onUpdateScaleObjectSelected(true);
     }
 
-    public int getTextureItemCount() {
-        return textureItems.size();
-    }
-
-    public TextureItemPresenter createTextureItemPresenter() {
-        TextureItemPresenter itemPresenter = new TextureItemPresenter();
-        singleTextureSelection.addItemPresenter(itemPresenter);
-        return itemPresenter;
-    }
-
     public void onDropModel() {
-        if (0 <= singleTextureSelection.selectedPosition) {
-            TextureItemModel model = textureItems.get(singleTextureSelection.selectedPosition);
-            renderer.addPlaneBitmap(model.bitmap);
-        }
+        getLog().v("onDropModel");
+        // TODO
+//        if (0 <= singleTextureSelection.selectedPosition) {
+//            TextureItemModel model = textureItems.get(singleTextureSelection.selectedPosition);
+//            renderer.addPlaneBitmap(model.bitmap);
+//        }
+    }
+
+    public void onDropModel(@NonNull ClipData clipData) {
+        if (clipData.getItemCount() == 0) throw new IllegalStateException("No item.");
+
+        Intent intent = clipData.getItemAt(0).getIntent();
+        if (intent == null) throw new IllegalStateException("No intent.");
+
+        UserActorImageModel userActorImageModel = UserActorImageModel.parseIntent(intent);
+        if (userActorImageModel == null) throw new IllegalStateException("No UserActorImageModel.");
+
+        renderer.addUserActorImage(userActorImageModel);
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
@@ -414,114 +369,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         }
 
         return config;
-    }
-
-    public final class TextureItemPresenter {
-
-        private TextureItemView itemView;
-
-        public void onCreateItemView(@NonNull TextureItemView itemView) {
-            this.itemView = itemView;
-        }
-
-        public void onBind(int position) {
-            TextureItemModel model = textureItems.get(position);
-            itemView.onModelUpdated(model);
-        }
-
-        public void onLoadBitmap(int position) {
-            TextureItemModel model = textureItems.get(position);
-
-            Disposable disposable = findUserTextureBitmapUseCase
-                    .execute(model.textureId, (totalBytes, bytesTransferred) -> {
-                        // Update the progress bar.
-                        itemView.onShowProgress((int) totalBytes, (int) bytesTransferred);
-                    })
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doFinally(() -> itemView.onHideProgress())
-                    .subscribe(bitmap -> {
-                        // Set the bitmap into the model.
-                        model.bitmap = bitmap;
-                        // Redraw.
-                        itemView.onModelUpdated(model);
-                    }, e -> {
-                        // TODO: How to recover.
-                        getLog().w(String.format("Failed to load the user texture bitmap: textureId = %s",
-                                                 model.textureId),
-                                   e);
-                    });
-            manageDisposable(disposable);
-        }
-
-        public void onClickViewTop(int position) {
-            singleTextureSelection.setSelectedPosition(position);
-        }
-
-        public void onLongClickViewTop(int position) {
-            singleTextureSelection.setSelectedPosition(position);
-            itemView.onStartDrag();
-        }
-
-        public void onClickImageButtonEditTexture(int position) {
-            TextureItemModel model = textureItems.get(position);
-            getView().onShowEditTextureView(model.textureId);
-        }
-
-        public void onClickImageButtonDeleteTexture(int position) {
-            itemView.onShowDeleteTextureConfirmationDialog();
-        }
-
-        public void onDelete(int position) {
-            TextureItemModel model = textureItems.get(position);
-
-            Disposable disposable = deleteUserTextureUseCase
-                    .execute(model.textureId)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(() -> {
-                        textureItems.remove(position);
-                        getView().onTextureItemsUpdated();
-                        getView().onSnackbar(R.string.snackbar_done);
-                    }, e -> {
-                        getLog().e(String.format("Failed to delete the user texture: textureId = %s", model.textureId),
-                                   e);
-                    });
-            manageDisposable(disposable);
-        }
-
-        void setSelected(int selectedPosition, boolean selected) {
-            itemView.onSelect(selectedPosition, selected);
-        }
-    }
-
-    private final class SingleTextureSelection {
-
-        int selectedPosition = -1;
-
-        Set<TextureItemPresenter> itemPresenters = new HashSet<>();
-
-        void addItemPresenter(TextureItemPresenter itemPresenter) {
-            itemPresenters.add(itemPresenter);
-        }
-
-        void setSelectedPosition(int selectedPosition) {
-            if (0 <= this.selectedPosition) {
-                // Deselect the previous selection.
-                for (TextureItemPresenter itemPresenter : itemPresenters) {
-                    itemPresenter.setSelected(this.selectedPosition, false);
-                }
-            }
-
-            if (this.selectedPosition == selectedPosition) {
-                // Deselect only.
-                this.selectedPosition = -1;
-            } else if (0 <= selectedPosition) {
-                // Select the new position.
-                this.selectedPosition = selectedPosition;
-                for (TextureItemPresenter itemPresenter : itemPresenters) {
-                    itemPresenter.setSelected(this.selectedPosition, true);
-                }
-            }
-        }
     }
 
     private enum LocalizationState {

@@ -11,7 +11,6 @@ import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneBuildPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureListAdapter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -23,12 +22,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -47,7 +43,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.OnTouch;
 
 public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuildView, UserSceneBuildPresenter>
@@ -66,15 +61,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     @BindView(R.id.texture_view)
     TextureView textureView;
-
-    @BindView(R.id.recycler_view)
-    RecyclerView recyclerView;
-
-    @BindView(R.id.view_group_model_pane)
-    ViewGroup viewGroupModelPane;
-
-    @BindView(R.id.fab_toggle_model_pane)
-    FloatingActionButton fabToggleModelPane;
 
     @BindView(R.id.view_group_object_menu)
     ViewGroup viewGroupObjectMenu;
@@ -188,13 +174,10 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
         ButterKnife.bind(this, view);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        recyclerView.setAdapter(new TextureListAdapter(presenter));
-
         textureView.setFrameRate(60d);
         textureView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
-        textureView.setOnDragListener((v, dragEvent) -> {
-            switch (dragEvent.getAction()) {
+        textureView.setOnDragListener((v, event) -> {
+            switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
                     // returns true to accept a drag event.
                     return true;
@@ -205,7 +188,7 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
                 case DragEvent.ACTION_DRAG_EXITED:
                     return true;
                 case DragEvent.ACTION_DROP:
-                    presenter.onDropModel();
+                    presenter.onDropModel(event.getClipData());
                     return true;
                 case DragEvent.ACTION_DRAG_ENDED:
                     return true;
@@ -214,6 +197,13 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
             return false;
         });
         textureView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+        UserActorImageListFragment userActorImageListFragment = UserActorImageListFragment.newInstance();
+        getChildFragmentManager().beginTransaction()
+                                 .add(R.id.user_actor_image_list_container,
+                                      userActorImageListFragment,
+                                      UserActorImageListFragment.class.getName())
+                                 .commit();
 
         setHasOptionsMenu(true);
     }
@@ -245,32 +235,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public void setSurfaceRenderer(ISurfaceRenderer renderer) {
         textureView.setSurfaceRenderer(renderer);
-    }
-
-    @Override
-    public void onUpdateTextureModelPaneVisible(boolean visible) {
-        if (visible) {
-            viewGroupModelPane.setVisibility(View.VISIBLE);
-            fabToggleModelPane.setImageResource(R.drawable.ic_expand_more_black_24dp);
-        } else {
-            viewGroupModelPane.setVisibility(View.GONE);
-            fabToggleModelPane.setImageResource(R.drawable.ic_expand_less_black_24dp);
-        }
-    }
-
-    @Override
-    public void onTextureItemInserted(int position) {
-        recyclerView.getAdapter().notifyItemInserted(position);
-    }
-
-    @Override
-    public void onTextureItemsUpdated() {
-        recyclerView.getAdapter().notifyDataSetChanged();
-    }
-
-    @Override
-    public void onShowEditTextureView(@Nullable String id) {
-        interactionListener.onShowEditTextureView(id);
     }
 
     @Override
@@ -340,16 +304,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @OnClick(R.id.image_button_add_model)
-    void onClickImageButtonAddModel() {
-        presenter.onClickImageButtonAddModel();
-    }
-
-    @OnClick(R.id.fab_toggle_model_pane)
-    void onClickFabToggleModelPane() {
-        presenter.onClickFabToggleModelPane();
     }
 
     //
@@ -442,6 +396,5 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     public interface InteractionListener {
 
-        void onShowEditTextureView(@Nullable String id);
     }
 }

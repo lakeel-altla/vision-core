@@ -4,6 +4,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserActorImageFileRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserActorImageRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionSceneRepository;
@@ -93,5 +95,17 @@ public final class FirebaseRepositoryModule {
     @Provides
     public UserAreaDescriptionSceneRepository provideUserAreaDescriptionSceneRepository(FirebaseDatabase database) {
         return new UserAreaDescriptionSceneRepository(database);
+    }
+
+    @ActivityScope
+    @Provides
+    UserActorImageRepository provideUserActorImageRepository(FirebaseDatabase database) {
+        return new UserActorImageRepository(database);
+    }
+
+    @ActivityScope
+    @Provides
+    UserActorImageFileRepository provideUserActorImageFileRepository(FirebaseStorage storage) {
+        return new UserActorImageFileRepository(storage);
     }
 }

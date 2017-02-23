@@ -5,13 +5,13 @@ import com.lakeel.altla.vision.builder.presentation.di.module.AndroidRepositoryM
 import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseRepositoryModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorImageListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
 
@@ -39,9 +39,9 @@ public interface ActivityComponent {
 
     void inject(UserAreaDescriptionListInAreaFragment fragment);
 
+    void inject(UserSceneListInAreaFragmentInArea fragment);
+
     void inject(UserSceneBuildFragment fragment);
 
-    void inject(RegisterTextureFragment fragment);
-
-    void inject(UserSceneListInAreaFragmentInArea fragment);
+    void inject(UserActorImageListFragment fragment);
 }

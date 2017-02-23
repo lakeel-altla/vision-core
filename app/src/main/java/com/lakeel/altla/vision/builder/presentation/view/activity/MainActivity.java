@@ -14,7 +14,6 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
@@ -29,7 +28,6 @@ import com.squareup.picasso.Picasso;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -278,11 +276,6 @@ public final class MainActivity extends AppCompatActivity
         if (fragment != null) {
             fragment.onUserSceneSelected(sceneId);
         }
-    }
-
-    @Override
-    public void onShowEditTextureView(@Nullable String textureId) {
-        replaceFragmentAndAddToBackStack(RegisterTextureFragment.newInstance(textureId));
     }
 
     private void updateActionBarHome() {

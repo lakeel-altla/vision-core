@@ -112,52 +112,10 @@
 
     </RelativeLayout>
 
-    <RelativeLayout android:layout_gravity="bottom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-        <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_toggle_model_pane"
-                android:tint="@color/tint_fab_icon"
-                android:layout_alignParentEnd="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/fab_margin"
-                android:src="@drawable/ic_expand_less_black_24dp"/>
-
-        <LinearLayout
-                android:id="@+id/view_group_model_pane"
-                android:orientation="horizontal"
-                android:background="@color/background_model_pane"
-                android:layout_below="@id/fab_toggle_model_pane"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/model_pane_height">
-
-            <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                <ImageButton android:id="@+id/image_button_add_model"
-                             android:src="@drawable/ic_add_black_24dp"
-                             android:background="?android:attr/actionBarItemBackground"
-                             android:tint="@color/tint_image_button_texture_pane"
-                             android:layout_marginStart="@dimen/content_horizontal_margin"
-                             android:layout_marginEnd="@dimen/content_horizontal_margin"
-                             android:layout_marginTop="@dimen/content_vertical_margin"
-                             android:layout_width="@dimen/touch_target_width"
-                             android:layout_height="@dimen/touch_target_height"/>
-
-            </LinearLayout>
-
-            <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-    </RelativeLayout>
+    <FrameLayout android:id="@+id/user_actor_image_list_container"
+                 android:layout_gravity="bottom"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"/>
 
     <RelativeLayout android:id="@+id/view_group_debug_console"
                     android:background="@color/debug_console_background"
