@@ -13,7 +13,7 @@ import android.support.annotation.StringRes;
 /**
  * Defines the main view.
  */
-public interface UserSceneEditView {
+public interface UserSceneBuildView {
 
     void setTangoUxLayout(TangoUx tangoUx);
 

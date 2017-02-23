@@ -12,14 +12,14 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
+import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneEditFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
@@ -61,7 +61,7 @@ public final class MainActivity extends AppCompatActivity
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneListInAreaFragmentInArea.InteractionListener,
-                   UserSceneEditFragment.InteractionListener,
+                   UserSceneBuildFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -244,10 +244,10 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserSceneEditView(@NonNull SceneEditModel sceneEditModel) {
+    public void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel) {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(UserSceneEditFragment.newInstance(sceneEditModel));
+        replaceFragment(UserSceneBuildFragment.newInstance(sceneBuildModel));
     }
 
     @Override

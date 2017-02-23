@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.AndroidRepositoryM
 import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseRepositoryModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneEditFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.RegisterTextureFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
@@ -39,7 +39,7 @@ public interface ActivityComponent {
 
     void inject(UserAreaDescriptionListInAreaFragment fragment);
 
-    void inject(UserSceneEditFragment fragment);
+    void inject(UserSceneBuildFragment fragment);
 
     void inject(RegisterTextureFragment fragment);
 

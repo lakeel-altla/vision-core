@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
+import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.ProjectPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
@@ -144,8 +144,8 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     }
 
     @Override
-    public void onShowUserSceneEditView(@NonNull SceneEditModel sceneEditModel) {
-        interactionListener.onShowUserSceneEditView(sceneEditModel);
+    public void onShowUserSceneEditView(@NonNull SceneBuildModel sceneBuildModel) {
+        interactionListener.onShowUserSceneBuildView(sceneBuildModel);
     }
 
     @OnClick(R.id.image_button_select_area)
@@ -194,6 +194,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
 
         void onShowUserSceneListInAreaView(@NonNull String areaId);
 
-        void onShowUserSceneEditView(@NonNull SceneEditModel sceneEditModel);
+        void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel);
     }
 }

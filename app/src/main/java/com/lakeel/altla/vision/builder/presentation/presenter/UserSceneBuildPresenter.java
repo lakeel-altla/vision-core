@@ -14,10 +14,10 @@ import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
-import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
+import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.model.TextureItemModel;
 import com.lakeel.altla.vision.builder.presentation.view.TextureItemView;
-import com.lakeel.altla.vision.builder.presentation.view.UserSceneEditView;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserTextureUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAllUserTexturesUseCase;
@@ -44,9 +44,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Defines the presenter for {@link UserSceneEditView}.
+ * Defines the presenter for {@link UserSceneBuildView}.
  */
-public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditView>
+public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildView>
         implements OnPoseAvailableListener, OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
 
     private static final int SECS_TO_MILLISECS = 1000;
@@ -127,15 +127,15 @@ public final class UserSceneEditPresenter extends BasePresenter<UserSceneEditVie
     });
 
     @Inject
-    public UserSceneEditPresenter() {
+    public UserSceneBuildPresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull SceneEditModel sceneEditModel) {
+    public static Bundle createArguments(@NonNull SceneBuildModel sceneBuildModel) {
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_AREA_ID, sceneEditModel.areaId);
-        bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneEditModel.areaDescriptionId);
-        bundle.putString(ARG_SCENE_ID, sceneEditModel.sceneId);
+        bundle.putString(ARG_AREA_ID, sceneBuildModel.areaId);
+        bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneBuildModel.areaDescriptionId);
+        bundle.putString(ARG_SCENE_ID, sceneBuildModel.sceneId);
         return bundle;
     }
 

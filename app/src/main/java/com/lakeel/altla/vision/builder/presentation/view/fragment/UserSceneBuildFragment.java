@@ -8,9 +8,9 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
-import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneEditPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserSceneEditView;
+import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneBuildPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.TextureListAdapter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -50,13 +50,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class UserSceneEditFragment extends AbstractFragment<UserSceneEditView, UserSceneEditPresenter>
-        implements UserSceneEditView {
+public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuildView, UserSceneBuildPresenter>
+        implements UserSceneBuildView {
 
     private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
 
     @Inject
-    UserSceneEditPresenter presenter;
+    UserSceneBuildPresenter presenter;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -122,20 +122,20 @@ public final class UserSceneEditFragment extends AbstractFragment<UserSceneEditV
     private InteractionListener interactionListener;
 
     @NonNull
-    public static Fragment newInstance(@NonNull SceneEditModel sceneEditModel) {
-        UserSceneEditFragment fragment = new UserSceneEditFragment();
-        Bundle bundle = UserSceneEditPresenter.createArguments(sceneEditModel);
+    public static Fragment newInstance(@NonNull SceneBuildModel sceneBuildModel) {
+        UserSceneBuildFragment fragment = new UserSceneBuildFragment();
+        Bundle bundle = UserSceneBuildPresenter.createArguments(sceneBuildModel);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserSceneEditPresenter getPresenter() {
+    protected UserSceneBuildPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserSceneEditView getViewInterface() {
+    protected UserSceneBuildView getViewInterface() {
         return this;
     }
 
@@ -179,7 +179,7 @@ public final class UserSceneEditFragment extends AbstractFragment<UserSceneEditV
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_scene_edit, container, false);
+        return inflater.inflate(R.layout.fragment_user_scene_build, container, false);
     }
 
     @Override

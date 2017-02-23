@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.vision.builder.presentation.model.SceneEditModel;
+import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
@@ -107,8 +107,8 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onClickButtonEdit() {
-        SceneEditModel sceneEditModel = new SceneEditModel(model.areaId, model.areaDescriptionId, model.sceneId);
-        getView().onShowUserSceneEditView(sceneEditModel);
+        SceneBuildModel sceneBuildModel = new SceneBuildModel(model.areaId, model.areaDescriptionId, model.sceneId);
+        getView().onShowUserSceneEditView(sceneBuildModel);
     }
 
     public void onUserAreaSelected(@NonNull String areaId) {
