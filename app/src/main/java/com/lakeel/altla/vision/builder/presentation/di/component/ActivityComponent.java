@@ -5,6 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.AndroidRepositoryM
 import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseRepositoryModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.DebugConsoleFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
@@ -44,4 +45,6 @@ public interface ActivityComponent {
     void inject(UserSceneBuildFragment fragment);
 
     void inject(UserActorImageListFragment fragment);
+
+    void inject(DebugConsoleFragment fragment);
 }

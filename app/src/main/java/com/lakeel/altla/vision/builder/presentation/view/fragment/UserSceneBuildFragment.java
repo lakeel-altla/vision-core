@@ -7,7 +7,6 @@ import com.google.atap.tango.ux.TangoUxLayout;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneBuildPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
@@ -30,13 +29,11 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
-
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -47,8 +44,6 @@ import butterknife.OnTouch;
 
 public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuildView, UserSceneBuildPresenter>
         implements UserSceneBuildView {
-
-    private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
 
     @Inject
     UserSceneBuildPresenter presenter;
@@ -87,21 +82,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     @BindView(R.id.button_scale_object)
     Button buttonScaleObject;
-
-    @BindView(R.id.view_group_debug_console)
-    ViewGroup viewGroupDebugConsole;
-
-    @BindView(R.id.text_view_localized_value)
-    TextView textViewLocalizedValue;
-
-    @BindView(R.id.text_view_ad2ss_translation)
-    TextView textViewAd2SsTranslation;
-
-    @BindView(R.id.text_view_ad2d_translation)
-    TextView textViewAd2DTranslation;
-
-    @BindView(R.id.text_view_ss2d_translation)
-    TextView textViewSs2DTranslation;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -210,7 +190,18 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_scene_edit, menu);
+        inflater.inflate(R.menu.fragment_user_scene_build, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_debug:
+                presenter.onToggleDebug();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -235,26 +226,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public void setSurfaceRenderer(ISurfaceRenderer renderer) {
         textureView.setSurfaceRenderer(renderer);
-    }
-
-    @Override
-    public void onDebugModelUpdated(MainDebugModel model) {
-        textViewLocalizedValue.setText(Boolean.toString(model.localized));
-        textViewAd2SsTranslation.setText(String.format(Locale.getDefault(),
-                                                       FORMAT_TRANSLATION,
-                                                       model.ad2SsTranslation.x,
-                                                       model.ad2SsTranslation.y,
-                                                       model.ad2SsTranslation.z));
-        textViewAd2DTranslation.setText(String.format(Locale.getDefault(),
-                                                      FORMAT_TRANSLATION,
-                                                      model.ad2DTranslation.x,
-                                                      model.ad2DTranslation.y,
-                                                      model.ad2DTranslation.z));
-        textViewSs2DTranslation.setText(String.format(Locale.getDefault(),
-                                                      FORMAT_TRANSLATION,
-                                                      model.ss2DTranslation.x,
-                                                      model.ss2DTranslation.y,
-                                                      model.ss2DTranslation.z));
     }
 
     @Override
@@ -299,6 +270,26 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public void onUpdateScaleObjectSelected(boolean selected) {
         buttonScaleObject.setPressed(selected);
+    }
+
+    @Override
+    public void onUpdateDebugConsoleVisible(boolean visible) {
+        final String tag = DebugConsoleFragment.class.getName();
+
+        DebugConsoleFragment fragment = (DebugConsoleFragment) getChildFragmentManager().findFragmentByTag(tag);
+
+        if (visible) {
+            if (fragment == null) {
+                fragment = DebugConsoleFragment.newInstance();
+                getChildFragmentManager().beginTransaction()
+                                         .add(R.id.debug_console_container, fragment, tag)
+                                         .commit();
+            }
+        } else {
+            getChildFragmentManager().beginTransaction()
+                                     .remove(fragment)
+                                     .commit();
+        }
     }
 
     @Override

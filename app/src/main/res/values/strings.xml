@@ -51,5 +51,6 @@
     <string name="title_user_area_description_list_in_area">Select a User Area Description</string>
 
     <string name="action_create">Create</string>
+    <string name="action_debug">Debug ON/OFF</string>
 
 </resources>

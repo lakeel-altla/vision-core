@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.view;
 import com.google.atap.tango.ux.TangoUx;
 
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.builder.presentation.model.MainDebugModel;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 
@@ -34,7 +33,7 @@ public interface UserSceneBuildView {
 
     void onUpdateScaleObjectSelected(boolean selected);
 
-    void onDebugModelUpdated(MainDebugModel model);
+    void onUpdateDebugConsoleVisible(boolean visible);
 
     void onSnackbar(@StringRes int resId);
 }
