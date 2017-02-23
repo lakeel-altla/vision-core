@@ -14,9 +14,6 @@ import com.lakeel.altla.vision.data.repository.firebase.UserConnectionRepository
 import com.lakeel.altla.vision.data.repository.firebase.UserDeviceRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserProfileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserSceneRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserTextureFileMetadataRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserTextureFileRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserTextureRepository;
 import com.lakeel.altla.vision.di.ActivityScope;
 
 import dagger.Module;
@@ -47,24 +44,6 @@ public final class FirebaseRepositoryModule {
     @Provides
     public UserDeviceRepository provideUserDeviceRepository(FirebaseDatabase database) {
         return new UserDeviceRepository(database);
-    }
-
-    @ActivityScope
-    @Provides
-    public UserTextureRepository provideUserTextureRepository(FirebaseDatabase database) {
-        return new UserTextureRepository(database);
-    }
-
-    @ActivityScope
-    @Provides
-    public UserTextureFileRepository provideUserTextureFileRepository(FirebaseStorage storage) {
-        return new UserTextureFileRepository(storage);
-    }
-
-    @ActivityScope
-    @Provides
-    public UserTextureFileMetadataRepository provideUserTextureFileMetadataRepository(FirebaseStorage storage) {
-        return new UserTextureFileMetadataRepository(storage);
     }
 
     @ActivityScope
