@@ -178,11 +178,11 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
         });
         textureView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
-        UserActorImageListFragment userActorImageListFragment = UserActorImageListFragment.newInstance();
+        UserAssetImageListFragment userActorImageListFragment = UserAssetImageListFragment.newInstance();
         getChildFragmentManager().beginTransaction()
                                  .add(R.id.user_actor_image_list_container,
                                       userActorImageListFragment,
-                                      UserActorImageListFragment.class.getName())
+                                      UserAssetImageListFragment.class.getName())
                                  .commit();
 
         setHasOptionsMenu(true);

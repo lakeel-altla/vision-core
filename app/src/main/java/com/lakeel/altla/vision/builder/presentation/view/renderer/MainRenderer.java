@@ -10,7 +10,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.BitmapPlaneFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -48,7 +48,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private final Queue<UserActorImageModel> userActorImageModelQueue = new LinkedList<>();
+    private final Queue<UserAssetImageModel> userAssetImageModelQueue = new LinkedList<>();
 
     private final Queue<UserActorImageTarget> userActorImageTargetQueue = new LinkedList<>();
 
@@ -100,19 +100,19 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     @Override
     protected void onRender(long ellapsedRealtime, double deltaTime) {
         // Load bitmaps.
-        synchronized (userActorImageModelQueue) {
+        synchronized (userAssetImageModelQueue) {
             while (true) {
-                UserActorImageModel userActorImageModel = userActorImageModelQueue.poll();
-                if (userActorImageModel == null) {
+                UserAssetImageModel userAssetImageModel = userAssetImageModelQueue.poll();
+                if (userAssetImageModel == null) {
                     break;
                 }
 
-                UserActorImageTarget target = new UserActorImageTarget(userActorImageModel);
+                UserActorImageTarget target = new UserActorImageTarget(userAssetImageModel);
 
                 // Picasso must be called on the main thread.
                 mainHandler.post(() -> {
                     Picasso.with(getContext())
-                           .load(userActorImageModel.uri)
+                           .load(userAssetImageModel.uri)
                            .into(target);
                 });
             }
@@ -140,7 +140,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                 getCurrentScene().addChild(plane);
                 picker.registerObject(plane);
 
-                raiseOnObjectAdded(target.userActorImageModel, plane.getPosition(), plane.getOrientation());
+                raiseOnObjectAdded(target.userAssetImageModel, plane.getPosition(), plane.getOrientation());
             }
         }
 
@@ -221,10 +221,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         this.onObjectAddedListener = onObjectAddedListener;
     }
 
-    private void raiseOnObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+    private void raiseOnObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
                                     @NonNull Quaternion orientation) {
         if (onObjectAddedListener != null) {
-            mainHandler.post(() -> onObjectAddedListener.onObjectAdded(userActorImageModel, position, orientation));
+            mainHandler.post(() -> onObjectAddedListener.onObjectAdded(userAssetImageModel, position, orientation));
         }
     }
 
@@ -240,9 +240,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
     }
 
-    public void addUserActorImage(@NonNull UserActorImageModel userActorImageModel) {
-        synchronized (userActorImageModelQueue) {
-            userActorImageModelQueue.add(userActorImageModel);
+    public void addUserActorImage(@NonNull UserAssetImageModel userAssetImageModel) {
+        synchronized (userAssetImageModelQueue) {
+            userAssetImageModelQueue.add(userAssetImageModel);
         }
     }
 
@@ -431,7 +431,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     public interface OnObjectAddedListener {
 
-        void onObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+        void onObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
                            @NonNull Quaternion orientation);
     }
 
@@ -442,12 +442,12 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final class UserActorImageTarget implements Target {
 
-        private UserActorImageModel userActorImageModel;
+        private UserAssetImageModel userAssetImageModel;
 
         private Bitmap bitmap;
 
-        UserActorImageTarget(@NonNull UserActorImageModel userActorImageModel) {
-            this.userActorImageModel = userActorImageModel;
+        UserActorImageTarget(@NonNull UserAssetImageModel userAssetImageModel) {
+            this.userAssetImageModel = userAssetImageModel;
         }
 
         @Override

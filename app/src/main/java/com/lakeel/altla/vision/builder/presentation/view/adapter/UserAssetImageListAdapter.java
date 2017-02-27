@@ -1,9 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserActorImageListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorImageItemView;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
+import com.lakeel.altla.vision.builder.presentation.presenter.UserAssetImageListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageItemView;
 import com.lakeel.altla.vision.builder.presentation.view.helper.ThumbnailLoader;
 
 import android.content.ClipData;
@@ -22,17 +22,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnLongClick;
 
-public final class UserActorImageListAdapter extends RecyclerView.Adapter<UserActorImageListAdapter.ViewHolder> {
+public final class UserAssetImageListAdapter extends RecyclerView.Adapter<UserAssetImageListAdapter.ViewHolder> {
 
     private static final String INTENT_LABEL = "userActorImageModel";
 
-    private final UserActorImageListPresenter presenter;
+    private final UserAssetImageListPresenter presenter;
 
     private final ThumbnailLoader thumbnailLoader;
 
     private LayoutInflater inflater;
 
-    public UserActorImageListAdapter(@NonNull UserActorImageListPresenter presenter, @NonNull Context context) {
+    public UserAssetImageListAdapter(@NonNull UserAssetImageListPresenter presenter, @NonNull Context context) {
         this.presenter = presenter;
         thumbnailLoader = new ThumbnailLoader(context);
     }
@@ -42,7 +42,7 @@ public final class UserActorImageListAdapter extends RecyclerView.Adapter<UserAc
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
-        View itemView = inflater.inflate(R.layout.item_user_actor_image, parent, false);
+        View itemView = inflater.inflate(R.layout.item_user_asset_image, parent, false);
         return new ViewHolder(itemView);
     }
 
@@ -56,7 +56,7 @@ public final class UserActorImageListAdapter extends RecyclerView.Adapter<UserAc
         return presenter.getItemCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements UserActorImageItemView {
+    class ViewHolder extends RecyclerView.ViewHolder implements UserAssetImageItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;
@@ -64,7 +64,7 @@ public final class UserActorImageListAdapter extends RecyclerView.Adapter<UserAc
         @BindView(R.id.image_view_thumbnail)
         ImageView imageViewThumbnail;
 
-        private UserActorImageListPresenter.ItemPresenter itemPresenter;
+        private UserAssetImageListPresenter.ItemPresenter itemPresenter;
 
         private final View.DragShadowBuilder dragShadowBuilder;
 
@@ -109,7 +109,7 @@ public final class UserActorImageListAdapter extends RecyclerView.Adapter<UserAc
         }
 
         @Override
-        public void onStartDrag(@NonNull UserActorImageModel model) {
+        public void onStartDrag(@NonNull UserAssetImageModel model) {
             ClipData clipData = ClipData.newIntent(INTENT_LABEL, model.createIntent());
             imageViewThumbnail.startDrag(clipData, dragShadowBuilder, null, 0);
         }

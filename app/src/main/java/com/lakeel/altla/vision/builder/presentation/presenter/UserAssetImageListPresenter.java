@@ -1,13 +1,13 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorImageItemView;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorImageListView;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
+import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageItemView;
+import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageListView;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
-import com.lakeel.altla.vision.domain.model.UserActorImage;
-import com.lakeel.altla.vision.domain.usecase.GetUserActorImageFileUriUseCase;
-import com.lakeel.altla.vision.domain.usecase.ObserveAllUserActorImageUseCase;
+import com.lakeel.altla.vision.domain.model.UserAssetImage;
+import com.lakeel.altla.vision.domain.usecase.GetUserAssetImageFileUriUseCase;
+import com.lakeel.altla.vision.domain.usecase.ObserveAllUserAssetImageUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
@@ -18,21 +18,21 @@ import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public final class UserActorImageListPresenter extends BasePresenter<UserActorImageListView>
+public final class UserAssetImageListPresenter extends BasePresenter<UserAssetImageListView>
         implements DataList.OnItemListener {
 
     private final DataList<ItemModel> items = new DataList<>(this);
 
     @Inject
-    ObserveAllUserActorImageUseCase observeAllUserActorImageUseCase;
+    ObserveAllUserAssetImageUseCase observeAllUserAssetImageUseCase;
 
     @Inject
-    GetUserActorImageFileUriUseCase getUserActorImageFileUriUseCase;
+    GetUserAssetImageFileUriUseCase getUserAssetImageFileUriUseCase;
 
-    private Disposable getUserActorImageFileUriUseCaseDisposable;
+    private Disposable getUserAssetImageFileUriUseCaseDisposable;
 
     @Inject
-    public UserActorImageListPresenter() {
+    public UserAssetImageListPresenter() {
     }
 
     @Override
@@ -50,12 +50,12 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
 
         items.clear();
 
-        Disposable disposable = observeAllUserActorImageUseCase
+        Disposable disposable = observeAllUserAssetImageUseCase
                 .execute()
                 .map(this::map)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(model -> {
-                    items.change(model.type, model.item, model.previousAreaId);
+                    items.change(model.type, model.item, model.previousId);
                 }, e -> {
                     getLog().e("Failed.", e);
                     getView().onSnackbar(R.string.snackbar_failed);
@@ -117,28 +117,28 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
     }
 
     @NonNull
-    private EventModel map(@NonNull DataListEvent<UserActorImage> event) {
+    private EventModel map(@NonNull DataListEvent<UserAssetImage> event) {
         EventModel model = new EventModel();
         model.type = event.getType();
         model.item = map(event.getData());
-        model.previousAreaId = event.getPreviousChildName();
+        model.previousId = event.getPreviousChildName();
         return model;
     }
 
     @NonNull
-    private ItemModel map(@NonNull UserActorImage userActorImage) {
+    private ItemModel map(@NonNull UserAssetImage userAssetImage) {
         ItemModel model = new ItemModel();
-        model.userId = userActorImage.userId;
-        model.imageId = userActorImage.imageId;
-        model.name = userActorImage.name;
+        model.userId = userAssetImage.userId;
+        model.assetId = userAssetImage.assetId;
+        model.name = userAssetImage.name;
         return model;
     }
 
     public final class ItemPresenter {
 
-        private UserActorImageItemView itemView;
+        private UserAssetImageItemView itemView;
 
-        public void onCreateItemView(@NonNull UserActorImageItemView itemView) {
+        public void onCreateItemView(@NonNull UserAssetImageItemView itemView) {
             this.itemView = itemView;
         }
 
@@ -146,8 +146,8 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
             ItemModel model = items.get(position);
             itemView.onUpdateName(model.name);
 
-            Disposable disposable = getUserActorImageFileUriUseCase
-                    .execute(model.imageId)
+            Disposable disposable = getUserAssetImageFileUriUseCase
+                    .execute(model.assetId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(uri -> {
                         itemView.onUpdateThumbnail(uri);
@@ -162,15 +162,15 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
 
             ItemModel model = items.get(position);
 
-            getUserActorImageFileUriUseCaseDisposable = getUserActorImageFileUriUseCase
-                    .execute(model.imageId)
+            getUserAssetImageFileUriUseCaseDisposable = getUserAssetImageFileUriUseCase
+                    .execute(model.assetId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(uri -> {
-                        UserActorImageModel userActorImageModel = new UserActorImageModel();
-                        userActorImageModel.userId = model.userId;
-                        userActorImageModel.imageId = model.imageId;
-                        userActorImageModel.uri = uri;
-                        itemView.onStartDrag(userActorImageModel);
+                        UserAssetImageModel userAssetImageModel = new UserAssetImageModel();
+                        userAssetImageModel.userId = model.userId;
+                        userAssetImageModel.assetId = model.assetId;
+                        userAssetImageModel.uri = uri;
+                        itemView.onStartDrag(userAssetImageModel);
                     }, e -> {
                         getLog().e("Failed.", e);
                     });
@@ -178,9 +178,9 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
     }
 
     private void cancelStartDrag() {
-        if (getUserActorImageFileUriUseCaseDisposable != null) {
-            getUserActorImageFileUriUseCaseDisposable.dispose();
-            getUserActorImageFileUriUseCaseDisposable = null;
+        if (getUserAssetImageFileUriUseCaseDisposable != null) {
+            getUserAssetImageFileUriUseCaseDisposable.dispose();
+            getUserAssetImageFileUriUseCaseDisposable = null;
         }
     }
 
@@ -188,7 +188,7 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
 
         DataListEvent.Type type;
 
-        String previousAreaId;
+        String previousId;
 
         ItemModel item;
     }
@@ -197,13 +197,13 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
 
         String userId;
 
-        String imageId;
+        String assetId;
 
         String name;
 
         @Override
         public String getId() {
-            return imageId;
+            return assetId;
         }
     }
 }

@@ -4,12 +4,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserActorImageFileRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserActorImageRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionSceneRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAssetImageFileRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAssetImageRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserConnectionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserDeviceRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserProfileRepository;
@@ -78,13 +78,13 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    UserActorImageRepository provideUserActorImageRepository(FirebaseDatabase database) {
-        return new UserActorImageRepository(database);
+    UserAssetImageRepository provideUserAssetImageRepository(FirebaseDatabase database) {
+        return new UserAssetImageRepository(database);
     }
 
     @ActivityScope
     @Provides
-    UserActorImageFileRepository provideUserActorImageFileRepository(FirebaseStorage storage) {
-        return new UserActorImageFileRepository(storage);
+    UserAssetImageFileRepository provideUserAssetImageFileRepository(FirebaseStorage storage) {
+        return new UserAssetImageFileRepository(storage);
     }
 }

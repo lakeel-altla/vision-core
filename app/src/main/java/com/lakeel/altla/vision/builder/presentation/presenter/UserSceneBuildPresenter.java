@@ -11,7 +11,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -160,9 +160,9 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     @Override
-    public void onObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+    public void onObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
                               @NonNull Quaternion orientation) {
-        getLog().v("onObjectAdded: imageId = %s, position = %s, orientation = %s", userActorImageModel.imageId,
+        getLog().v("onObjectAdded: imageId = %s, position = %s, orientation = %s", userAssetImageModel.assetId,
                    position, orientation);
     }
 
@@ -227,10 +227,10 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         Intent intent = clipData.getItemAt(0).getIntent();
         if (intent == null) throw new IllegalStateException("No intent.");
 
-        UserActorImageModel userActorImageModel = UserActorImageModel.parseIntent(intent);
-        if (userActorImageModel == null) throw new IllegalStateException("No UserActorImageModel.");
+        UserAssetImageModel userAssetImageModel = UserAssetImageModel.parseIntent(intent);
+        if (userAssetImageModel == null) throw new IllegalStateException("No UserAssetImageModel.");
 
-        renderer.addUserActorImage(userActorImageModel);
+        renderer.addUserActorImage(userAssetImageModel);
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
