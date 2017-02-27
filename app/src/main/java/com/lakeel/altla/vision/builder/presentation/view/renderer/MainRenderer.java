@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -47,9 +48,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private final UserActorImageTarget userActorImageTarget = new UserActorImageTarget();
+    private final Queue<UserActorImageModel> userActorImageModelQueue = new LinkedList<>();
 
-    private final Queue<Bitmap> planeBitmapQueue = new LinkedList<>();
+    private final Queue<UserActorImageTarget> userActorImageTargetQueue = new LinkedList<>();
 
     private final BitmapPlaneFactory bitmapPlaneFactory = new BitmapPlaneFactory();
 
@@ -75,6 +76,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private float scaleObjectSize;
 
+    private OnObjectAddedListener onObjectAddedListener;
+
     public MainRenderer(Context context) {
         super(context);
     }
@@ -96,7 +99,27 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     protected void onRender(long ellapsedRealtime, double deltaTime) {
-        synchronized (planeBitmapQueue) {
+        // Load bitmaps.
+        synchronized (userActorImageModelQueue) {
+            while (true) {
+                UserActorImageModel userActorImageModel = userActorImageModelQueue.poll();
+                if (userActorImageModel == null) {
+                    break;
+                }
+
+                UserActorImageTarget target = new UserActorImageTarget(userActorImageModel);
+
+                // Picasso must be called on the main thread.
+                mainHandler.post(() -> {
+                    Picasso.with(getContext())
+                           .load(userActorImageModel.uri)
+                           .into(target);
+                });
+            }
+        }
+
+        // Add models.
+        synchronized (userActorImageTargetQueue) {
             while (true) {
                 // NOTE:
                 //
@@ -105,16 +128,19 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                 // So we queue a data indicating a primitive in a non-OpenGL,
                 // Renderer#onRender invoked in OpenGL thread instantiates an actual primitive.
                 //
-                Bitmap bitmap = planeBitmapQueue.poll();
-                if (bitmap == null) {
+
+                UserActorImageTarget target = userActorImageTargetQueue.poll();
+                if (target == null) {
                     break;
                 }
 
-                Plane plane = bitmapPlaneFactory.create(bitmap);
+                Plane plane = bitmapPlaneFactory.create(target.bitmap);
                 position(plane, getCurrentCamera(), getCurrentCameraForward());
 
                 getCurrentScene().addChild(plane);
                 picker.registerObject(plane);
+
+                raiseOnObjectAdded(target.userActorImageModel, plane.getPosition(), plane.getOrientation());
             }
         }
 
@@ -167,6 +193,96 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
 
         super.onRender(ellapsedRealtime, deltaTime);
+    }
+
+    @Override
+    public void onObjectPicked(@NonNull Object3D object) {
+        LOG.d("onObjectPicked: %s", object.getName());
+
+        if (pickedObject == object) {
+            // Unpick.
+            changePickedObject(null);
+        } else {
+            // Pick.
+            changePickedObject(object);
+        }
+    }
+
+    @Override
+    public void onNoObjectPicked() {
+        LOG.d("onNoObjectPicked");
+
+        // Unpick
+        changePickedObject(null);
+    }
+
+    // Non-thread-safe.
+    public void setOnObjectAddedListener(@Nullable OnObjectAddedListener onObjectAddedListener) {
+        this.onObjectAddedListener = onObjectAddedListener;
+    }
+
+    private void raiseOnObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+                                    @NonNull Quaternion orientation) {
+        if (onObjectAddedListener != null) {
+            mainHandler.post(() -> onObjectAddedListener.onObjectAdded(userActorImageModel, position, orientation));
+        }
+    }
+
+    // Non-thread-safe.
+    public void setOnPickedObjectChangedListener(
+            @Nullable OnPickedObjectChangedListener onPickedObjectChangedListener) {
+        this.onPickedObjectChangedListener = onPickedObjectChangedListener;
+    }
+
+    private void raiseOnPickedObjectChanged(String oldName, String newName) {
+        if (onPickedObjectChangedListener != null) {
+            mainHandler.post(() -> onPickedObjectChangedListener.onPickedObjectChanged(oldName, newName));
+        }
+    }
+
+    public void addUserActorImage(@NonNull UserActorImageModel userActorImageModel) {
+        synchronized (userActorImageModelQueue) {
+            userActorImageModelQueue.add(userActorImageModel);
+        }
+    }
+
+    public void tryPickObject(float x, float y) {
+        LOG.d("tryPickObject: x = %f, y = %f", x, y);
+        picker.getObjectAt(x, y);
+    }
+
+    public void setObjectEditMode(ObjectEditMode mode) {
+        LOG.d("setObjectEditMode: mode = %s", mode);
+        objectEditMode = mode;
+    }
+
+    public void setTranslateObjectAxis(Axis axis) {
+        LOG.d("setTranslateObjectAxis: axis = %s", axis);
+        synchronized (modeLock) {
+            translateObjectAxis = axis;
+        }
+    }
+
+    public void setTranslateObjectDistance(float distance) {
+        LOG.d("setTranslateObjectDistance: distance = %f", distance);
+        translateObjectDistance = distance;
+    }
+
+    public void setRotateObjectAxis(Axis axis) {
+        LOG.d("setRotateObjectAxis: axis = %s", axis);
+        synchronized (modeLock) {
+            rotateObjectAxis = axis;
+        }
+    }
+
+    public void setRotateObjectAngle(float angle) {
+        LOG.d("setRotateObjectAngle: angle = %f", angle);
+        rotateObjectAngle = angle;
+    }
+
+    public void setScaleObjectSize(float size) {
+        LOG.d("setScaleObjectSize: size = %f", size);
+        scaleObjectSize = size;
     }
 
     private void position(Object3D object, Camera camera, Vector3 cameraForward) {
@@ -287,27 +403,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
     }
 
-    @Override
-    public void onObjectPicked(@NonNull Object3D object) {
-        LOG.d("onObjectPicked: %s", object.getName());
-
-        if (pickedObject == object) {
-            // Unpick.
-            changePickedObject(null);
-        } else {
-            // Pick.
-            changePickedObject(object);
-        }
-    }
-
-    @Override
-    public void onNoObjectPicked() {
-        LOG.d("onNoObjectPicked");
-
-        // Unpick
-        changePickedObject(null);
-    }
-
     private void changePickedObject(Object3D object) {
         String oldName = null;
         if (pickedObject != null) {
@@ -334,60 +429,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         raiseOnPickedObjectChanged(oldName, newName);
     }
 
-    // Non-threa-safe.
-    public void setOnPickedObjectChangedListener(OnPickedObjectChangedListener onPickedObjectChangedListener) {
-        this.onPickedObjectChangedListener = onPickedObjectChangedListener;
-    }
+    public interface OnObjectAddedListener {
 
-    private void raiseOnPickedObjectChanged(String oldName, String newName) {
-        if (onPickedObjectChangedListener != null) {
-            mainHandler.post(() -> onPickedObjectChangedListener.onPickedObjectChanged(oldName, newName));
-        }
-    }
-
-    public void addUserActorImage(@NonNull UserActorImageModel userActorImageModel) {
-        Picasso.with(getContext())
-               .load(userActorImageModel.uri)
-               .into(userActorImageTarget);
-    }
-
-    public void tryPickObject(float x, float y) {
-        LOG.d("tryPickObject: x = %f, y = %f", x, y);
-        picker.getObjectAt(x, y);
-    }
-
-    public void setObjectEditMode(ObjectEditMode mode) {
-        LOG.d("setObjectEditMode: mode = %s", mode);
-        objectEditMode = mode;
-    }
-
-    public void setTranslateObjectAxis(Axis axis) {
-        LOG.d("setTranslateObjectAxis: axis = %s", axis);
-        synchronized (modeLock) {
-            translateObjectAxis = axis;
-        }
-    }
-
-    public void setTranslateObjectDistance(float distance) {
-        LOG.d("setTranslateObjectDistance: distance = %f", distance);
-        translateObjectDistance = distance;
-    }
-
-    public void setRotateObjectAxis(Axis axis) {
-        LOG.d("setRotateObjectAxis: axis = %s", axis);
-        synchronized (modeLock) {
-            rotateObjectAxis = axis;
-        }
-    }
-
-    public void setRotateObjectAngle(float angle) {
-        LOG.d("setRotateObjectAngle: angle = %f", angle);
-        rotateObjectAngle = angle;
-    }
-
-    public void setScaleObjectSize(float size) {
-        LOG.d("setScaleObjectSize: size = %f", size);
-        scaleObjectSize = size;
+        void onObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+                           @NonNull Quaternion orientation);
     }
 
     public interface OnPickedObjectChangedListener {
@@ -397,10 +442,20 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final class UserActorImageTarget implements Target {
 
+        private UserActorImageModel userActorImageModel;
+
+        private Bitmap bitmap;
+
+        UserActorImageTarget(@NonNull UserActorImageModel userActorImageModel) {
+            this.userActorImageModel = userActorImageModel;
+        }
+
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            synchronized (planeBitmapQueue) {
-                planeBitmapQueue.offer(bitmap);
+            this.bitmap = bitmap;
+
+            synchronized (userActorImageTargetQueue) {
+                userActorImageTargetQueue.add(this);
             }
         }
 

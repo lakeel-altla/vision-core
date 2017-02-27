@@ -16,6 +16,9 @@ import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.rajawali3d.math.Quaternion;
+import org.rajawali3d.math.vector.Vector3;
+
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +34,8 @@ import javax.inject.Named;
  * Defines the presenter for {@link UserSceneBuildView}.
  */
 public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildView>
-        implements OnFrameAvailableListener, MainRenderer.OnPickedObjectChangedListener {
+        implements OnFrameAvailableListener, MainRenderer.OnObjectAddedListener,
+                   MainRenderer.OnPickedObjectChangedListener {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -109,6 +113,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().setTangoUxLayout(tangoWrapper.getTangoUx());
 
         renderer = new MainRenderer(context);
+        renderer.setOnObjectAddedListener(this);
         renderer.setOnPickedObjectChangedListener(this);
         getView().setSurfaceRenderer(renderer);
 
@@ -152,6 +157,13 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         if (active && cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
             renderer.onFrameAvailable();
         }
+    }
+
+    @Override
+    public void onObjectAdded(@NonNull UserActorImageModel userActorImageModel, @NonNull Vector3 position,
+                              @NonNull Quaternion orientation) {
+        getLog().v("onObjectAdded: imageId = %s, position = %s, orientation = %s", userActorImageModel.imageId,
+                   position, orientation);
     }
 
     @Override
