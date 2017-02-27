@@ -29,6 +29,8 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
     @Inject
     GetUserActorImageFileUriUseCase getUserActorImageFileUriUseCase;
 
+    private Disposable getUserActorImageFileUriUseCaseDisposable;
+
     @Inject
     public UserActorImageListPresenter() {
     }
@@ -59,6 +61,13 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
                     getView().onSnackbar(R.string.snackbar_failed);
                 });
         manageDisposable(disposable);
+    }
+
+    @Override
+    protected void onPauseOverride() {
+        super.onPauseOverride();
+
+        cancelStartDrag();
     }
 
     @Override
@@ -149,9 +158,11 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
         }
 
         public void onLongClickViewTop(int position) {
+            cancelStartDrag();
+
             ItemModel model = items.get(position);
 
-            Disposable disposable = getUserActorImageFileUriUseCase
+            getUserActorImageFileUriUseCaseDisposable = getUserActorImageFileUriUseCase
                     .execute(model.imageId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(uri -> {
@@ -163,7 +174,13 @@ public final class UserActorImageListPresenter extends BasePresenter<UserActorIm
                     }, e -> {
                         getLog().e("Failed.", e);
                     });
-            manageDisposable(disposable);
+        }
+    }
+
+    private void cancelStartDrag() {
+        if (getUserActorImageFileUriUseCaseDisposable != null) {
+            getUserActorImageFileUriUseCaseDisposable.dispose();
+            getUserActorImageFileUriUseCaseDisposable = null;
         }
     }
 
