@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-public enum ObjectEditMode {
+public enum ActorEditMode {
 
     NONE(0),
     TRANSLATE(1),
@@ -9,7 +9,7 @@ public enum ObjectEditMode {
 
     private final int value;
 
-    ObjectEditMode(int value) {
+    ActorEditMode(int value) {
         this.value = value;
     }
 

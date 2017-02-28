@@ -24,13 +24,13 @@ public class ApplicationModule {
     @Named(Names.APPLICATION_CONTEXT)
     @Singleton
     @Provides
-    public Context provideContext() {
+    Context provideContext() {
         return application;
     }
 
     @Singleton
     @Provides
-    public Resources provideResources() {
+    Resources provideResources() {
         return application.getResources();
     }
 }

@@ -27,50 +27,50 @@ public final class AndroidRepositoryModule {
 
     @ActivityScope
     @Provides
-    public DocumentRepository provideDocumentRepository(ContentResolver contentResolver) {
+    DocumentRepository provideDocumentRepository(ContentResolver contentResolver) {
         return new DocumentRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
-    public DocumentBitmapRepository provideDocumentBitmapRepository(ContentResolver contentResolver) {
+    DocumentBitmapRepository provideDocumentBitmapRepository(ContentResolver contentResolver) {
         return new DocumentBitmapRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
-    public DocumentFilenameRepository provideDocumentFilenameRepository(ContentResolver contentResolver) {
+    DocumentFilenameRepository provideDocumentFilenameRepository(ContentResolver contentResolver) {
         return new DocumentFilenameRepository(contentResolver);
     }
 
     @ActivityScope
     @Provides
-    public FileBitmapRepository provideFileBitmapRepository() {
+    FileBitmapRepository provideFileBitmapRepository() {
         return new FileBitmapRepository();
     }
 
     @ActivityScope
     @Provides
-    public TextureCacheRepository provideTextureCacheRepository(@Named(Names.ACTIVITY_CONTEXT) Context context) {
+    TextureCacheRepository provideTextureCacheRepository(@Named(Names.ACTIVITY_CONTEXT) Context context) {
         return new TextureCacheRepository(context);
     }
 
     @ActivityScope
     @Provides
-    public TangoAreaDescriptionMetadataRepository provideTangoMetadataRepository() {
+    TangoAreaDescriptionMetadataRepository provideTangoMetadataRepository() {
         return new TangoAreaDescriptionMetadataRepository();
     }
 
     @ActivityScope
     @Provides
-    public AreaDescriptionCacheRepository provideAreaDescriptionCacheRepository(
+    AreaDescriptionCacheRepository provideAreaDescriptionCacheRepository(
             @Named(Names.EXTERNAL_STORAGE_ROOT) File rootDirectory) {
         return new AreaDescriptionCacheRepository(rootDirectory);
     }
 
     @ActivityScope
     @Provides
-    public PlaceRepository providePlaceRepository(GoogleApiClient googleApiClient) {
+    PlaceRepository providePlaceRepository(GoogleApiClient googleApiClient) {
         return new PlaceRepository(googleApiClient);
     }
 }

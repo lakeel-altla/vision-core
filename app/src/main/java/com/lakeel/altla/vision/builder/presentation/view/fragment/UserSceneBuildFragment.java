@@ -85,6 +85,8 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     private GestureDetectorCompat gestureDetector;
 
+    private boolean scrolling;
+
     private InteractionListener interactionListener;
 
     @NonNull
@@ -111,27 +113,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
         interactionListener = InteractionListener.class.cast(context);
-
-        gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent e) {
-                getLog().d("onDown");
-                // Must return true to receive motion events on onScroll.
-                return true;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                getLog().d("onScroll");
-                return presenter.onScroll(e1, e2, distanceX, distanceY);
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                getLog().d("onSingleTapUp");
-                return presenter.onSingleTapUp(e);
-            }
-        });
     }
 
     @Override
@@ -176,7 +157,43 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
             return false;
         });
-        textureView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+        gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                getLog().d("onDown");
+                // Must return true to receive motion events on onScroll.
+                return true;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                getLog().d("onScroll");
+                scrolling = true;
+                return presenter.onScroll(e1, e2, distanceX, distanceY);
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                getLog().d("onSingleTapUp");
+                return presenter.onSingleTapUp(e);
+            }
+        });
+
+        textureView.setOnTouchListener((v, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                return true;
+            }
+
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (scrolling) {
+                    scrolling = false;
+                    presenter.onScrollFinished(event);
+                }
+            }
+
+            return false;
+        });
 
         UserAssetImageListFragment userActorImageListFragment = UserAssetImageListFragment.newInstance();
         getChildFragmentManager().beginTransaction()
@@ -359,7 +376,7 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     }
 
     @OnTouch(R.id.button_rotate_object_in_y_axis)
-    boolean onTouchkButtonRotateObjectInYAxis(MotionEvent event) {
+    boolean onTouchButtonRotateObjectInYAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             buttonsRotateObjectAxes[Axis.Y.getValue()].setPressed(true);
             presenter.onTouchButtonRotateObjectAxis(Axis.Y);

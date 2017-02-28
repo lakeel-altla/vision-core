@@ -5,7 +5,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public class UserAssetImageModel {
+public class UserAssetImageDragModel {
 
     private static final String EXTRA_USER_ID = "userId";
 
@@ -28,8 +28,8 @@ public class UserAssetImageModel {
     }
 
     @Nullable
-    public static UserAssetImageModel parseIntent(@NonNull Intent intent) {
-        UserAssetImageModel model = new UserAssetImageModel();
+    public static UserAssetImageDragModel parseIntent(@NonNull Intent intent) {
+        UserAssetImageDragModel model = new UserAssetImageDragModel();
         model.userId = intent.getStringExtra(EXTRA_USER_ID);
         model.assetId = intent.getStringExtra(EXTRA_ASSET_ID);
         model.uri = intent.getParcelableExtra(EXTRA_URI);

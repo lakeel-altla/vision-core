@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageDragModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserAssetImageListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageItemView;
 import com.lakeel.altla.vision.builder.presentation.view.helper.ThumbnailLoader;
@@ -109,7 +109,7 @@ public final class UserAssetImageListAdapter extends RecyclerView.Adapter<UserAs
         }
 
         @Override
-        public void onStartDrag(@NonNull UserAssetImageModel model) {
+        public void onStartDrag(@NonNull UserAssetImageDragModel model) {
             ClipData clipData = ClipData.newIntent(INTENT_LABEL, model.createIntent());
             imageViewThumbnail.startDrag(clipData, dragShadowBuilder, null, 0);
         }

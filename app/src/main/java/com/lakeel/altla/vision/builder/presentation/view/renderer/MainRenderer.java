@@ -2,81 +2,61 @@ package com.lakeel.altla.vision.builder.presentation.view.renderer;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.rajawali.pool.Pool.Holder;
-import com.lakeel.altla.rajawali.pool.QuaternionPool;
-import com.lakeel.altla.rajawali.pool.Vector3Pool;
 import com.lakeel.altla.tango.rajawali.TangoCameraRenderer;
 import com.lakeel.altla.vision.builder.presentation.graphics.BitmapPlaneFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
-import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
-import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorModel;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Line3D;
-import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 public final class MainRenderer extends TangoCameraRenderer implements OnObjectPickedListener {
 
     private static final Log LOG = LogFactory.getLog(MainRenderer.class);
 
-    private static final float OBJECT_POSITION_ADJUSTMENT = 2f;
-
-    private static final float TRANSLATE_OBJECT_DISTANCE_SCALE = 0.005f;
-
-    private static final float ROTATE_OBJECT_ANGLE_SCALE = 1f;
-
-    private static final float SCALE_OBJECT_SIZE_SCALE = 0.5f;
-
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private final Queue<UserAssetImageModel> userAssetImageModelQueue = new LinkedList<>();
+    private final Queue<UserActorModel> addUserActorModelQueue = new LinkedList<>();
 
-    private final Queue<UserActorImageTarget> userActorImageTargetQueue = new LinkedList<>();
+    private final Queue<UserActorModel> updateUserActorModelQueue = new LinkedList<>();
 
     private final BitmapPlaneFactory bitmapPlaneFactory = new BitmapPlaneFactory();
 
-    private final Object modeLock = new Object();
+    private final Object editAxesModelLock = new Object();
 
-    private ObjectColorPicker picker;
+    private final Map<Object3D, UserActorModel> userActorModelMap = new HashMap<>();
+
+    private final Map<String, Object3D> object3DMap = new HashMap<>();
+
+    private ObjectColorPicker objectColorPicker;
 
     private Line3D axes;
 
     private Object3D pickedObject;
 
-    private OnPickedObjectChangedListener onPickedObjectChangedListener;
+    private EditAxesModel editAxesModel;
 
-    private ObjectEditMode objectEditMode = ObjectEditMode.NONE;
+    private OnUserActorPickedListener onUserActorPickedListener;
 
-    private Axis translateObjectAxis = Axis.X;
-
-    private Axis rotateObjectAxis = Axis.Y;
-
-    private float translateObjectDistance;
-
-    private float rotateObjectAngle;
-
-    private float scaleObjectSize;
-
-    private OnObjectAddedListener onObjectAddedListener;
+    private OnCurrentCameraTransformUpdatedListener onCurrentCameraTransformUpdatedListener;
 
     public MainRenderer(Context context) {
         super(context);
@@ -84,8 +64,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     protected void initSceneOverride() {
-        picker = new ObjectColorPicker(this);
-        picker.setOnObjectPickedListener(this);
+        super.initSceneOverride();
+
+        objectColorPicker = new ObjectColorPicker(this);
+        objectColorPicker.setOnObjectPickedListener(this);
 
         // Build axes model indicating a pose of a picked object.
         axes = new XyzAxesBuilder().setThickness(5)
@@ -99,96 +81,67 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     protected void onRender(long ellapsedRealtime, double deltaTime) {
-        // Load bitmaps.
-        synchronized (userAssetImageModelQueue) {
+        // NOTE:
+        //
+        // Adding primitives into a scene in a non-OpenGL thread fail,
+        // because its constructors access OpenGL vertex buffers etc.
+        // So we queue a data indicating a primitive in a non-OpenGL,
+        // Renderer#onRender invoked in OpenGL thread instantiates an actual primitive.
+        //
+
+        // Add user actors.
+        synchronized (addUserActorModelQueue) {
             while (true) {
-                UserAssetImageModel userAssetImageModel = userAssetImageModelQueue.poll();
-                if (userAssetImageModel == null) {
+                UserActorModel model = addUserActorModelQueue.poll();
+                if (model == null) {
                     break;
                 }
 
-                UserActorImageTarget target = new UserActorImageTarget(userAssetImageModel);
+                Object3D object3D;
+                if (model instanceof UserActorImageModel) {
+                    object3D = bitmapPlaneFactory.create(((UserActorImageModel) model).bitmap);
+                    object3D.setPosition(model.position);
+                    object3D.setOrientation(model.orientation);
+                    object3D.setScale(model.scale);
+                } else {
+                    LOG.e("Unknown UserActorModel sub-class: " + model.getClass().getName());
+                    continue;
+                }
 
-                // Picasso must be called on the main thread.
-                mainHandler.post(() -> {
-                    Picasso.with(getContext())
-                           .load(userAssetImageModel.uri)
-                           .into(target);
-                });
+                getCurrentScene().addChild(object3D);
+                objectColorPicker.registerObject(object3D);
+                userActorModelMap.put(object3D, model);
+                object3DMap.put(model.actorId, object3D);
             }
         }
 
-        // Add models.
-        synchronized (userActorImageTargetQueue) {
+        // Update user actors.
+        synchronized (updateUserActorModelQueue) {
             while (true) {
-                // NOTE:
-                //
-                // Adding primitives into a scene in a non-OpenGL thread fail,
-                // because its constructors access OpenGL vertex buffers etc.
-                // So we queue a data indicating a primitive in a non-OpenGL,
-                // Renderer#onRender invoked in OpenGL thread instantiates an actual primitive.
-                //
-
-                UserActorImageTarget target = userActorImageTargetQueue.poll();
-                if (target == null) {
+                UserActorModel model = updateUserActorModelQueue.poll();
+                if (model == null) {
                     break;
                 }
 
-                Plane plane = bitmapPlaneFactory.create(target.bitmap);
-                position(plane, getCurrentCamera(), getCurrentCameraForward());
+                Object3D object3D = object3DMap.get(model.actorId);
+                if (object3D == null) {
+                    LOG.e("Object3D not found: actorId = %s", model.actorId);
+                    continue;
+                }
 
-                getCurrentScene().addChild(plane);
-                picker.registerObject(plane);
-
-                raiseOnObjectAdded(target.userAssetImageModel, plane.getPosition(), plane.getOrientation());
+                object3D.setPosition(model.position);
+                object3D.setOrientation(model.orientation);
+                object3D.setScale(model.scale);
             }
         }
 
-        if (pickedObject != null) {
-            if (objectEditMode == ObjectEditMode.TRANSLATE && translateObjectDistance != 0) {
+        // Update axes for edit.
+        synchronized (editAxesModelLock) {
+            if (editAxesModel != null) {
+                axes.setPosition(editAxesModel.position);
+                axes.setOrientation(editAxesModel.orientation);
 
-                // Scale.
-                float scaledDistance = translateObjectDistance * TRANSLATE_OBJECT_DISTANCE_SCALE;
-
-                // Ensure the selected axis in this thread.
-                Axis axis;
-                synchronized (modeLock) {
-                    axis = translateObjectAxis;
-                }
-
-                // Translate.
-                translate(pickedObject, axis, scaledDistance);
-                translate(axes, axis, scaledDistance);
-
-                // Clear.
-                translateObjectDistance = 0;
-            } else if (objectEditMode == ObjectEditMode.ROTATE && rotateObjectAngle != 0) {
-
-                // Scale.
-                float scaledAngle = rotateObjectAngle * ROTATE_OBJECT_ANGLE_SCALE;
-
-                // Ensure the selected axis in this thread.
-                Axis axis;
-                synchronized (modeLock) {
-                    axis = rotateObjectAxis;
-                }
-
-                // Rotate.
-                rotate(pickedObject, axis, scaledAngle);
-                rotate(axes, axis, scaledAngle);
-
-                // Clear.
-                rotateObjectAngle = 0;
-            } else if (objectEditMode == ObjectEditMode.SCALE && scaleObjectSize != 0) {
-
-                // Scale the raw value.
-                float scaledSize = scaleObjectSize * SCALE_OBJECT_SIZE_SCALE;
-
-                // Scale the object.
-                scale(pickedObject, scaledSize);
-
-                // Clear.
-                scaleObjectSize = 0;
+                editAxesModel = null;
             }
         }
 
@@ -197,8 +150,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     public void onObjectPicked(@NonNull Object3D object) {
-        LOG.d("onObjectPicked: %s", object.getName());
-
         if (pickedObject == object) {
             // Unpick.
             changePickedObject(null);
@@ -210,262 +161,110 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     public void onNoObjectPicked() {
-        LOG.d("onNoObjectPicked");
-
         // Unpick
         changePickedObject(null);
     }
 
-    // Non-thread-safe.
-    public void setOnObjectAddedListener(@Nullable OnObjectAddedListener onObjectAddedListener) {
-        this.onObjectAddedListener = onObjectAddedListener;
+    @Override
+    protected void onCurrentCameraTransformUpdated(double timestamp) {
+        super.onCurrentCameraTransformUpdated(timestamp);
+
+        Camera camera = getCurrentCamera();
+        Vector3 position = camera.getPosition();
+        Quaternion orientation = camera.getOrientation();
+        Vector3 forward = getCurrentCameraForward();
+
+        raiseOnCurrentCameraTransformUpdated(position.x, position.y, position.z,
+                                             orientation.x, orientation.y, orientation.z, orientation.w,
+                                             forward.x, forward.y, forward.z);
     }
 
-    private void raiseOnObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
-                                    @NonNull Quaternion orientation) {
-        if (onObjectAddedListener != null) {
-            mainHandler.post(() -> onObjectAddedListener.onObjectAdded(userAssetImageModel, position, orientation));
+    // This method must be invoke on the main thread.
+    public void setOnCurrentCameraTransformUpdatedListener(
+            OnCurrentCameraTransformUpdatedListener onCurrentCameraTransformUpdatedListener) {
+        this.onCurrentCameraTransformUpdatedListener = onCurrentCameraTransformUpdatedListener;
+    }
+
+    // This method must be invoke on the main thread.
+    public void setOnUserActorPickedListener(@Nullable OnUserActorPickedListener onUserActorPickedListener) {
+        this.onUserActorPickedListener = onUserActorPickedListener;
+    }
+
+    public void addUserActorModel(@NonNull UserActorModel userActorModel) {
+        synchronized (addUserActorModelQueue) {
+            addUserActorModelQueue.add(userActorModel);
         }
     }
 
-    // Non-thread-safe.
-    public void setOnPickedObjectChangedListener(
-            @Nullable OnPickedObjectChangedListener onPickedObjectChangedListener) {
-        this.onPickedObjectChangedListener = onPickedObjectChangedListener;
-    }
-
-    private void raiseOnPickedObjectChanged(String oldName, String newName) {
-        if (onPickedObjectChangedListener != null) {
-            mainHandler.post(() -> onPickedObjectChangedListener.onPickedObjectChanged(oldName, newName));
+    public void updateUserActorModel(@NonNull UserActorModel userActorModel) {
+        synchronized (updateUserActorModelQueue) {
+            updateUserActorModelQueue.add(userActorModel);
         }
     }
 
-    public void addUserActorImage(@NonNull UserAssetImageModel userAssetImageModel) {
-        synchronized (userAssetImageModelQueue) {
-            userAssetImageModelQueue.add(userAssetImageModel);
+    public void updateEditAxesModel(@NonNull EditAxesModel editAxesModel) {
+        synchronized (editAxesModelLock) {
+            this.editAxesModel = editAxesModel;
         }
     }
 
     public void tryPickObject(float x, float y) {
         LOG.d("tryPickObject: x = %f, y = %f", x, y);
-        picker.getObjectAt(x, y);
+        objectColorPicker.getObjectAt(x, y);
     }
 
-    public void setObjectEditMode(ObjectEditMode mode) {
-        LOG.d("setObjectEditMode: mode = %s", mode);
-        objectEditMode = mode;
-    }
-
-    public void setTranslateObjectAxis(Axis axis) {
-        LOG.d("setTranslateObjectAxis: axis = %s", axis);
-        synchronized (modeLock) {
-            translateObjectAxis = axis;
-        }
-    }
-
-    public void setTranslateObjectDistance(float distance) {
-        LOG.d("setTranslateObjectDistance: distance = %f", distance);
-        translateObjectDistance = distance;
-    }
-
-    public void setRotateObjectAxis(Axis axis) {
-        LOG.d("setRotateObjectAxis: axis = %s", axis);
-        synchronized (modeLock) {
-            rotateObjectAxis = axis;
-        }
-    }
-
-    public void setRotateObjectAngle(float angle) {
-        LOG.d("setRotateObjectAngle: angle = %f", angle);
-        rotateObjectAngle = angle;
-    }
-
-    public void setScaleObjectSize(float size) {
-        LOG.d("setScaleObjectSize: size = %f", size);
-        scaleObjectSize = size;
-    }
-
-    private void position(Object3D object, Camera camera, Vector3 cameraForward) {
-        try (Holder<Vector3> positionHolder = Vector3Pool.get();
-             Holder<Vector3> translationHolder = Vector3Pool.get();
-             Holder<Vector3> cameraBackwardHolder = Vector3Pool.get();
-             Holder<Quaternion> orientationHolder = QuaternionPool.get()) {
-
-            Vector3 position = positionHolder.get();
-            Vector3 translation = translationHolder.get();
-            Vector3 cameraBackward = cameraBackwardHolder.get();
-            Quaternion orientation = orientationHolder.get();
-
-            position.setAll(camera.getPosition());
-
-            translation.setAll(cameraForward);
-            translation.multiply(OBJECT_POSITION_ADJUSTMENT);
-
-            position.add(translation);
-
-            object.setPosition(position);
-
-            cameraBackward.setAll(cameraForward);
-            cameraBackward.inverse();
-
-            orientation.lookAt(cameraBackward, Vector3.Y);
-
-            object.setOrientation(orientation);
-        }
-    }
-
-    private void translate(Object3D object, Axis axis, float distance) {
-        try (Holder<Vector3> translationHolder = Vector3Pool.get();
-             Holder<Quaternion> rotationHolder = QuaternionPool.get();
-             Holder<Vector3> positionHolder = Vector3Pool.get()) {
-
-            Vector3 translation = translationHolder.get();
-            Quaternion rotation = rotationHolder.get();
-            Vector3 position = positionHolder.get();
-
-            switch (axis) {
-                case X:
-                    translation.setAll(Vector3.X);
-                    break;
-                case Y:
-                    translation.setAll(Vector3.Y);
-                    break;
-                case Z:
-                default:
-                    translation.setAll(Vector3.Z);
-                    break;
-            }
-
-            rotation.setAll(object.getOrientation());
-            // Conjugate because rotateBy is wrong...
-            rotation.conjugate();
-
-            translation.rotateBy(rotation);
-            translation.normalize();
-            translation.multiply(distance);
-
-            position.setAll(object.getPosition());
-            position.add(translation);
-
-            object.setPosition(position);
-        }
-    }
-
-    private void rotate(Object3D object, Axis axis, float angle) {
-        try (Holder<Vector3> baseAxisHolder = Vector3Pool.get();
-             Holder<Vector3> modelAxisHolder = Vector3Pool.get();
-             Holder<Quaternion> rotationHolder = QuaternionPool.get()) {
-
-            Vector3 baseAxis = baseAxisHolder.get();
-            Vector3 modelAxis = modelAxisHolder.get();
-            Quaternion rotation = rotationHolder.get();
-
-            switch (axis) {
-                case X:
-                    baseAxis.setAll(Vector3.X);
-                    break;
-                case Y:
-                    baseAxis.setAll(Vector3.Y);
-                    break;
-                case Z:
-                default:
-                    baseAxis.setAll(Vector3.Z);
-                    break;
-            }
-
-            modelAxis.setAll(baseAxis);
-            rotation.setAll(object.getOrientation());
-            // Conjugate because rotateBy is wrong...
-            rotation.conjugate();
-            modelAxis.rotateBy(rotation);
-
-            object.rotate(modelAxis, angle);
-        }
-    }
-
-    private void scale(Object3D object, float size) {
-        final float MIN_RATIO = 0.1f;
-
-        try (Holder<Vector3> scaleHolder = Vector3Pool.get()) {
-            Vector3 scale = scaleHolder.get();
-
-            float ratio;
-            if (0 < size) {
-                ratio = 1 + size * 0.01f;
-            } else {
-                ratio = Math.max(1 - Math.abs(size) * 0.01f, MIN_RATIO);
-            }
-
-            scale.setAll(object.getScale());
-            scale.multiply(ratio);
-
-            object.setScale(scale);
-        }
-    }
-
-    private void changePickedObject(Object3D object) {
-        String oldName = null;
-        if (pickedObject != null) {
-            // Unpick
-            oldName = pickedObject.getName();
-        }
-
-        String newName = null;
-        if (object != null) {
-            newName = object.getName();
-        }
-
+    private void changePickedObject(@Nullable Object3D object) {
         pickedObject = object;
+
+        UserActorModel pickedUserActor = null;
 
         if (pickedObject != null) {
             // The axes model uses the same pose with the picked object.
             axes.setPosition(pickedObject.getPosition().clone());
             axes.setOrientation(pickedObject.getOrientation().clone());
             axes.setVisible(true);
+
+            pickedUserActor = userActorModelMap.get(pickedObject);
         } else {
             axes.setVisible(false);
         }
 
-        raiseOnPickedObjectChanged(oldName, newName);
+        raiseOnUserActorPicked(pickedUserActor);
     }
 
-    public interface OnObjectAddedListener {
-
-        void onObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
-                           @NonNull Quaternion orientation);
-    }
-
-    public interface OnPickedObjectChangedListener {
-
-        void onPickedObjectChanged(String oldName, String newName);
-    }
-
-    private final class UserActorImageTarget implements Target {
-
-        private UserAssetImageModel userAssetImageModel;
-
-        private Bitmap bitmap;
-
-        UserActorImageTarget(@NonNull UserAssetImageModel userAssetImageModel) {
-            this.userAssetImageModel = userAssetImageModel;
-        }
-
-        @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            this.bitmap = bitmap;
-
-            synchronized (userActorImageTargetQueue) {
-                userActorImageTargetQueue.add(this);
+    private void raiseOnCurrentCameraTransformUpdated(double positionX, double positionY, double positionZ,
+                                                      double orientationX, double orientationY, double orientationZ,
+                                                      double orientationW,
+                                                      double forwardX, double forwardY, double forwardZ) {
+        mainHandler.post(() -> {
+            if (onCurrentCameraTransformUpdatedListener != null) {
+                onCurrentCameraTransformUpdatedListener.onCurrentCameraTransformUpdated(
+                        positionX, positionY, positionZ,
+                        orientationX, orientationY, orientationZ, orientationW,
+                        forwardX, forwardY, forwardZ
+                );
             }
-        }
+        });
+    }
 
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            LOG.e("Failed to load the bitmap.");
-        }
+    private void raiseOnUserActorPicked(@Nullable UserActorModel userActorModel) {
+        mainHandler.post(() -> {
+            if (onUserActorPickedListener != null) {
+                onUserActorPickedListener.onUserActorPicked(userActorModel);
+            }
+        });
+    }
 
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-        }
+    public interface OnCurrentCameraTransformUpdatedListener {
+
+        void onCurrentCameraTransformUpdated(double positionX, double positionY, double positionZ,
+                                             double orientationX, double orientationY, double orientationZ,
+                                             double orientationW,
+                                             double forwardX, double forwardY, double forwardZ);
+    }
+
+    public interface OnUserActorPickedListener {
+
+        void onUserActorPicked(@Nullable UserActorModel userActorModel);
     }
 }

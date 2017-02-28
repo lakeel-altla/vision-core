@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageDragModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAssetImageListView;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
@@ -166,11 +166,11 @@ public final class UserAssetImageListPresenter extends BasePresenter<UserAssetIm
                     .execute(model.assetId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(uri -> {
-                        UserAssetImageModel userAssetImageModel = new UserAssetImageModel();
-                        userAssetImageModel.userId = model.userId;
-                        userAssetImageModel.assetId = model.assetId;
-                        userAssetImageModel.uri = uri;
-                        itemView.onStartDrag(userAssetImageModel);
+                        UserAssetImageDragModel userAssetImageDragModel = new UserAssetImageDragModel();
+                        userAssetImageDragModel.userId = model.userId;
+                        userAssetImageDragModel.assetId = model.assetId;
+                        userAssetImageDragModel.uri = uri;
+                        itemView.onStartDrag(userAssetImageDragModel);
                     }, e -> {
                         getLog().e("Failed.", e);
                     });

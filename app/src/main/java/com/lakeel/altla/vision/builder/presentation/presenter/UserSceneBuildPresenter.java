@@ -4,17 +4,31 @@ import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 
+import com.lakeel.altla.rajawali.pool.Pool;
+import com.lakeel.altla.rajawali.pool.QuaternionPool;
+import com.lakeel.altla.rajawali.pool.Vector3Pool;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
+import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.builder.presentation.model.ObjectEditMode;
+import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserActorModel;
+import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageDragModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
+import com.lakeel.altla.vision.domain.helper.DataListEvent;
+import com.lakeel.altla.vision.domain.model.UserActor;
+import com.lakeel.altla.vision.domain.usecase.GetUserAssetImageFileUriUseCase;
+import com.lakeel.altla.vision.domain.usecase.ObserveAllUserActorsUserCase;
+import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
@@ -22,20 +36,29 @@ import org.rajawali3d.math.vector.Vector3;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Defines the presenter for {@link UserSceneBuildView}.
  */
 public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildView>
-        implements OnFrameAvailableListener, MainRenderer.OnObjectAddedListener,
-                   MainRenderer.OnPickedObjectChangedListener {
+        implements OnFrameAvailableListener, MainRenderer.OnCurrentCameraTransformUpdatedListener,
+                   MainRenderer.OnUserActorPickedListener {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -43,12 +66,37 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private static final String ARG_SCENE_ID = "sceneId";
 
+    private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
+
+    private static final float TRANSLATE_OBJECT_DISTANCE_SCALE = 0.005f;
+
+    private static final float ROTATE_OBJECT_ANGLE_SCALE = 1f;
+
+    private static final float SCALE_OBJECT_SIZE_SCALE = 0.5f;
+
     @Named(Names.ACTIVITY_CONTEXT)
     @Inject
     Context context;
 
     @Inject
     TangoWrapper tangoWrapper;
+
+    @Inject
+    ObserveAllUserActorsUserCase observeAllUserActorsUserCase;
+
+    @Inject
+    GetUserAssetImageFileUriUseCase getUserAssetImageFileUriUseCase;
+
+    @Inject
+    SaveUserActorUseCase saveUserActorUseCase;
+
+    private final UserActorManager userActorManager = new UserActorManager();
+
+    private final Vector3 cameraPosition = new Vector3();
+
+    private final Quaternion cameraOrientation = new Quaternion();
+
+    private final Vector3 cameraForward = new Vector3();
 
     private String areaId;
 
@@ -58,11 +106,15 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private MainRenderer renderer;
 
-    private boolean hasPickedObject;
+    private UserActorModel pickedUserActorModel;
 
     private volatile boolean active = true;
 
-    private ObjectEditMode objectEditMode = ObjectEditMode.NONE;
+    private ActorEditMode actorEditMode = ActorEditMode.NONE;
+
+    private Axis translateAxis = Axis.X;
+
+    private Axis rotateAxis = Axis.Y;
 
     private boolean debugConsoleVisible;
 
@@ -113,8 +165,8 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().setTangoUxLayout(tangoWrapper.getTangoUx());
 
         renderer = new MainRenderer(context);
-        renderer.setOnObjectAddedListener(this);
-        renderer.setOnPickedObjectChangedListener(this);
+        renderer.setOnCurrentCameraTransformUpdatedListener(this);
+        renderer.setOnUserActorPickedListener(this);
         getView().setSurfaceRenderer(renderer);
 
         getView().onUpdateObjectMenuVisible(false);
@@ -129,6 +181,16 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     @Override
     protected void onStartOverride() {
         super.onStartOverride();
+
+        Disposable disposable = observeAllUserActorsUserCase
+                .execute(sceneId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(event -> {
+                    userActorManager.handle(event);
+                }, e -> {
+                    getLog().e("Failed.", e);
+                });
+        manageDisposable(disposable);
     }
 
     @Override
@@ -160,21 +222,23 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     @Override
-    public void onObjectAdded(@NonNull UserAssetImageModel userAssetImageModel, @NonNull Vector3 position,
-                              @NonNull Quaternion orientation) {
-        getLog().v("onObjectAdded: imageId = %s, position = %s, orientation = %s", userAssetImageModel.assetId,
-                   position, orientation);
+    public void onCurrentCameraTransformUpdated(double positionX, double positionY, double positionZ,
+                                                double orientationX, double orientationY, double orientationZ,
+                                                double orientationW, double forwardX, double forwardY,
+                                                double forwardZ) {
+        cameraPosition.setAll(positionX, positionY, positionZ);
+        cameraOrientation.setAll(orientationW, orientationX, orientationY, orientationZ);
+        cameraForward.setAll(forwardX, forwardY, forwardZ);
     }
 
     @Override
-    public void onPickedObjectChanged(String oldName, String newName) {
-        hasPickedObject = (newName != null);
-        getView().onUpdateObjectMenuVisible(hasPickedObject);
+    public void onUserActorPicked(@Nullable UserActorModel userActorModel) {
+        pickedUserActorModel = userActorModel;
+        getView().onUpdateObjectMenuVisible(pickedUserActorModel != null);
     }
 
     public void onTouchButtonTranslateObject() {
-        objectEditMode = ObjectEditMode.TRANSLATE;
-        renderer.setObjectEditMode(objectEditMode);
+        actorEditMode = ActorEditMode.TRANSLATE;
 
         getView().onUpdateTranslateObjectSelected(true);
         getView().onUpdateTranslateObjectMenuVisible(true);
@@ -184,8 +248,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onTouchButtonRotateObject() {
-        objectEditMode = ObjectEditMode.ROTATE;
-        renderer.setObjectEditMode(objectEditMode);
+        actorEditMode = ActorEditMode.ROTATE;
 
         getView().onUpdateTranslateObjectSelected(false);
         getView().onUpdateTranslateObjectMenuVisible(false);
@@ -195,7 +258,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onTouchButtonTranslateObjectAxis(Axis axis) {
-        renderer.setTranslateObjectAxis(axis);
+        translateAxis = axis;
 
         getView().onUpdateTranslateObjectAxisSelected(Axis.X, axis == Axis.X);
         getView().onUpdateTranslateObjectAxisSelected(Axis.Y, axis == Axis.Y);
@@ -203,7 +266,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onTouchButtonRotateObjectAxis(Axis axis) {
-        renderer.setRotateObjectAxis(axis);
+        rotateAxis = axis;
 
         getView().onUpdateRotateObjectAxisSelected(Axis.X, axis == Axis.X);
         getView().onUpdateRotateObjectAxisSelected(Axis.Y, axis == Axis.Y);
@@ -211,8 +274,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onTouchButtonScaleObject() {
-        objectEditMode = ObjectEditMode.SCALE;
-        renderer.setObjectEditMode(objectEditMode);
+        actorEditMode = ActorEditMode.SCALE;
 
         getView().onUpdateTranslateObjectSelected(false);
         getView().onUpdateTranslateObjectMenuVisible(false);
@@ -227,10 +289,56 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         Intent intent = clipData.getItemAt(0).getIntent();
         if (intent == null) throw new IllegalStateException("No intent.");
 
-        UserAssetImageModel userAssetImageModel = UserAssetImageModel.parseIntent(intent);
-        if (userAssetImageModel == null) throw new IllegalStateException("No UserAssetImageModel.");
+        UserAssetImageDragModel userAssetImageDragModel = UserAssetImageDragModel.parseIntent(intent);
+        if (userAssetImageDragModel == null) throw new IllegalStateException("No UserAssetImageDragModel.");
 
-        renderer.addUserActorImage(userAssetImageModel);
+        UserActor userActor = new UserActor(userAssetImageDragModel.userId,
+                                            sceneId,
+                                            UUID.randomUUID().toString());
+        userActor.assetType = UserActor.AssetType.IMAGE;
+        userActor.assetId = userAssetImageDragModel.assetId;
+
+        // Decide the position and the orientation of the dropped user actor.
+        try (Pool.Holder<Vector3> positionHolder = Vector3Pool.get();
+             Pool.Holder<Quaternion> orientationHolder = QuaternionPool.get();
+             Pool.Holder<Vector3> translationHolder = Vector3Pool.get();
+             Pool.Holder<Vector3> cameraBackwardHolder = Vector3Pool.get()) {
+
+            Vector3 position = positionHolder.get();
+            Quaternion orientation = orientationHolder.get();
+            Vector3 translation = translationHolder.get();
+            Vector3 cameraBackward = cameraBackwardHolder.get();
+
+            position.setAll(cameraPosition);
+
+            translation.setAll(cameraForward);
+            translation.multiply(ACTOR_DROP_POSITION_ADJUSTMENT);
+
+            position.add(translation);
+
+            cameraBackward.setAll(cameraForward);
+            cameraBackward.inverse();
+
+            orientation.lookAt(cameraBackward, Vector3.Y);
+
+            userActor.positionX = position.x;
+            userActor.positionY = position.y;
+            userActor.positionZ = position.z;
+            userActor.orientationX = orientation.x;
+            userActor.orientationY = orientation.y;
+            userActor.orientationZ = orientation.z;
+            userActor.orientationW = orientation.w;
+        }
+
+        Disposable disposable = saveUserActorUseCase
+                .execute(userActor)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                }, e -> {
+                    getLog().e("Failed.", e);
+                    getView().onSnackbar(R.string.snackbar_failed);
+                });
+        manageDisposable(disposable);
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
@@ -239,24 +347,24 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        if (hasPickedObject) {
-            if (objectEditMode == ObjectEditMode.TRANSLATE) {
+        if (pickedUserActorModel != null) {
+            if (actorEditMode == ActorEditMode.TRANSLATE) {
                 if (Math.abs(distanceY) < Math.abs(distanceX)) {
-                    renderer.setTranslateObjectDistance(distanceX);
+                    translateUserActor(distanceX);
                 } else {
-                    renderer.setTranslateObjectDistance(distanceY);
+                    translateUserActor(distanceY);
                 }
-            } else if (objectEditMode == ObjectEditMode.ROTATE) {
+            } else if (actorEditMode == ActorEditMode.ROTATE) {
                 if (Math.abs(distanceY) < Math.abs(distanceX)) {
-                    renderer.setRotateObjectAngle(distanceX);
+                    rotateUserActor(distanceX);
                 } else {
-                    renderer.setRotateObjectAngle(distanceY);
+                    rotateUserActor(distanceY);
                 }
-            } else if (objectEditMode == ObjectEditMode.SCALE) {
+            } else if (actorEditMode == ActorEditMode.SCALE) {
                 if (Math.abs(distanceY) < Math.abs(distanceX)) {
-                    renderer.setScaleObjectSize(distanceX);
+                    scaleUserActor(distanceX);
                 } else {
-                    renderer.setScaleObjectSize(distanceY);
+                    scaleUserActor(distanceY);
                 }
             }
 
@@ -265,7 +373,150 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         return false;
     }
 
-    private TangoConfig createTangoConfig(Tango tango) {
+    public void onScrollFinished(MotionEvent event) {
+        // TODO: save the user actor here.
+
+        UserActor userActor;
+        if (pickedUserActorModel instanceof UserActorImageModel) {
+            userActor = map((UserActorImageModel) pickedUserActorModel);
+        } else {
+            throw new IllegalStateException(
+                    "Unknown UserActorModel sub-class: " + pickedUserActorModel.getClass().getName());
+        }
+
+        // Save.
+        Disposable disposable = saveUserActorUseCase
+                .execute(userActor)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                }, e -> {
+                    getLog().e("Failed.", e);
+                });
+        manageDisposable(disposable);
+    }
+
+    private void translateUserActor(float distance) {
+        // Scale.
+        float scaledDistance = distance * TRANSLATE_OBJECT_DISTANCE_SCALE;
+
+        // Translate.
+        try (Pool.Holder<Vector3> translationHolder = Vector3Pool.get();
+             Pool.Holder<Quaternion> rotationHolder = QuaternionPool.get();
+             Pool.Holder<Vector3> positionHolder = Vector3Pool.get()) {
+
+            Vector3 translation = translationHolder.get();
+            Quaternion rotation = rotationHolder.get();
+            Vector3 position = positionHolder.get();
+
+            switch (translateAxis) {
+                case X:
+                    translation.setAll(Vector3.X);
+                    break;
+                case Y:
+                    translation.setAll(Vector3.Y);
+                    break;
+                case Z:
+                default:
+                    translation.setAll(Vector3.Z);
+                    break;
+            }
+
+            rotation.setAll(pickedUserActorModel.orientation);
+            // Conjugate because rotateBy is wrong...
+            rotation.conjugate();
+
+            translation.rotateBy(rotation);
+            translation.normalize();
+            translation.multiply(scaledDistance);
+
+            position.setAll(pickedUserActorModel.position);
+            position.add(translation);
+
+            pickedUserActorModel.position.setAll(position);
+        }
+
+        EditAxesModel editAxesModel = new EditAxesModel();
+        editAxesModel.position.setAll(pickedUserActorModel.position);
+        editAxesModel.orientation.setAll(pickedUserActorModel.orientation);
+
+        renderer.updateUserActorModel(pickedUserActorModel);
+        renderer.updateEditAxesModel(editAxesModel);
+    }
+
+    private void rotateUserActor(float angle) {
+        // Scale.
+        float scaledAngle = angle * ROTATE_OBJECT_ANGLE_SCALE;
+
+        // Rotate.
+        try (Pool.Holder<Vector3> baseAxisHolder = Vector3Pool.get();
+             Pool.Holder<Vector3> modelAxisHolder = Vector3Pool.get();
+             Pool.Holder<Quaternion> rotationHolder = QuaternionPool.get();
+             Pool.Holder<Quaternion> axisRotationHolder = QuaternionPool.get()) {
+
+            Vector3 baseAxis = baseAxisHolder.get();
+            Vector3 modelAxis = modelAxisHolder.get();
+            Quaternion rotation = rotationHolder.get();
+            Quaternion axisRotation = axisRotationHolder.get();
+
+            switch (rotateAxis) {
+                case X:
+                    baseAxis.setAll(Vector3.X);
+                    break;
+                case Y:
+                    baseAxis.setAll(Vector3.Y);
+                    break;
+                case Z:
+                default:
+                    baseAxis.setAll(Vector3.Z);
+                    break;
+            }
+
+            modelAxis.setAll(baseAxis);
+            rotation.setAll(pickedUserActorModel.orientation);
+            // Conjugate because rotateBy is wrong...
+            rotation.conjugate();
+            modelAxis.rotateBy(rotation);
+
+            axisRotation.fromAngleAxis(modelAxis, scaledAngle);
+            pickedUserActorModel.orientation.multiply(axisRotation);
+        }
+
+        EditAxesModel editAxesModel = new EditAxesModel();
+        editAxesModel.position.setAll(pickedUserActorModel.position);
+        editAxesModel.orientation.setAll(pickedUserActorModel.orientation);
+
+        renderer.updateUserActorModel(pickedUserActorModel);
+        renderer.updateEditAxesModel(editAxesModel);
+    }
+
+    private void scaleUserActor(float size) {
+
+        // Scale the raw value.
+        float scaledSize = size * SCALE_OBJECT_SIZE_SCALE;
+
+        final float MIN_RATIO = 0.1f;
+
+        try (Pool.Holder<Vector3> scaleHolder = Vector3Pool.get()) {
+            Vector3 scale = scaleHolder.get();
+
+            float ratio;
+            if (0 < scaledSize) {
+                ratio = 1 + scaledSize * 0.01f;
+            } else {
+                ratio = Math.max(1 - Math.abs(scaledSize) * 0.01f, MIN_RATIO);
+            }
+
+            scale.setAll(pickedUserActorModel.scale);
+            scale.multiply(ratio);
+
+            pickedUserActorModel.scale.setAll(scale);
+        }
+
+        renderer.updateUserActorModel(pickedUserActorModel);
+    }
+
+    @NonNull
+    private TangoConfig createTangoConfig(@NonNull Tango tango) {
         TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
 
         // NOTE:
@@ -288,5 +539,145 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     public void onToggleDebug() {
         debugConsoleVisible = !debugConsoleVisible;
         getView().onUpdateDebugConsoleVisible(debugConsoleVisible);
+    }
+
+    @NonNull
+    private static UserActorImageModel map(@NonNull UserActor userActor) {
+        UserActorImageModel model = new UserActorImageModel(userActor.userId,
+                                                            userActor.sceneId,
+                                                            userActor.actorId,
+                                                            userActor.assetId);
+        model.position.setAll(userActor.positionX, userActor.positionY, userActor.positionZ);
+        model.orientation.setAll(userActor.orientationW,
+                                 userActor.orientationX,
+                                 userActor.orientationY,
+                                 userActor.orientationZ);
+        model.scale.setAll(userActor.scaleX, userActor.scaleY, userActor.scaleZ);
+        model.createdAt = userActor.createdAt;
+        model.updatedAt = userActor.updatedAt;
+        return model;
+    }
+
+    @NonNull
+    private static UserActor map(@NonNull UserActorImageModel userActorImageModel) {
+        UserActor userActor = new UserActor(userActorImageModel.userId,
+                                            userActorImageModel.sceneId,
+                                            userActorImageModel.actorId);
+        userActor.assetType = UserActor.AssetType.IMAGE;
+        userActor.assetId = userActorImageModel.assetId;
+        userActor.positionX = userActorImageModel.position.x;
+        userActor.positionY = userActorImageModel.position.y;
+        userActor.positionZ = userActorImageModel.position.z;
+        userActor.orientationX = userActorImageModel.orientation.x;
+        userActor.orientationY = userActorImageModel.orientation.y;
+        userActor.orientationZ = userActorImageModel.orientation.z;
+        userActor.orientationW = userActorImageModel.orientation.w;
+        userActor.scaleX = userActorImageModel.scale.x;
+        userActor.scaleY = userActorImageModel.scale.y;
+        userActor.scaleZ = userActorImageModel.scale.z;
+        userActor.createdAt = userActorImageModel.createdAt;
+        userActor.updatedAt = userActorImageModel.updatedAt;
+        return userActor;
+    }
+
+    private final class UserActorManager {
+
+        final Set<Target> targetMap = new HashSet<>();
+
+        void handle(@NonNull DataListEvent<UserActor> event) {
+            getLog().v("DataListEvent<UserActor>: type = %s, actorId = %s", event.getType(),
+                       event.getData().actorId);
+
+            switch (event.getType()) {
+                case ADDED:
+                    onAdded(event.getData());
+                    break;
+                case CHANGED:
+                    onChanged(event.getData());
+                    break;
+                case MOVED:
+                    // Ignore.
+                    break;
+                case REMOVED:
+                    onRemoved(event.getData());
+                    break;
+            }
+        }
+
+        void onAdded(@NonNull UserActor userActor) {
+            switch (userActor.assetType) {
+                case IMAGE:
+                    onUserActorImageAdded(userActor);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown asset type: " + userActor.assetType);
+            }
+        }
+
+        void onChanged(@NonNull UserActor userActor) {
+            switch (userActor.assetType) {
+                case IMAGE:
+                    onUserActorImageChanged(userActor);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown asset type: " + userActor.assetType);
+            }
+        }
+
+        void onRemoved(@NonNull UserActor userActor) {
+            // TODO
+        }
+
+        void onUserActorImageAdded(@NonNull UserActor userActor) {
+            Disposable disposable = getUserAssetImageFileUriUseCase
+                    .execute(userActor.assetId)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(uri -> {
+                        final UserActorImageModel model = map(userActor);
+
+                        Target target = new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                getLog().d("onBitmapLoaded: actorId = %s, uri = %s", model.actorId, uri);
+
+                                model.bitmap = bitmap;
+
+                                renderer.addUserActorModel(model);
+
+                                // Dereference.
+                                targetMap.remove(this);
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Drawable errorDrawable) {
+                                getLog().e("onBitmapFailed: actorId = %s, uri = %s", model.actorId, uri);
+
+                                // TODO
+
+                                // Dereference.
+                                targetMap.remove(this);
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                            }
+                        };
+                        // Hold the strong reference to the Target instance,
+                        // because Piccaso uses it as a weak reference.
+                        targetMap.add(target);
+
+                        Picasso.with(context)
+                               .load(uri)
+                               .into(target);
+                    }, e -> {
+                        getLog().e("Failed.", e);
+                    });
+            manageDisposable(disposable);
+        }
+
+        void onUserActorImageChanged(@NonNull UserActor userActor) {
+            UserActorImageModel model = map(userActor);
+            renderer.updateUserActorModel(model);
+        }
     }
 }

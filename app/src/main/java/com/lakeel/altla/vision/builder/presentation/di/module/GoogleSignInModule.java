@@ -15,7 +15,7 @@ public final class GoogleSignInModule {
 
     @Singleton
     @Provides
-    public GoogleSignInOptions provideGoogleSignInOptions(
+    GoogleSignInOptions provideGoogleSignInOptions(
             Resources resources, @Named(Names.GOOGLE_API_WEB_CLIENT_ID) int webClientId) {
         return new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
