@@ -1,6 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
+import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -32,5 +35,11 @@ public class ApplicationModule {
     @Provides
     Resources provideResources() {
         return application.getResources();
+    }
+
+    @Singleton
+    @Provides
+    CurrentDeviceResolver provideCurrentDeviceResolver() {
+        return new CurrentDeviceResolver(FirebaseInstanceId.getInstance().getId());
     }
 }
