@@ -23,6 +23,7 @@ import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
 import com.lakeel.altla.vision.domain.model.UserActor;
+import com.lakeel.altla.vision.domain.usecase.DeleteUserActorUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetUserAssetImageFileUriUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveAllUserActorsUserCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
@@ -89,6 +90,9 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     @Inject
     SaveUserActorUseCase saveUserActorUseCase;
+
+    @Inject
+    DeleteUserActorUseCase deleteUserActorUseCase;
 
     private final UserActorManager userActorManager = new UserActorManager();
 
@@ -281,6 +285,25 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().onUpdateRotateSelected(false);
         getView().onUpdateRotateMenuVisible(false);
         getView().onUpdateScaleSelected(true);
+    }
+
+    public void onTouchButtonEdit() {
+        // TODO
+    }
+
+    public void onClickButtonDelete() {
+        if (pickedUserActorModel == null) return;
+
+        // TODO: confirmation.
+
+        Disposable disposable = deleteUserActorUseCase
+                .execute(sceneId, pickedUserActorModel.actorId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                }, e -> {
+                    getLog().e("Failed.", e);
+                });
+        manageDisposable(disposable);
     }
 
     public void onDropModel(@NonNull ClipData clipData) {
@@ -625,7 +648,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         }
 
         void onRemoved(@NonNull UserActor userActor) {
-            // TODO
+            renderer.removeUserActor(userActor);
         }
 
         void onUserActorImageAdded(@NonNull UserActor userActor) {

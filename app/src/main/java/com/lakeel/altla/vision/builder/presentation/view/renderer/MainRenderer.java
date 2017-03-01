@@ -8,6 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
 import com.lakeel.altla.vision.builder.presentation.model.UserActorModel;
+import com.lakeel.altla.vision.domain.model.UserActor;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
@@ -37,6 +38,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     private final Queue<UserActorModel> addUserActorModelQueue = new LinkedList<>();
 
     private final Queue<UserActorModel> updateUserActorModelQueue = new LinkedList<>();
+
+    private final Queue<String> deleteUserActorIdQueue = new LinkedList<>();
 
     private final BitmapPlaneFactory bitmapPlaneFactory = new BitmapPlaneFactory();
 
@@ -145,6 +148,29 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
             }
         }
 
+        // Delete user actors.
+        synchronized (deleteUserActorIdQueue) {
+            while (true) {
+                String actorId = deleteUserActorIdQueue.poll();
+                if (actorId == null) {
+                    break;
+                }
+
+                Object3D object3D = object3DMap.remove(actorId);
+                if (object3D == null) {
+                    continue;
+                }
+
+                userActorModelMap.remove(object3D);
+
+                getCurrentScene().removeChild(object3D);
+
+                if (pickedObject == object3D) {
+                    onNoObjectPicked();
+                }
+            }
+        }
+
         super.onRender(ellapsedRealtime, deltaTime);
     }
 
@@ -205,6 +231,12 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     public void updateEditAxesModel(@NonNull EditAxesModel editAxesModel) {
         synchronized (editAxesModelLock) {
             this.editAxesModel = editAxesModel;
+        }
+    }
+
+    public void removeUserActor(UserActor userActor) {
+        synchronized (deleteUserActorIdQueue) {
+            deleteUserActorIdQueue.add(userActor.actorId);
         }
     }
 

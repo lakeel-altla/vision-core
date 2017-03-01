@@ -49,5 +49,6 @@
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
+    <string name="button_delete">DELETE</string>
 
 </resources>

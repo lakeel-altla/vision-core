@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnTouch;
 
 public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuildView, UserSceneBuildPresenter>
@@ -82,6 +83,9 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     @BindView(R.id.button_scale)
     Button buttonScale;
+
+    @BindView(R.id.button_edit)
+    Button buttonEdit;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -400,6 +404,20 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
             presenter.onTouchButtonScale();
         }
         return true;
+    }
+
+    @OnTouch(R.id.button_edit)
+    boolean onTouchButtonEdit(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            buttonEdit.setPressed(true);
+            presenter.onTouchButtonEdit();
+        }
+        return true;
+    }
+
+    @OnClick(R.id.button_delete)
+    void onClickButtonDelete() {
+        presenter.onClickButtonDelete();
     }
 
     public interface InteractionListener {

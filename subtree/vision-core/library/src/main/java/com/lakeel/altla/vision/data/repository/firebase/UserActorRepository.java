@@ -74,6 +74,19 @@ public final class UserActorRepository extends BaseDatabaseRepository {
         return new ObservableDataList<>(query, snapshot -> map(userId, sceneId, snapshot));
     }
 
+    public void delete(@NonNull String userId, @NonNull String sceneId, @NonNull String actorId) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(userId)
+                     .child(sceneId)
+                     .child(actorId)
+                     .removeValue((error, reference) -> {
+                         if (error != null) {
+                             LOG.e(String.format("Failed to remove: reference = %s", reference), error.toException());
+                         }
+                     });
+    }
+
     @NonNull
     private static Value map(@NonNull UserActor userActor) {
         Value value = new Value();
