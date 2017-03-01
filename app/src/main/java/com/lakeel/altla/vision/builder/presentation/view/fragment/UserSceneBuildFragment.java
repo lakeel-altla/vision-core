@@ -57,31 +57,31 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @BindView(R.id.texture_view)
     TextureView textureView;
 
-    @BindView(R.id.view_group_object_menu)
-    ViewGroup viewGroupObjectMenu;
+    @BindView(R.id.view_group_edit_user_actor_menu)
+    ViewGroup viewGroupEditUserActorMenu;
 
-    @BindView(R.id.view_group_translate_object_menu)
-    ViewGroup viewGroupTranslateObjectMenu;
+    @BindView(R.id.view_group_translate_menu)
+    ViewGroup viewGroupTranslateMenu;
 
-    @BindView(R.id.view_group_rotate_object_menu)
-    ViewGroup viewGroupRotateObjectMenu;
+    @BindView(R.id.view_group_rotate_menu)
+    ViewGroup viewGroupRotateMenu;
 
-    @BindView(R.id.button_translate_object)
-    Button buttonTranslateObject;
+    @BindView(R.id.button_translate)
+    Button buttonTranslate;
 
-    @BindViews({ R.id.button_translate_object_in_x_axis, R.id.button_translate_object_in_y_axis,
-                 R.id.button_translate_object_in_z_axis })
-    Button[] buttonsTranslateObjectAxes;
+    @BindViews({ R.id.button_translate_in_x_axis, R.id.button_translate_in_y_axis,
+                 R.id.button_translate_in_z_axis })
+    Button[] buttonsTranslateAxes;
 
-    @BindView(R.id.button_rotate_object)
-    Button buttonRotateObject;
+    @BindView(R.id.button_rotate)
+    Button buttonRotate;
 
-    @BindViews({ R.id.button_rotate_object_in_x_axis, R.id.button_rotate_object_in_y_axis,
+    @BindViews({ R.id.button_rotate_in_x_axis, R.id.button_rotate_object_in_y_axis,
                  R.id.button_rotate_object_in_z_axis })
-    Button[] buttonsRotateObjectAxes;
+    Button[] buttonsRotateAxes;
 
-    @BindView(R.id.button_scale_object)
-    Button buttonScaleObject;
+    @BindView(R.id.button_scale)
+    Button buttonScale;
 
     private GestureDetectorCompat gestureDetector;
 
@@ -248,45 +248,45 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public void onUpdateObjectMenuVisible(boolean visible) {
         if (visible) {
-            viewGroupObjectMenu.setVisibility(View.VISIBLE);
+            viewGroupEditUserActorMenu.setVisibility(View.VISIBLE);
         } else {
-            viewGroupObjectMenu.setVisibility(View.GONE);
+            viewGroupEditUserActorMenu.setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void onUpdateTranslateObjectSelected(boolean selected) {
-        buttonTranslateObject.setPressed(selected);
+    public void onUpdateTranslateSelected(boolean selected) {
+        buttonTranslate.setPressed(selected);
     }
 
     @Override
-    public void onUpdateTranslateObjectMenuVisible(boolean visible) {
-        viewGroupTranslateObjectMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
+    public void onUpdateTranslateMenuVisible(boolean visible) {
+        viewGroupTranslateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void onUpdateTranslateObjectAxisSelected(Axis axis, boolean selected) {
-        buttonsTranslateObjectAxes[axis.getValue()].setPressed(selected);
+    public void onUpdateTranslateAxisSelected(Axis axis, boolean selected) {
+        buttonsTranslateAxes[axis.getValue()].setPressed(selected);
     }
 
     @Override
-    public void onUpdateRotateObjectSelected(boolean selected) {
-        buttonRotateObject.setPressed(selected);
+    public void onUpdateRotateSelected(boolean selected) {
+        buttonRotate.setPressed(selected);
     }
 
     @Override
-    public void onUpdateRotateObjectMenuVisible(boolean visible) {
-        viewGroupRotateObjectMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
+    public void onUpdateRotateMenuVisible(boolean visible) {
+        viewGroupRotateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void onUpdateRotateObjectAxisSelected(Axis axis, boolean selected) {
-        buttonsRotateObjectAxes[axis.getValue()].setPressed(selected);
+    public void onUpdateRotateAxisSelected(Axis axis, boolean selected) {
+        buttonsRotateAxes[axis.getValue()].setPressed(selected);
     }
 
     @Override
-    public void onUpdateScaleObjectSelected(boolean selected) {
-        buttonScaleObject.setPressed(selected);
+    public void onUpdateScaleSelected(boolean selected) {
+        buttonScale.setPressed(selected);
     }
 
     @Override
@@ -321,83 +321,83 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     // instead of an onClick ones.
     //
 
-    @OnTouch(R.id.button_translate_object)
-    boolean onTouchButtonTranslateObject(MotionEvent event) {
+    @OnTouch(R.id.button_translate)
+    boolean onTouchButtonTranslate(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonTranslateObject.setPressed(true);
-            presenter.onTouchButtonTranslateObject();
+            buttonTranslate.setPressed(true);
+            presenter.onTouchButtonTranslate();
         }
         return true;
     }
 
-    @OnTouch(R.id.button_translate_object_in_x_axis)
-    boolean onTouchButtonTranslateObjectInXAxis(MotionEvent event) {
+    @OnTouch(R.id.button_translate_in_x_axis)
+    boolean onTouchButtonTranslateInXAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsTranslateObjectAxes[Axis.X.getValue()].setPressed(true);
-            presenter.onTouchButtonTranslateObjectAxis(Axis.X);
+            buttonsTranslateAxes[Axis.X.getValue()].setPressed(true);
+            presenter.onTouchButtonTranslateAxis(Axis.X);
         }
         return true;
     }
 
-    @OnTouch(R.id.button_translate_object_in_y_axis)
-    boolean onTouchButtonTranslateObjectInYAxis(MotionEvent event) {
+    @OnTouch(R.id.button_translate_in_y_axis)
+    boolean onTouchButtonTranslateInYAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsTranslateObjectAxes[Axis.Y.getValue()].setPressed(true);
-            presenter.onTouchButtonTranslateObjectAxis(Axis.Y);
+            buttonsTranslateAxes[Axis.Y.getValue()].setPressed(true);
+            presenter.onTouchButtonTranslateAxis(Axis.Y);
         }
         return true;
     }
 
-    @OnTouch(R.id.button_translate_object_in_z_axis)
-    boolean onTouchButtonTranslateObjectInZAxis(MotionEvent event) {
+    @OnTouch(R.id.button_translate_in_z_axis)
+    boolean onTouchButtonTranslateInZAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsTranslateObjectAxes[Axis.Z.getValue()].setPressed(true);
-            presenter.onTouchButtonTranslateObjectAxis(Axis.Z);
+            buttonsTranslateAxes[Axis.Z.getValue()].setPressed(true);
+            presenter.onTouchButtonTranslateAxis(Axis.Z);
         }
         return true;
     }
 
-    @OnTouch(R.id.button_rotate_object)
+    @OnTouch(R.id.button_rotate)
     boolean onTouchButtonRotateObject(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonRotateObject.setPressed(true);
+            buttonRotate.setPressed(true);
             presenter.onTouchButtonRotateObject();
         }
         return true;
     }
 
-    @OnTouch(R.id.button_rotate_object_in_x_axis)
-    boolean onTouchButtonRotateObjectInXAxis(MotionEvent event) {
+    @OnTouch(R.id.button_rotate_in_x_axis)
+    boolean onTouchButtonRotateInXAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsRotateObjectAxes[Axis.X.getValue()].setPressed(true);
-            presenter.onTouchButtonRotateObjectAxis(Axis.X);
+            buttonsRotateAxes[Axis.X.getValue()].setPressed(true);
+            presenter.onTouchButtonRotateAxis(Axis.X);
         }
         return true;
     }
 
     @OnTouch(R.id.button_rotate_object_in_y_axis)
-    boolean onTouchButtonRotateObjectInYAxis(MotionEvent event) {
+    boolean onTouchButtonRotateInYAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsRotateObjectAxes[Axis.Y.getValue()].setPressed(true);
-            presenter.onTouchButtonRotateObjectAxis(Axis.Y);
+            buttonsRotateAxes[Axis.Y.getValue()].setPressed(true);
+            presenter.onTouchButtonRotateAxis(Axis.Y);
         }
         return true;
     }
 
     @OnTouch(R.id.button_rotate_object_in_z_axis)
-    boolean onTouchButtonRotateObjectInZAxis(MotionEvent event) {
+    boolean onTouchButtonRotateInZAxis(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonsRotateObjectAxes[Axis.Z.getValue()].setPressed(true);
-            presenter.onTouchButtonRotateObjectAxis(Axis.Z);
+            buttonsRotateAxes[Axis.Z.getValue()].setPressed(true);
+            presenter.onTouchButtonRotateAxis(Axis.Z);
         }
         return true;
     }
 
-    @OnTouch(R.id.button_scale_object)
-    boolean onTouchButtonScaleObject(MotionEvent event) {
+    @OnTouch(R.id.button_scale)
+    boolean onTouchButtonScale(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            buttonScaleObject.setPressed(true);
-            presenter.onTouchButtonScaleObject();
+            buttonScale.setPressed(true);
+            presenter.onTouchButtonScale();
         }
         return true;
     }

@@ -1,15 +1,12 @@
 <resources>
     <string name="app_name">Altla Vision Builder</string>
 
-    <string name="button_translate_object">TRANSLATE</string>
-    <string name="button_rotate_object">ROTATE</string>
-    <string name="button_scale_object">SCALE</string>
-    <string name="button_translate_object_in_x_axis">X-axis</string>
-    <string name="button_translate_object_in_y_axis">Y-axis</string>
-    <string name="button_translate_object_in_z_axis">Z-axis</string>
-    <string name="button_rotate_object_in_x_axis">X-axis</string>
-    <string name="button_rotate_object_in_y_axis">Y-axis</string>
-    <string name="button_rotate_object_in_z_axis">Z-axis</string>
+    <string name="button_translate">TRANSLATE</string>
+    <string name="button_rotate">ROTATE</string>
+    <string name="button_scale">SCALE</string>
+    <string name="button_x_axis">X-axis</string>
+    <string name="button_y_axis">Y-axis</string>
+    <string name="button_z_axis">Z-axis</string>
     <string name="button_edit">Edit</string>
     <string name="button_create">Create</string>
 

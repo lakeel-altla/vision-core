@@ -170,12 +170,12 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().setSurfaceRenderer(renderer);
 
         getView().onUpdateObjectMenuVisible(false);
-        getView().onUpdateTranslateObjectSelected(false);
-        getView().onUpdateRotateObjectSelected(false);
-        getView().onUpdateTranslateObjectMenuVisible(false);
-        getView().onUpdateRotateObjectMenuVisible(false);
-        getView().onUpdateTranslateObjectAxisSelected(Axis.X, true);
-        getView().onUpdateRotateObjectAxisSelected(Axis.Y, true);
+        getView().onUpdateTranslateSelected(false);
+        getView().onUpdateRotateSelected(false);
+        getView().onUpdateTranslateMenuVisible(false);
+        getView().onUpdateRotateMenuVisible(false);
+        getView().onUpdateTranslateAxisSelected(Axis.X, true);
+        getView().onUpdateRotateAxisSelected(Axis.Y, true);
     }
 
     @Override
@@ -237,50 +237,50 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().onUpdateObjectMenuVisible(pickedUserActorModel != null);
     }
 
-    public void onTouchButtonTranslateObject() {
+    public void onTouchButtonTranslate() {
         actorEditMode = ActorEditMode.TRANSLATE;
 
-        getView().onUpdateTranslateObjectSelected(true);
-        getView().onUpdateTranslateObjectMenuVisible(true);
-        getView().onUpdateRotateObjectSelected(false);
-        getView().onUpdateRotateObjectMenuVisible(false);
-        getView().onUpdateScaleObjectSelected(false);
+        getView().onUpdateTranslateSelected(true);
+        getView().onUpdateTranslateMenuVisible(true);
+        getView().onUpdateRotateSelected(false);
+        getView().onUpdateRotateMenuVisible(false);
+        getView().onUpdateScaleSelected(false);
     }
 
     public void onTouchButtonRotateObject() {
         actorEditMode = ActorEditMode.ROTATE;
 
-        getView().onUpdateTranslateObjectSelected(false);
-        getView().onUpdateTranslateObjectMenuVisible(false);
-        getView().onUpdateRotateObjectSelected(true);
-        getView().onUpdateRotateObjectMenuVisible(true);
-        getView().onUpdateScaleObjectSelected(false);
+        getView().onUpdateTranslateSelected(false);
+        getView().onUpdateTranslateMenuVisible(false);
+        getView().onUpdateRotateSelected(true);
+        getView().onUpdateRotateMenuVisible(true);
+        getView().onUpdateScaleSelected(false);
     }
 
-    public void onTouchButtonTranslateObjectAxis(Axis axis) {
+    public void onTouchButtonTranslateAxis(Axis axis) {
         translateAxis = axis;
 
-        getView().onUpdateTranslateObjectAxisSelected(Axis.X, axis == Axis.X);
-        getView().onUpdateTranslateObjectAxisSelected(Axis.Y, axis == Axis.Y);
-        getView().onUpdateTranslateObjectAxisSelected(Axis.Z, axis == Axis.Z);
+        getView().onUpdateTranslateAxisSelected(Axis.X, axis == Axis.X);
+        getView().onUpdateTranslateAxisSelected(Axis.Y, axis == Axis.Y);
+        getView().onUpdateTranslateAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
-    public void onTouchButtonRotateObjectAxis(Axis axis) {
+    public void onTouchButtonRotateAxis(Axis axis) {
         rotateAxis = axis;
 
-        getView().onUpdateRotateObjectAxisSelected(Axis.X, axis == Axis.X);
-        getView().onUpdateRotateObjectAxisSelected(Axis.Y, axis == Axis.Y);
-        getView().onUpdateRotateObjectAxisSelected(Axis.Z, axis == Axis.Z);
+        getView().onUpdateRotateAxisSelected(Axis.X, axis == Axis.X);
+        getView().onUpdateRotateAxisSelected(Axis.Y, axis == Axis.Y);
+        getView().onUpdateRotateAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
-    public void onTouchButtonScaleObject() {
+    public void onTouchButtonScale() {
         actorEditMode = ActorEditMode.SCALE;
 
-        getView().onUpdateTranslateObjectSelected(false);
-        getView().onUpdateTranslateObjectMenuVisible(false);
-        getView().onUpdateRotateObjectSelected(false);
-        getView().onUpdateRotateObjectMenuVisible(false);
-        getView().onUpdateScaleObjectSelected(true);
+        getView().onUpdateTranslateSelected(false);
+        getView().onUpdateTranslateMenuVisible(false);
+        getView().onUpdateRotateSelected(false);
+        getView().onUpdateRotateMenuVisible(false);
+        getView().onUpdateScaleSelected(true);
     }
 
     public void onDropModel(@NonNull ClipData clipData) {

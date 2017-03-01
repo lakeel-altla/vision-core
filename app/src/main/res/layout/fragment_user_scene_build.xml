@@ -10,34 +10,34 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-    <RelativeLayout android:id="@+id/view_group_object_menu"
+    <RelativeLayout android:id="@+id/view_group_edit_user_actor_menu"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
                     android:layout_marginTop="@dimen/content_vertical_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-        <LinearLayout android:id="@+id/view_group_edit_object_menu"
+        <LinearLayout android:id="@+id/view_group_edit_actor_menu"
                       android:orientation="horizontal"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content">
 
-            <Button android:id="@+id/button_translate_object"
-                    android:text="@string/button_translate_object"
+            <Button android:id="@+id/button_translate"
+                    android:text="@string/button_translate"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-            <Button android:id="@+id/button_rotate_object"
-                    android:text="@string/button_rotate_object"
+            <Button android:id="@+id/button_rotate"
+                    android:text="@string/button_rotate"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-            <Button android:id="@+id/button_scale_object"
-                    android:text="@string/button_scale_object"
+            <Button android:id="@+id/button_scale"
+                    android:text="@string/button_scale"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
@@ -46,30 +46,30 @@
 
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/view_group_translate_object_menu"
-                      android:layout_below="@id/view_group_edit_object_menu"
+        <LinearLayout android:id="@+id/view_group_translate_menu"
+                      android:layout_below="@id/view_group_edit_actor_menu"
                       android:layout_marginTop="@dimen/content_vertical_margin"
                       android:orientation="horizontal"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content">
 
-            <Button android:id="@+id/button_translate_object_in_x_axis"
-                    android:text="@string/button_translate_object_in_x_axis"
+            <Button android:id="@+id/button_translate_in_x_axis"
+                    android:text="@string/button_x_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-            <Button android:id="@+id/button_translate_object_in_y_axis"
-                    android:text="@string/button_translate_object_in_y_axis"
+            <Button android:id="@+id/button_translate_in_y_axis"
+                    android:text="@string/button_y_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-            <Button android:id="@+id/button_translate_object_in_z_axis"
-                    android:text="@string/button_translate_object_in_z_axis"
+            <Button android:id="@+id/button_translate_in_z_axis"
+                    android:text="@string/button_z_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
@@ -78,22 +78,22 @@
 
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/view_group_rotate_object_menu"
-                      android:layout_below="@id/view_group_edit_object_menu"
+        <LinearLayout android:id="@+id/view_group_rotate_menu"
+                      android:layout_below="@id/view_group_edit_actor_menu"
                       android:layout_marginTop="@dimen/content_vertical_margin"
                       android:orientation="horizontal"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content">
 
-            <Button android:id="@+id/button_rotate_object_in_x_axis"
-                    android:text="@string/button_rotate_object_in_x_axis"
+            <Button android:id="@+id/button_rotate_in_x_axis"
+                    android:text="@string/button_x_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
             <Button android:id="@+id/button_rotate_object_in_y_axis"
-                    android:text="@string/button_rotate_object_in_y_axis"
+                    android:text="@string/button_y_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"
@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"/>
 
             <Button android:id="@+id/button_rotate_object_in_z_axis"
-                    android:text="@string/button_rotate_object_in_z_axis"
+                    android:text="@string/button_z_axis"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"

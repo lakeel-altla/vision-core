@@ -19,19 +19,19 @@ public interface UserSceneBuildView {
 
     void onUpdateObjectMenuVisible(boolean visible);
 
-    void onUpdateTranslateObjectSelected(boolean selected);
+    void onUpdateTranslateSelected(boolean selected);
 
-    void onUpdateTranslateObjectMenuVisible(boolean visible);
+    void onUpdateTranslateMenuVisible(boolean visible);
 
-    void onUpdateTranslateObjectAxisSelected(Axis axis, boolean selected);
+    void onUpdateTranslateAxisSelected(Axis axis, boolean selected);
 
-    void onUpdateRotateObjectSelected(boolean selected);
+    void onUpdateRotateSelected(boolean selected);
 
-    void onUpdateRotateObjectMenuVisible(boolean visible);
+    void onUpdateRotateMenuVisible(boolean visible);
 
-    void onUpdateRotateObjectAxisSelected(Axis axis, boolean selected);
+    void onUpdateRotateAxisSelected(Axis axis, boolean selected);
 
-    void onUpdateScaleObjectSelected(boolean selected);
+    void onUpdateScaleSelected(boolean selected);
 
     void onUpdateDebugConsoleVisible(boolean visible);
 
