@@ -374,7 +374,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onScrollFinished(MotionEvent event) {
-        // TODO: save the user actor here.
+        if (pickedUserActorModel == null) return;
 
         UserActor userActor;
         if (pickedUserActorModel instanceof UserActorImageModel) {
