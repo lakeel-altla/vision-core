@@ -124,7 +124,7 @@ public final class UserActorRepository extends BaseDatabaseRepository {
     private static UserActor map(@NonNull String userId, @NonNull String sceneId, @NonNull DataSnapshot snapshot) {
         Value value = snapshot.getValue(Value.class);
         UserActor userActor = new UserActor(userId, sceneId, snapshot.getKey());
-        userActor.assetType = UserActor.AssetType.toModelType(value.assetType);
+        userActor.assetType = UserActor.AssetType.toAssetType(value.assetType);
         userActor.assetId = value.assetId;
         userActor.positionX = value.positionX;
         userActor.positionY = value.positionY;
