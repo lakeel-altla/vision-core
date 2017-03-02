@@ -242,6 +242,13 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onCloseUserSceneBuildView() {
+        toolbar.setVisibility(View.VISIBLE);
+
+        replaceFragment(ProjectFragment.newInstance());
+    }
+
+    @Override
     public void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel) {
         toolbar.setVisibility(View.VISIBLE);
 

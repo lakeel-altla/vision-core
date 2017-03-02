@@ -35,5 +35,7 @@ public interface UserSceneBuildView {
 
     void onUpdateDebugConsoleVisible(boolean visible);
 
+    void onCloseView();
+
     void onSnackbar(@StringRes int resId);
 }

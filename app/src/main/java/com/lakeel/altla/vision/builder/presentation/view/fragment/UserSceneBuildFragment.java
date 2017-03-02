@@ -217,8 +217,11 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_close:
+                presenter.onActionCloseSelected();
+                return true;
             case R.id.action_debug:
-                presenter.onToggleDebug();
+                presenter.onActionDebugSelected();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -311,6 +314,11 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
                                      .remove(fragment)
                                      .commit();
         }
+    }
+
+    @Override
+    public void onCloseView() {
+        interactionListener.onCloseUserSceneBuildView();
     }
 
     @Override
@@ -422,5 +430,6 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
 
     public interface InteractionListener {
 
+        void onCloseUserSceneBuildView();
     }
 }

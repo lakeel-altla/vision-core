@@ -212,10 +212,10 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         super.onPauseOverride();
 
         active = false;
+        renderer.disconnectFromTangoCamera();
         tangoWrapper.removeOnTangoReadyListener(renderer::connectToTangoCamera);
         tangoWrapper.removeOnFrameAvailableListener(this);
         tangoWrapper.disconnect();
-        renderer.disconnectFromTangoCamera();
     }
 
     @Override
@@ -559,7 +559,12 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         return config;
     }
 
-    public void onToggleDebug() {
+    public void onActionCloseSelected() {
+        // TODO: confirmation.
+        getView().onCloseView();
+    }
+
+    public void onActionDebugSelected() {
         debugConsoleVisible = !debugConsoleVisible;
         getView().onUpdateDebugConsoleVisible(debugConsoleVisible);
     }
