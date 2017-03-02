@@ -162,8 +162,8 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
     }
 
     @Override
-    public void onShowUserActorEditView(@NonNull String actorId) {
-        interactionListener.onShowUserActorEditView(actorId);
+    public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
+        interactionListener.onShowUserActorEditView(sceneId, actorId);
     }
 
     @Override
@@ -173,6 +173,6 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
 
     public interface InteractionListener {
 
-        void onShowUserActorEditView(@NonNull String actorId);
+        void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId);
     }
 }

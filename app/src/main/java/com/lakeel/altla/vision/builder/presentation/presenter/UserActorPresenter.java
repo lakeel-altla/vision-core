@@ -90,7 +90,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     }
 
     public void onEdit() {
-        getView().onShowUserActorEditView(actorId);
+        getView().onShowUserActorEditView(sceneId, actorId);
     }
 
     @NonNull

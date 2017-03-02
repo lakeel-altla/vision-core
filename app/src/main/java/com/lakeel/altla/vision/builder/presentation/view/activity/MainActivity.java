@@ -16,6 +16,7 @@ import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
@@ -62,6 +63,7 @@ public final class MainActivity extends AppCompatActivity
                    UserSceneListInAreaFragmentInArea.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
                    UserActorFragment.InteractionListener,
+                   UserActorEditFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -211,6 +213,16 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onInvalidateOptionsMenu() {
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onBackView() {
+        onBackPressed();
+    }
+
+    @Override
     public void onCloseSignInView() {
         toolbar.setVisibility(View.INVISIBLE);
 
@@ -250,7 +262,8 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserActorEditView(@NonNull String actorId) {
+    public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
+        replaceFragmentAndAddToBackStack(UserActorEditFragment.newInstance(sceneId, actorId));
         // TODO
     }
 

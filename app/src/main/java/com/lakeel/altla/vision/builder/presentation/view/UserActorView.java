@@ -20,7 +20,7 @@ public interface UserActorView {
 
     void onUpdateUpdatedAt(long updatedAt);
 
-    void onShowUserActorEditView(@NonNull String actorId);
+    void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId);
 
     void onSnackbar(@StringRes int resId);
 }

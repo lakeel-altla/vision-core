@@ -10,6 +10,7 @@
     <string name="button_edit">Edit</string>
     <string name="button_create">Create</string>
     <string name="button_delete">DELETE</string>
+    <string name="button_detail">Detail</string>
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
@@ -57,6 +58,10 @@
     <string name="action_debug">Debug ON/OFF</string>
     <string name="action_close">Close</string>
     <string name="action_edit">Edit</string>
-    <string name="button_detail">Detail</string>
+    <string name="action_save">Save</string>
+    <string name="label_x">X</string>
+    <string name="label_y">Y</string>
+    <string name="label_z">Z</string>
+    <string name="label_w">W</string>
 
 </resources>
