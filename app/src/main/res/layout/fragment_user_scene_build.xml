@@ -44,8 +44,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-            <Button android:id="@+id/button_edit"
-                    android:text="@string/button_edit"
+            <Button android:id="@+id/button_detail"
+                    android:text="@string/button_detail"
                     android:textColor="@drawable/button_text_color"
                     android:background="@drawable/button_background"
                     android:layout_marginStart="@dimen/content_horizontal_margin"

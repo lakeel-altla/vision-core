@@ -16,6 +16,7 @@ import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
@@ -60,6 +61,7 @@ public final class MainActivity extends AppCompatActivity
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneListInAreaFragmentInArea.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
+                   UserActorFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -125,7 +127,9 @@ public final class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationViewHeader = new NavigationViewHeader(navigationView);
 
-        showSignInFragment();
+        if (savedInstanceState == null) {
+            showSignInFragment();
+        }
     }
 
     @Override
@@ -222,36 +226,36 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowUserAreaListView() {
-        toolbar.setVisibility(View.VISIBLE);
-
         replaceFragmentAndAddToBackStack(UserAreaListFragment.newInstance());
     }
 
     @Override
     public void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId) {
-        toolbar.setVisibility(View.VISIBLE);
-
         replaceFragmentAndAddToBackStack(UserAreaDescriptionListInAreaFragment.newInstance(areaId));
     }
 
     @Override
     public void onShowUserSceneListInAreaView(@NonNull String areaId) {
-        toolbar.setVisibility(View.VISIBLE);
-
         replaceFragmentAndAddToBackStack(UserSceneListInAreaFragmentInArea.newInstance(areaId));
     }
 
     @Override
-    public void onCloseUserSceneBuildView() {
-        toolbar.setVisibility(View.VISIBLE);
+    public void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId) {
+        replaceFragmentAndAddToBackStack(UserActorFragment.newInstance(sceneId, actorId));
+    }
 
+    @Override
+    public void onCloseUserSceneBuildView() {
         replaceFragment(ProjectFragment.newInstance());
     }
 
     @Override
-    public void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel) {
-        toolbar.setVisibility(View.VISIBLE);
+    public void onShowUserActorEditView(@NonNull String actorId) {
+        // TODO
+    }
 
+    @Override
+    public void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel) {
         replaceFragment(UserSceneBuildFragment.newInstance(sceneBuildModel));
     }
 

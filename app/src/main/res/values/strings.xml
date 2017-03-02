@@ -9,6 +9,7 @@
     <string name="button_z_axis">Z-axis</string>
     <string name="button_edit">Edit</string>
     <string name="button_create">Create</string>
+    <string name="button_delete">DELETE</string>
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
@@ -42,6 +43,11 @@
     <string name="label_area">Area</string>
     <string name="label_area_description">Area Description</string>
     <string name="label_scene">Scene</string>
+    <string name="label_position">Position</string>
+    <string name="label_orientation">Orientation</string>
+    <string name="label_scale">Scale</string>
+    <string name="label_created_at">Created At</string>
+    <string name="label_updated_at">Updated At</string>
 
     <string name="title_project">Project</string>
     <string name="title_user_area_list">Select a User Area</string>
@@ -49,7 +55,8 @@
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
-    <string name="button_delete">DELETE</string>
     <string name="action_close">Close</string>
+    <string name="action_edit">Edit</string>
+    <string name="button_detail">Detail</string>
 
 </resources>

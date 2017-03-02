@@ -289,8 +289,10 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         getView().onUpdateScaleSelected(true);
     }
 
-    public void onTouchButtonEdit() {
-        // TODO
+    public void onTouchButtonDetail() {
+        if (pickedUserActorModel == null) return;
+
+        getView().onShowUserActorView(pickedUserActorModel.sceneId, pickedUserActorModel.actorId);
     }
 
     public void onClickButtonDelete() {

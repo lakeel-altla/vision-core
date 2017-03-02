@@ -9,9 +9,10 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.DebugConsoleFr
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAssetImageListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAssetImageListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -45,6 +46,8 @@ public interface ActivityComponent {
     void inject(UserSceneBuildFragment fragment);
 
     void inject(UserAssetImageListFragment fragment);
+
+    void inject(UserActorFragment fragment);
 
     void inject(DebugConsoleFragment fragment);
 }

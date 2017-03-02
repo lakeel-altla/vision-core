@@ -84,7 +84,7 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @BindView(R.id.button_scale)
     Button buttonScale;
 
-    @BindView(R.id.button_edit)
+    @BindView(R.id.button_detail)
     Button buttonEdit;
 
     private GestureDetectorCompat gestureDetector;
@@ -317,6 +317,11 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     }
 
     @Override
+    public void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId) {
+        interactionListener.onShowUserActorView(sceneId, actorId);
+    }
+
+    @Override
     public void onCloseView() {
         interactionListener.onCloseUserSceneBuildView();
     }
@@ -414,11 +419,11 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
         return true;
     }
 
-    @OnTouch(R.id.button_edit)
+    @OnTouch(R.id.button_detail)
     boolean onTouchButtonEdit(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             buttonEdit.setPressed(true);
-            presenter.onTouchButtonEdit();
+            presenter.onTouchButtonDetail();
         }
         return true;
     }
@@ -429,6 +434,8 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     }
 
     public interface InteractionListener {
+
+        void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId);
 
         void onCloseUserSceneBuildView();
     }

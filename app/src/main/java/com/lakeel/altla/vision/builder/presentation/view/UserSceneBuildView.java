@@ -6,6 +6,7 @@ import com.lakeel.altla.vision.builder.presentation.model.Axis;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
 /**
@@ -34,6 +35,8 @@ public interface UserSceneBuildView {
     void onUpdateScaleSelected(boolean selected);
 
     void onUpdateDebugConsoleVisible(boolean visible);
+
+    void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId);
 
     void onCloseView();
 
