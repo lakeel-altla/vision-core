@@ -160,8 +160,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         this.sceneId = sceneId;
 
         tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
-
-        userActorManager = new UserActorManager(context);
     }
 
     @Override
@@ -187,6 +185,9 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     @Override
     protected void onStartOverride() {
         super.onStartOverride();
+
+        // Instantiate UserActorManager here to clear the bitmap cache in Picasso.
+        userActorManager = new UserActorManager(context);
 
         Disposable disposable = observeAllUserActorsUserCase
                 .execute(sceneId)
