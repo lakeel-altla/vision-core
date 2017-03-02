@@ -94,8 +94,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     @Inject
     DeleteUserActorUseCase deleteUserActorUseCase;
 
-    private final UserActorManager userActorManager = new UserActorManager();
-
     private final Vector3 cameraPosition = new Vector3();
 
     private final Quaternion cameraOrientation = new Quaternion();
@@ -107,6 +105,8 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     private String areaDescriptionId;
 
     private String sceneId;
+
+    private UserActorManager userActorManager;
 
     private MainRenderer renderer;
 
@@ -160,6 +160,8 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         this.sceneId = sceneId;
 
         tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
+
+        userActorManager = new UserActorManager(context);
     }
 
     @Override
@@ -612,6 +614,12 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         final Set<Target> targetMap = new HashSet<>();
 
+        Picasso picasso;
+
+        UserActorManager(@NonNull Context context) {
+            picasso = new Picasso.Builder(context).build();
+        }
+
         void handle(@NonNull DataListEvent<UserActor> event) {
             getLog().v("DataListEvent<UserActor>: type = %s, actorId = %s", event.getType(),
                        event.getData().actorId);
@@ -694,8 +702,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
                         // because Piccaso uses it as a weak reference.
                         targetMap.add(target);
 
-                        Picasso.with(context)
-                               .load(uri)
+                        picasso.load(uri)
                                .into(target);
                     }, e -> {
                         getLog().e("Failed.", e);
