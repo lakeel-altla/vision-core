@@ -199,12 +199,17 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
             return false;
         });
 
-        UserAssetImageListFragment userActorImageListFragment = UserAssetImageListFragment.newInstance();
-        getChildFragmentManager().beginTransaction()
-                                 .add(R.id.user_actor_image_list_container,
-                                      userActorImageListFragment,
-                                      UserAssetImageListFragment.class.getName())
-                                 .commit();
+        UserAssetImageListFragment userActorImageListFragment =
+                (UserAssetImageListFragment) getChildFragmentManager().findFragmentByTag(
+                        UserAssetImageListFragment.class.getName());
+        if (userActorImageListFragment == null) {
+            userActorImageListFragment = UserAssetImageListFragment.newInstance();
+            getChildFragmentManager().beginTransaction()
+                                     .add(R.id.user_actor_image_list_container,
+                                          userActorImageListFragment,
+                                          UserAssetImageListFragment.class.getName())
+                                     .commit();
+        }
 
         setHasOptionsMenu(true);
     }
