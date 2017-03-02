@@ -72,8 +72,9 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
                 .map(this::map)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(model -> {
-                    getView().onUpdateTitle(model.actorId);
+                    getView().onUpdateTitle(model.name);
                     getView().onUpdateActorId(model.actorId);
+                    getView().onUpdateName(model.name);
                     getView().onUpdatePosition(model.positionX, model.positionY, model.positionZ);
                     getView().onUpdateOrientation(model.orientationX,
                                                   model.orientationY,
@@ -97,6 +98,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     private Model map(@NonNull UserActor userActor) {
         Model model = new Model();
         model.actorId = userActor.actorId;
+        model.name = userActor.name;
         model.positionX = userActor.positionX;
         model.positionY = userActor.positionY;
         model.positionZ = userActor.positionZ;
@@ -115,6 +117,8 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     private final class Model {
 
         String actorId;
+
+        String name;
 
         double positionX;
 

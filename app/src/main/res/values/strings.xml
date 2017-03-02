@@ -34,8 +34,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_content_confirm_delete_texture">Delete this texture?</string>
 
-    <string name="hint_edit_texure_name">The texture name.</string>
-    <string name="hint_edit_name">Input the scene name</string>
+    <string name="hint_edit_name">Input the name</string>
 
     <string name="label_id">ID</string>
     <string name="label_place">Place</string>
@@ -63,5 +62,6 @@
     <string name="label_y">Y</string>
     <string name="label_z">Z</string>
     <string name="label_w">W</string>
+    <string name="input_error_required">Required.</string>
 
 </resources>

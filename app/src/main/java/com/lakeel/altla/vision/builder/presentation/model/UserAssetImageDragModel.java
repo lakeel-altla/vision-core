@@ -13,9 +13,13 @@ public class UserAssetImageDragModel {
 
     private static final String EXTRA_URI = "uri";
 
+    private static final String EXTRA_NAME = "name";
+
     public String userId;
 
     public String assetId;
+
+    public String name;
 
     public Uri uri;
 
@@ -23,6 +27,7 @@ public class UserAssetImageDragModel {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_USER_ID, userId);
         intent.putExtra(EXTRA_ASSET_ID, assetId);
+        intent.putExtra(EXTRA_NAME, name);
         intent.putExtra(EXTRA_URI, uri);
         return intent;
     }
@@ -32,6 +37,7 @@ public class UserAssetImageDragModel {
         UserAssetImageDragModel model = new UserAssetImageDragModel();
         model.userId = intent.getStringExtra(EXTRA_USER_ID);
         model.assetId = intent.getStringExtra(EXTRA_ASSET_ID);
+        model.name = intent.getStringExtra(EXTRA_NAME);
         model.uri = intent.getParcelableExtra(EXTRA_URI);
         return model;
     }

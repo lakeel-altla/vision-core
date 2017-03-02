@@ -325,6 +325,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
                                             UUID.randomUUID().toString());
         userActor.assetType = UserActor.AssetType.IMAGE;
         userActor.assetId = userAssetImageDragModel.assetId;
+        userActor.name = userAssetImageDragModel.name;
 
         // Decide the position and the orientation of the dropped user actor.
         try (Pool.Holder<Vector3> positionHolder = Vector3Pool.get();

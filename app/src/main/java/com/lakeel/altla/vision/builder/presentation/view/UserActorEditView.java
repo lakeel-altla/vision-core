@@ -17,6 +17,8 @@ public interface UserActorEditView {
 
     void onUpdateTitle(@Nullable String title);
 
+    void onUpdateName(@Nullable String name);
+
     void onUpdatePositionX(double x);
 
     void onUpdatePositionY(double y);
@@ -36,6 +38,10 @@ public interface UserActorEditView {
     void onUpdateScaleY(double y);
 
     void onUpdateScaleZ(double z);
+
+    void onShowNameError(@StringRes int resId);
+
+    void onHideNameError();
 
     void onBackView();
 

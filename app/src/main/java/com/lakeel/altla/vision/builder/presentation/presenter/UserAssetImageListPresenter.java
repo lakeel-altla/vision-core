@@ -169,6 +169,7 @@ public final class UserAssetImageListPresenter extends BasePresenter<UserAssetIm
                         UserAssetImageDragModel userAssetImageDragModel = new UserAssetImageDragModel();
                         userAssetImageDragModel.userId = model.userId;
                         userAssetImageDragModel.assetId = model.assetId;
+                        userAssetImageDragModel.name = model.name;
                         userAssetImageDragModel.uri = uri;
                         itemView.onStartDrag(userAssetImageDragModel);
                     }, e -> {

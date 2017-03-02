@@ -14,6 +14,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -39,6 +41,12 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
 
     @BindView(R.id.view_top)
     View viewTop;
+
+    @BindView(R.id.text_input_layout_name)
+    TextInputLayout textInputLayoutName;
+
+    @BindView(R.id.text_input_edit_text_name)
+    TextInputEditText textInputEditTextName;
 
     @BindView(R.id.edit_text_position_x)
     EditText editTextPositionX;
@@ -188,6 +196,11 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
     }
 
     @Override
+    public void onUpdateName(@Nullable String name) {
+        textInputEditTextName.setText(name);
+    }
+
+    @Override
     public void onUpdatePositionX(double x) {
         editTextPositionX.setText(String.valueOf(x));
     }
@@ -238,6 +251,16 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
     }
 
     @Override
+    public void onShowNameError(@StringRes int resId) {
+        textInputLayoutName.setError(getString(resId));
+    }
+
+    @Override
+    public void onHideNameError() {
+        textInputLayoutName.setError(null);
+    }
+
+    @Override
     public void onBackView() {
         interactionListener.onBackView();
     }
@@ -245,6 +268,11 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @OnTextChanged(value = R.id.text_input_edit_text_name, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
+    void onEditTextNameAfterTextChanged(Editable editable) {
+        presenter.onEditTextNameAfterTextChanged(editable.toString());
     }
 
     @OnTextChanged(value = R.id.edit_text_position_x, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)

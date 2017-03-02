@@ -44,6 +44,9 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
     @BindView(R.id.text_view_id)
     TextView textViewId;
 
+    @BindView(R.id.text_view_name)
+    TextView textViewName;
+
     @BindView(R.id.text_view_position)
     TextView textViewPosition;
 
@@ -134,6 +137,11 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
     @Override
     public void onUpdateActorId(@NonNull String actorId) {
         textViewId.setText(actorId);
+    }
+
+    @Override
+    public void onUpdateName(@NonNull String name) {
+        textViewName.setText(name);
     }
 
     @Override

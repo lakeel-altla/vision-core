@@ -10,6 +10,8 @@ public interface UserActorView {
 
     void onUpdateActorId(@NonNull String actorId);
 
+    void onUpdateName(@NonNull String name);
+
     void onUpdatePosition(double x, double y, double z);
 
     void onUpdateOrientation(double x, double y, double z, double w);
