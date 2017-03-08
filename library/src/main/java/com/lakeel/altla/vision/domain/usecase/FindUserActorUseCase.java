@@ -2,18 +2,16 @@ package com.lakeel.altla.vision.domain.usecase;
 
 import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
-import com.lakeel.altla.vision.domain.helper.DataListEvent;
-import com.lakeel.altla.vision.domain.helper.ObservableDataList;
 import com.lakeel.altla.vision.domain.model.Actor;
 
 import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Maybe;
 import io.reactivex.schedulers.Schedulers;
 
-public final class ObserveAllUserActorsUserCase {
+public final class FindUserActorUseCase {
 
     @Inject
     UserActorRepository userActorRepository;
@@ -22,14 +20,21 @@ public final class ObserveAllUserActorsUserCase {
     CurrentUserResolver currentUserResolver;
 
     @Inject
-    public ObserveAllUserActorsUserCase() {
+    public FindUserActorUseCase() {
     }
 
     @NonNull
-    public Observable<DataListEvent<Actor>> execute(@NonNull String sceneId) {
+    public Maybe<Actor> execute(@NonNull String sceneId, @NonNull String actorId) {
         String userId = currentUserResolver.getUserId();
 
-        return ObservableDataList.using(() -> userActorRepository.observeAll(userId, sceneId))
-                                 .subscribeOn(Schedulers.io());
+        return Maybe.<Actor>create(e -> {
+            userActorRepository.find(userId, sceneId, actorId, actor -> {
+                if (actor == null) {
+                    e.onComplete();
+                } else {
+                    e.onSuccess(actor);
+                }
+            }, e::onError);
+        }).subscribeOn(Schedulers.io());
     }
 }
