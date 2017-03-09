@@ -5,10 +5,10 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.rajawali.TangoCameraRenderer;
 import com.lakeel.altla.vision.builder.presentation.graphics.BitmapPlaneFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
+import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorModel;
-import com.lakeel.altla.vision.domain.model.UserActor;
+import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
+import com.lakeel.altla.vision.domain.model.Actor;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
@@ -35,17 +35,17 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private final Queue<UserActorModel> addUserActorModelQueue = new LinkedList<>();
+    private final Queue<ActorModel> addActorModelQueue = new LinkedList<>();
 
-    private final Queue<UserActorModel> updateUserActorModelQueue = new LinkedList<>();
+    private final Queue<ActorModel> updateActorModelQueue = new LinkedList<>();
 
-    private final Queue<String> deleteUserActorIdQueue = new LinkedList<>();
+    private final Queue<String> deleteActorIdQueue = new LinkedList<>();
 
     private final BitmapPlaneFactory bitmapPlaneFactory = new BitmapPlaneFactory();
 
     private final Object editAxesModelLock = new Object();
 
-    private final Map<Object3D, UserActorModel> userActorModelMap = new HashMap<>();
+    private final Map<Object3D, ActorModel> actorModelMap = new HashMap<>();
 
     private final Map<String, Object3D> object3DMap = new HashMap<>();
 
@@ -57,7 +57,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private EditAxesModel editAxesModel;
 
-    private OnUserActorPickedListener onUserActorPickedListener;
+    private OnActorPickedListener onActorPickedListener;
 
     private OnCurrentCameraTransformUpdatedListener onCurrentCameraTransformUpdatedListener;
 
@@ -93,35 +93,35 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         //
 
         // Add user actors.
-        synchronized (addUserActorModelQueue) {
+        synchronized (addActorModelQueue) {
             while (true) {
-                UserActorModel model = addUserActorModelQueue.poll();
+                ActorModel model = addActorModelQueue.poll();
                 if (model == null) {
                     break;
                 }
 
                 Object3D object3D;
-                if (model instanceof UserActorImageModel) {
-                    object3D = bitmapPlaneFactory.create(((UserActorImageModel) model).bitmap);
+                if (model instanceof ImageActorModel) {
+                    object3D = bitmapPlaneFactory.create(((ImageActorModel) model).bitmap);
                     object3D.setPosition(model.position);
                     object3D.setOrientation(model.orientation);
                     object3D.setScale(model.scale);
                 } else {
-                    LOG.e("Unknown UserActorModel sub-class: " + model.getClass().getName());
+                    LOG.e("Unknown ActorModel sub-class: " + model.getClass().getName());
                     continue;
                 }
 
                 getCurrentScene().addChild(object3D);
                 objectColorPicker.registerObject(object3D);
-                userActorModelMap.put(object3D, model);
+                actorModelMap.put(object3D, model);
                 object3DMap.put(model.actorId, object3D);
             }
         }
 
         // Update user actors.
-        synchronized (updateUserActorModelQueue) {
+        synchronized (updateActorModelQueue) {
             while (true) {
-                UserActorModel model = updateUserActorModelQueue.poll();
+                ActorModel model = updateActorModelQueue.poll();
                 if (model == null) {
                     break;
                 }
@@ -149,9 +149,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
 
         // Delete user actors.
-        synchronized (deleteUserActorIdQueue) {
+        synchronized (deleteActorIdQueue) {
             while (true) {
-                String actorId = deleteUserActorIdQueue.poll();
+                String actorId = deleteActorIdQueue.poll();
                 if (actorId == null) {
                     break;
                 }
@@ -161,7 +161,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                     continue;
                 }
 
-                userActorModelMap.remove(object3D);
+                actorModelMap.remove(object3D);
 
                 getCurrentScene().removeChild(object3D);
 
@@ -212,19 +212,21 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     }
 
     // This method must be invoke on the main thread.
-    public void setOnUserActorPickedListener(@Nullable OnUserActorPickedListener onUserActorPickedListener) {
-        this.onUserActorPickedListener = onUserActorPickedListener;
+    public void setOnActorPickedListener(@Nullable OnActorPickedListener onActorPickedListener) {
+        this.onActorPickedListener = onActorPickedListener;
     }
 
-    public void addUserActorModel(@NonNull UserActorModel userActorModel) {
-        synchronized (addUserActorModelQueue) {
-            addUserActorModelQueue.add(userActorModel);
+    public void addActorModel(@NonNull ActorModel actorModel) {
+        LOG.v("Added ActorModel: actorId = %s", actorModel.actorId);
+
+        synchronized (addActorModelQueue) {
+            addActorModelQueue.add(actorModel);
         }
     }
 
-    public void updateUserActorModel(@NonNull UserActorModel userActorModel) {
-        synchronized (updateUserActorModelQueue) {
-            updateUserActorModelQueue.add(userActorModel);
+    public void updateActorModel(@NonNull ActorModel actorModel) {
+        synchronized (updateActorModelQueue) {
+            updateActorModelQueue.add(actorModel);
         }
     }
 
@@ -234,9 +236,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
     }
 
-    public void removeUserActor(UserActor userActor) {
-        synchronized (deleteUserActorIdQueue) {
-            deleteUserActorIdQueue.add(userActor.actorId);
+    public void removeActor(Actor actor) {
+        synchronized (deleteActorIdQueue) {
+            deleteActorIdQueue.add(actor.getId());
         }
     }
 
@@ -248,7 +250,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     private void changePickedObject(@Nullable Object3D object) {
         pickedObject = object;
 
-        UserActorModel pickedUserActor = null;
+        ActorModel pickedActor = null;
 
         if (pickedObject != null) {
             // The axes model uses the same pose with the picked object.
@@ -256,12 +258,12 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
             axes.setOrientation(pickedObject.getOrientation().clone());
             axes.setVisible(true);
 
-            pickedUserActor = userActorModelMap.get(pickedObject);
+            pickedActor = actorModelMap.get(pickedObject);
         } else {
             axes.setVisible(false);
         }
 
-        raiseOnUserActorPicked(pickedUserActor);
+        raiseOnActorPicked(pickedActor);
     }
 
     private void raiseOnCurrentCameraTransformUpdated(double positionX, double positionY, double positionZ,
@@ -279,10 +281,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         });
     }
 
-    private void raiseOnUserActorPicked(@Nullable UserActorModel userActorModel) {
+    private void raiseOnActorPicked(@Nullable ActorModel actorModel) {
         mainHandler.post(() -> {
-            if (onUserActorPickedListener != null) {
-                onUserActorPickedListener.onUserActorPicked(userActorModel);
+            if (onActorPickedListener != null) {
+                onActorPickedListener.onActorPicked(actorModel);
             }
         });
     }
@@ -295,8 +297,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                                              double forwardX, double forwardY, double forwardZ);
     }
 
-    public interface OnUserActorPickedListener {
+    public interface OnActorPickedListener {
 
-        void onUserActorPicked(@Nullable UserActorModel userActorModel);
+        void onActorPicked(@Nullable ActorModel actorModel);
     }
 }

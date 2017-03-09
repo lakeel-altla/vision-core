@@ -199,15 +199,15 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
             return false;
         });
 
-        UserAssetImageListFragment userActorImageListFragment =
-                (UserAssetImageListFragment) getChildFragmentManager().findFragmentByTag(
-                        UserAssetImageListFragment.class.getName());
-        if (userActorImageListFragment == null) {
-            userActorImageListFragment = UserAssetImageListFragment.newInstance();
+        UserImageAssetListFragment userImageAssetListFragment =
+                (UserImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
+                        UserImageAssetListFragment.class.getName());
+        if (userImageAssetListFragment == null) {
+            userImageAssetListFragment = UserImageAssetListFragment.newInstance();
             getChildFragmentManager().beginTransaction()
-                                     .add(R.id.user_actor_image_list_container,
-                                          userActorImageListFragment,
-                                          UserAssetImageListFragment.class.getName())
+                                     .add(R.id.user_image_asset_list_container,
+                                          userImageAssetListFragment,
+                                          UserImageAssetListFragment.class.getName())
                                      .commit();
         }
 

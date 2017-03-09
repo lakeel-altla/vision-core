@@ -3,12 +3,11 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorEditView;
-import com.lakeel.altla.vision.domain.model.UserActor;
+import com.lakeel.altla.vision.domain.model.Actor;
 import com.lakeel.altla.vision.domain.usecase.FindUserActorUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
-import org.parceler.Parcel;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -26,7 +25,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
     private static final String ARG_ACTOR_ID = "actorId";
 
-    private static final String STATE_MODEL = "model";
+    private static final String STATE_ACTOR = "actor";
 
     @Inject
     FindUserActorUseCase findUserActorUseCase;
@@ -38,7 +37,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
     private String actorId;
 
-    private Model model;
+    private Actor actor;
 
     @Inject
     public UserActorEditPresenter() {
@@ -72,9 +71,9 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
         this.actorId = actorId;
 
         if (savedInstanceState == null) {
-            model = null;
+            actor = null;
         } else {
-            model = Parcels.unwrap(savedInstanceState.getParcelable(STATE_MODEL));
+            actor = Parcels.unwrap(savedInstanceState.getParcelable(STATE_ACTOR));
         }
     }
 
@@ -82,7 +81,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelable(STATE_MODEL, Parcels.wrap(model));
+        outState.putParcelable(STATE_ACTOR, Parcels.wrap(actor));
     }
 
     @Override
@@ -100,14 +99,13 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
         getView().onUpdateViewsEnabled(false);
         getView().onUpdateActionSave(false);
 
-        if (model == null) {
+        if (actor == null) {
             Disposable disposable = findUserActorUseCase
                     .execute(sceneId, actorId)
-                    .map(UserActorEditPresenter::map)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(model -> {
-                        this.model = model;
-                        updateViews(model);
+                    .subscribe(actor -> {
+                        this.actor = actor;
+                        updateViews(actor);
                         getView().onUpdateViewsEnabled(true);
                         getView().onUpdateActionSave(canSave());
                     }, e -> {
@@ -116,7 +114,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
                     });
             manageDisposable(disposable);
         } else {
-            updateViews(model);
+            updateViews(actor);
             getView().onUpdateViewsEnabled(true);
             getView().onUpdateActionSave(canSave());
         }
@@ -130,11 +128,11 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     }
 
     public void onEditTextNameAfterTextChanged(String value) {
-        model.name = value;
+        actor.setName(value);
         getView().onHideNameError();
 
         // Don't save the empty name.
-        if (model.name == null || model.name.length() == 0) {
+        if (actor.getName() == null || actor.getName().length() == 0) {
             getView().onShowNameError(R.string.input_error_required);
         }
 
@@ -142,47 +140,47 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     }
 
     public void onEditTextPositionXAfterTextChanged(String value) {
-        model.positionX = Double.parseDouble(value);
+        actor.setPositionX(Double.parseDouble(value));
     }
 
     public void onEditTextPositionYAfterTextChanged(String value) {
-        model.positionY = Double.parseDouble(value);
+        actor.setPositionY(Double.parseDouble(value));
     }
 
     public void onEditTextPositionZAfterTextChanged(String value) {
-        model.positionZ = Double.parseDouble(value);
+        actor.setPositionZ(Double.parseDouble(value));
     }
 
     public void onEditTextOrientationXAfterTextChanged(String value) {
-        model.orientationX = Double.parseDouble(value);
+        actor.setOrientationX(Double.parseDouble(value));
     }
 
     public void onEditTextOrientationYAfterTextChanged(String value) {
-        model.orientationY = Double.parseDouble(value);
+        actor.setOrientationY(Double.parseDouble(value));
     }
 
     public void onEditTextOrientationZAfterTextChanged(String value) {
-        model.orientationZ = Double.parseDouble(value);
+        actor.setOrientationZ(Double.parseDouble(value));
     }
 
     public void onEditTextOrientationWAfterTextChanged(String value) {
-        model.orientationW = Double.parseDouble(value);
+        actor.setOrientationW(Double.parseDouble(value));
     }
 
     public void onEditTextScaleXAfterTextChanged(String value) {
-        model.scaleX = Double.parseDouble(value);
+        actor.setScaleX(Double.parseDouble(value));
 
         getView().onUpdateActionSave(canSave());
     }
 
     public void onEditTextScaleYAfterTextChanged(String value) {
-        model.scaleY = Double.parseDouble(value);
+        actor.setScaleY(Double.parseDouble(value));
 
         getView().onUpdateActionSave(canSave());
     }
 
     public void onEditTextScaleZAfterTextChanged(String value) {
-        model.scaleZ = Double.parseDouble(value);
+        actor.setScaleZ(Double.parseDouble(value));
 
         getView().onUpdateActionSave(canSave());
     }
@@ -191,10 +189,8 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
         getView().onUpdateViewsEnabled(false);
         getView().onUpdateActionSave(false);
 
-        UserActor userActor = map(model);
-
         Disposable disposable = saveUserActorUseCase
-                .execute(userActor)
+                .execute(actor)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                     getView().onSnackbar(R.string.snackbar_done);
@@ -207,109 +203,24 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     }
 
     private boolean canSave() {
-        return 0 < model.scaleX &&
-               0 < model.scaleY &&
-               0 < model.scaleZ &&
-               model.name != null &&
-               model.name.length() != 0;
+        return 0 < actor.getScaleX() &&
+               0 < actor.getScaleY() &&
+               0 < actor.getScaleZ() &&
+               actor.getName() != null &&
+               actor.getName().length() != 0;
     }
 
-    private void updateViews(@NonNull Model model) {
-        getView().onUpdateName(model.name);
-        getView().onUpdatePositionX(model.positionX);
-        getView().onUpdatePositionY(model.positionY);
-        getView().onUpdatePositionZ(model.positionZ);
-        getView().onUpdateOrientationX(model.orientationX);
-        getView().onUpdateOrientationY(model.orientationY);
-        getView().onUpdateOrientationZ(model.orientationZ);
-        getView().onUpdateOrientationW(model.orientationW);
-        getView().onUpdateScaleX(model.scaleX);
-        getView().onUpdateScaleY(model.scaleY);
-        getView().onUpdateScaleZ(model.scaleZ);
-    }
-
-    @NonNull
-    private static Model map(@NonNull UserActor userActor) {
-        Model model = new Model();
-        model.userId = userActor.userId;
-        model.sceneId = userActor.sceneId;
-        model.actorId = userActor.actorId;
-        model.assetTypeValue = userActor.assetType.getValue();
-        model.assetId = userActor.assetId;
-        model.name = userActor.name;
-        model.positionX = userActor.positionX;
-        model.positionY = userActor.positionY;
-        model.positionZ = userActor.positionZ;
-        model.orientationX = userActor.orientationX;
-        model.orientationY = userActor.orientationY;
-        model.orientationZ = userActor.orientationZ;
-        model.orientationW = userActor.orientationW;
-        model.scaleX = userActor.scaleX;
-        model.scaleY = userActor.scaleY;
-        model.scaleZ = userActor.scaleZ;
-        model.createdAt = userActor.createdAt;
-        model.updatedAt = userActor.updatedAt;
-        return model;
-    }
-
-    @NonNull
-    private static UserActor map(@NonNull Model model) {
-        UserActor userActor = new UserActor(model.userId, model.sceneId, model.actorId);
-        userActor.assetType = UserActor.AssetType.toAssetType(model.assetTypeValue);
-        userActor.assetId = model.assetId;
-        userActor.name = model.name;
-        userActor.positionX = model.positionX;
-        userActor.positionY = model.positionY;
-        userActor.positionZ = model.positionZ;
-        userActor.orientationX = model.orientationX;
-        userActor.orientationY = model.orientationY;
-        userActor.orientationZ = model.orientationZ;
-        userActor.orientationW = model.orientationW;
-        userActor.scaleX = model.scaleX;
-        userActor.scaleY = model.scaleY;
-        userActor.scaleZ = model.scaleZ;
-        userActor.createdAt = model.createdAt;
-        userActor.updatedAt = model.updatedAt;
-        return userActor;
-    }
-
-    @Parcel
-    public static final class Model {
-
-        String userId;
-
-        String sceneId;
-
-        String actorId;
-
-        int assetTypeValue;
-
-        String assetId;
-
-        String name;
-
-        double positionX;
-
-        double positionY;
-
-        double positionZ;
-
-        double orientationX;
-
-        double orientationY;
-
-        double orientationZ;
-
-        double orientationW;
-
-        double scaleX;
-
-        double scaleY;
-
-        double scaleZ;
-
-        long createdAt;
-
-        long updatedAt;
+    private void updateViews(@NonNull Actor actor) {
+        getView().onUpdateName(actor.getName());
+        getView().onUpdatePositionX(actor.getPositionX());
+        getView().onUpdatePositionY(actor.getPositionY());
+        getView().onUpdatePositionZ(actor.getOrientationZ());
+        getView().onUpdateOrientationX(actor.getOrientationX());
+        getView().onUpdateOrientationY(actor.getOrientationY());
+        getView().onUpdateOrientationZ(actor.getOrientationZ());
+        getView().onUpdateOrientationW(actor.getOrientationW());
+        getView().onUpdateScaleX(actor.getScaleX());
+        getView().onUpdateScaleY(actor.getScaleY());
+        getView().onUpdateScaleZ(actor.getScaleZ());
     }
 }

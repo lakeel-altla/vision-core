@@ -10,7 +10,7 @@ public interface UserActorView {
 
     void onUpdateActorId(@NonNull String actorId);
 
-    void onUpdateName(@NonNull String name);
+    void onUpdateName(@Nullable String name);
 
     void onUpdatePosition(double x, double y, double z);
 

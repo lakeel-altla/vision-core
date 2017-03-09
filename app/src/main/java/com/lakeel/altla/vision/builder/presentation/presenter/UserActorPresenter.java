@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
-import com.lakeel.altla.vision.domain.model.UserActor;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -69,20 +68,19 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
         Disposable disposable = observeUserActorUseCase
                 .execute(sceneId, actorId)
-                .map(this::map)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(model -> {
-                    getView().onUpdateTitle(model.name);
-                    getView().onUpdateActorId(model.actorId);
-                    getView().onUpdateName(model.name);
-                    getView().onUpdatePosition(model.positionX, model.positionY, model.positionZ);
-                    getView().onUpdateOrientation(model.orientationX,
-                                                  model.orientationY,
-                                                  model.orientationZ,
-                                                  model.orientationW);
-                    getView().onUpdateScale(model.scaleX, model.scaleY, model.scaleZ);
-                    getView().onUpdateCreatedAt(model.createdAt);
-                    getView().onUpdateUpdatedAt(model.updatedAt);
+                .subscribe(actor -> {
+                    getView().onUpdateTitle(actor.getName());
+                    getView().onUpdateActorId(actor.getId());
+                    getView().onUpdateName(actor.getName());
+                    getView().onUpdatePosition(actor.getPositionX(), actor.getPositionY(), actor.getPositionZ());
+                    getView().onUpdateOrientation(actor.getOrientationX(),
+                                                  actor.getOrientationY(),
+                                                  actor.getOrientationZ(),
+                                                  actor.getOrientationW());
+                    getView().onUpdateScale(actor.getScaleX(), actor.getScaleY(), actor.getScaleZ());
+                    getView().onUpdateCreatedAt(actor.getCreatedAtAsLong());
+                    getView().onUpdateUpdatedAt(actor.getUpdatedAtAsLong());
                 }, e -> {
                     getLog().e("Failed.", e);
                     getView().onSnackbar(R.string.snackbar_failed);
@@ -92,56 +90,5 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
     public void onEdit() {
         getView().onShowUserActorEditView(sceneId, actorId);
-    }
-
-    @NonNull
-    private Model map(@NonNull UserActor userActor) {
-        Model model = new Model();
-        model.actorId = userActor.actorId;
-        model.name = userActor.name;
-        model.positionX = userActor.positionX;
-        model.positionY = userActor.positionY;
-        model.positionZ = userActor.positionZ;
-        model.orientationX = userActor.orientationX;
-        model.orientationY = userActor.orientationY;
-        model.orientationZ = userActor.orientationZ;
-        model.orientationW = userActor.orientationW;
-        model.scaleX = userActor.scaleX;
-        model.scaleY = userActor.scaleY;
-        model.scaleZ = userActor.scaleZ;
-        model.createdAt = userActor.createdAt;
-        model.updatedAt = userActor.updatedAt;
-        return model;
-    }
-
-    private final class Model {
-
-        String actorId;
-
-        String name;
-
-        double positionX;
-
-        double positionY;
-
-        double positionZ;
-
-        double orientationX;
-
-        double orientationY;
-
-        double orientationZ;
-
-        double orientationW;
-
-        double scaleX = 1;
-
-        double scaleY = 1;
-
-        double scaleZ = 1;
-
-        long createdAt;
-
-        long updatedAt;
     }
 }

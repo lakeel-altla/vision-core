@@ -7,13 +7,12 @@ import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionSceneRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserAssetImageFileRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserAssetImageRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserConnectionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserCurrentProjectRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserDeviceConnectionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserDeviceRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserProfileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserSceneRepository;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -32,8 +31,8 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    UserConnectionRepository provideUserConnectionRepository(FirebaseDatabase database) {
-        return new UserConnectionRepository(database);
+    UserDeviceConnectionRepository provideUserDeviceConnectionRepository(FirebaseDatabase database) {
+        return new UserDeviceConnectionRepository(database);
     }
 
     @ActivityScope
@@ -74,26 +73,20 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    UserAreaDescriptionSceneRepository provideUserAreaDescriptionSceneRepository(FirebaseDatabase database) {
-        return new UserAreaDescriptionSceneRepository(database);
-    }
-
-    @ActivityScope
-    @Provides
     UserCurrentProjectRepository provideUserCurrentProjectRepository(FirebaseDatabase database) {
         return new UserCurrentProjectRepository(database);
     }
 
     @ActivityScope
     @Provides
-    UserAssetImageRepository provideUserAssetImageRepository(FirebaseDatabase database) {
-        return new UserAssetImageRepository(database);
+    UserImageAssetRepository provideUserImageAssetRepository(FirebaseDatabase database) {
+        return new UserImageAssetRepository(database);
     }
 
     @ActivityScope
     @Provides
-    UserAssetImageFileRepository provideUserAssetImageFileRepository(FirebaseStorage storage) {
-        return new UserAssetImageFileRepository(storage);
+    UserImageAssetFileRepository provideUserImageAssetFileRepository(FirebaseStorage storage) {
+        return new UserImageAssetFileRepository(storage);
     }
 
     @ActivityScope

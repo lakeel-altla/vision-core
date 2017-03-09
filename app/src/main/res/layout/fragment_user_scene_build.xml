@@ -128,7 +128,7 @@
 
     </RelativeLayout>
 
-    <FrameLayout android:id="@+id/user_actor_image_list_container"
+    <FrameLayout android:id="@+id/user_image_asset_list_container"
                  android:layout_gravity="bottom"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content"/>

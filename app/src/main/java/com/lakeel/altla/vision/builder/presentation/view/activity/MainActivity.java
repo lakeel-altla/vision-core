@@ -373,14 +373,14 @@ public final class MainActivity extends AppCompatActivity
                     observeUserProfileDisposable = observeUserProfileUseCase
                             .execute()
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(userProfile -> {
+                            .subscribe(profile -> {
                                 // Update UI each time the user profile is updated.
-                                if (userProfile.photoUri != null) {
-                                    Uri photoUri = Uri.parse(userProfile.photoUri);
+                                if (profile.getPhotoUri() != null) {
+                                    Uri photoUri = Uri.parse(profile.getPhotoUri());
                                     Picasso.with(MainActivity.this).load(photoUri).into(imageViewUserPhoto);
                                 }
-                                textViewUserName.setText(userProfile.displayName);
-                                textViewUserEmail.setText(userProfile.email);
+                                textViewUserName.setText(profile.getDisplayName());
+                                textViewUserEmail.setText(profile.getEmail());
                             });
                 }
             } else {

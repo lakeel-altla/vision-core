@@ -12,25 +12,28 @@ import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
+import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
+import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
+import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorImageModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserActorModel;
-import com.lakeel.altla.vision.builder.presentation.model.UserAssetImageDragModel;
 import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
+import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
-import com.lakeel.altla.vision.domain.model.UserActor;
+import com.lakeel.altla.vision.domain.model.Actor;
+import com.lakeel.altla.vision.domain.model.Asset;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserActorUseCase;
-import com.lakeel.altla.vision.domain.usecase.GetUserAssetImageFileUriUseCase;
+import com.lakeel.altla.vision.domain.usecase.GetUserImageAssetFileUriUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveAllUserActorsUserCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.parceler.Parcels;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -46,7 +49,6 @@ import android.view.MotionEvent;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -59,7 +61,7 @@ import io.reactivex.disposables.Disposable;
  */
 public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildView>
         implements OnFrameAvailableListener, MainRenderer.OnCurrentCameraTransformUpdatedListener,
-                   MainRenderer.OnUserActorPickedListener {
+                   MainRenderer.OnActorPickedListener {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -86,13 +88,16 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     ObserveAllUserActorsUserCase observeAllUserActorsUserCase;
 
     @Inject
-    GetUserAssetImageFileUriUseCase getUserAssetImageFileUriUseCase;
+    GetUserImageAssetFileUriUseCase getUserImageAssetFileUriUseCase;
 
     @Inject
     SaveUserActorUseCase saveUserActorUseCase;
 
     @Inject
     DeleteUserActorUseCase deleteUserActorUseCase;
+
+    @Inject
+    CurrentUserResolver currentUserResolver;
 
     private final Vector3 cameraPosition = new Vector3();
 
@@ -106,11 +111,11 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private String sceneId;
 
-    private UserActorManager userActorManager;
+    private ActorManager actorManager;
 
     private MainRenderer renderer;
 
-    private UserActorModel pickedUserActorModel;
+    private ActorModel pickedActorModel;
 
     private volatile boolean active = true;
 
@@ -170,7 +175,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         renderer = new MainRenderer(context);
         renderer.setOnCurrentCameraTransformUpdatedListener(this);
-        renderer.setOnUserActorPickedListener(this);
+        renderer.setOnActorPickedListener(this);
         getView().setSurfaceRenderer(renderer);
 
         getView().onUpdateObjectMenuVisible(false);
@@ -186,14 +191,14 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     protected void onStartOverride() {
         super.onStartOverride();
 
-        // Instantiate UserActorManager here to clear the bitmap cache in Picasso.
-        userActorManager = new UserActorManager(context);
+        // Instantiate ActorManager here to clear the bitmap cache in Picasso.
+        actorManager = new ActorManager(context);
 
         Disposable disposable = observeAllUserActorsUserCase
                 .execute(sceneId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
-                    userActorManager.handle(event);
+                    actorManager.handle(event);
                 }, e -> {
                     getLog().e("Failed.", e);
                 });
@@ -239,9 +244,9 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     @Override
-    public void onUserActorPicked(@Nullable UserActorModel userActorModel) {
-        pickedUserActorModel = userActorModel;
-        getView().onUpdateObjectMenuVisible(pickedUserActorModel != null);
+    public void onActorPicked(@Nullable ActorModel actorModel) {
+        pickedActorModel = actorModel;
+        getView().onUpdateObjectMenuVisible(pickedActorModel != null);
     }
 
     public void onTouchButtonTranslate() {
@@ -291,18 +296,18 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onTouchButtonDetail() {
-        if (pickedUserActorModel == null) return;
+        if (pickedActorModel == null) return;
 
-        getView().onShowUserActorView(pickedUserActorModel.sceneId, pickedUserActorModel.actorId);
+        getView().onShowUserActorView(pickedActorModel.sceneId, pickedActorModel.actorId);
     }
 
     public void onClickButtonDelete() {
-        if (pickedUserActorModel == null) return;
+        if (pickedActorModel == null) return;
 
         // TODO: confirmation.
 
         Disposable disposable = deleteUserActorUseCase
-                .execute(sceneId, pickedUserActorModel.actorId)
+                .execute(sceneId, pickedActorModel.actorId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -317,15 +322,18 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         Intent intent = clipData.getItemAt(0).getIntent();
         if (intent == null) throw new IllegalStateException("No intent.");
 
-        UserAssetImageDragModel userAssetImageDragModel = UserAssetImageDragModel.parseIntent(intent);
-        if (userAssetImageDragModel == null) throw new IllegalStateException("No UserAssetImageDragModel.");
+        Bundle bundle = intent.getExtras();
+        bundle.setClassLoader(Parcels.class.getClassLoader());
+        Asset asset = Parcels.unwrap(bundle.getParcelable(ActorDragConstants.INTENT_EXTRA_ASSET));
+        if (asset == null) throw new IllegalStateException("No actor.");
 
-        UserActor userActor = new UserActor(userAssetImageDragModel.userId,
-                                            sceneId,
-                                            UUID.randomUUID().toString());
-        userActor.assetType = UserActor.AssetType.IMAGE;
-        userActor.assetId = userAssetImageDragModel.assetId;
-        userActor.name = userAssetImageDragModel.name;
+        Actor actor = new Actor();
+        actor.setUserId(currentUserResolver.getUserId());
+        actor.setSceneId(sceneId);
+        // TODO: handle other asset types.
+        actor.setAssetType(Actor.AssetType.IMAGE);
+        actor.setAssetId(asset.getId());
+        actor.setName(asset.getName());
 
         // Decide the position and the orientation of the dropped user actor.
         try (Pool.Holder<Vector3> positionHolder = Vector3Pool.get();
@@ -350,17 +358,17 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
             orientation.lookAt(cameraBackward, Vector3.Y);
 
-            userActor.positionX = position.x;
-            userActor.positionY = position.y;
-            userActor.positionZ = position.z;
-            userActor.orientationX = orientation.x;
-            userActor.orientationY = orientation.y;
-            userActor.orientationZ = orientation.z;
-            userActor.orientationW = orientation.w;
+            actor.setPositionX(position.x);
+            actor.setPositionY(position.y);
+            actor.setPositionZ(position.z);
+            actor.setOrientationX(orientation.x);
+            actor.setOrientationY(orientation.y);
+            actor.setOrientationZ(orientation.z);
+            actor.setOrientationW(orientation.w);
         }
 
         Disposable disposable = saveUserActorUseCase
-                .execute(userActor)
+                .execute(actor)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -376,7 +384,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        if (pickedUserActorModel != null) {
+        if (pickedActorModel != null) {
             if (actorEditMode == ActorEditMode.TRANSLATE) {
                 if (Math.abs(distanceY) < Math.abs(distanceX)) {
                     translateUserActor(distanceX);
@@ -403,19 +411,19 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     public void onScrollFinished(MotionEvent event) {
-        if (pickedUserActorModel == null) return;
+        if (pickedActorModel == null) return;
 
-        UserActor userActor;
-        if (pickedUserActorModel instanceof UserActorImageModel) {
-            userActor = map((UserActorImageModel) pickedUserActorModel);
+        Actor actor;
+        if (pickedActorModel instanceof ImageActorModel) {
+            actor = map((ImageActorModel) pickedActorModel);
         } else {
             throw new IllegalStateException(
-                    "Unknown UserActorModel sub-class: " + pickedUserActorModel.getClass().getName());
+                    "Unknown ActorModel sub-class: " + pickedActorModel.getClass().getName());
         }
 
         // Save.
         Disposable disposable = saveUserActorUseCase
-                .execute(userActor)
+                .execute(actor)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -450,7 +458,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
                     break;
             }
 
-            rotation.setAll(pickedUserActorModel.orientation);
+            rotation.setAll(pickedActorModel.orientation);
             // Conjugate because rotateBy is wrong...
             rotation.conjugate();
 
@@ -458,17 +466,17 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
             translation.normalize();
             translation.multiply(scaledDistance);
 
-            position.setAll(pickedUserActorModel.position);
+            position.setAll(pickedActorModel.position);
             position.add(translation);
 
-            pickedUserActorModel.position.setAll(position);
+            pickedActorModel.position.setAll(position);
         }
 
         EditAxesModel editAxesModel = new EditAxesModel();
-        editAxesModel.position.setAll(pickedUserActorModel.position);
-        editAxesModel.orientation.setAll(pickedUserActorModel.orientation);
+        editAxesModel.position.setAll(pickedActorModel.position);
+        editAxesModel.orientation.setAll(pickedActorModel.orientation);
 
-        renderer.updateUserActorModel(pickedUserActorModel);
+        renderer.updateActorModel(pickedActorModel);
         renderer.updateEditAxesModel(editAxesModel);
     }
 
@@ -501,20 +509,20 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
             }
 
             modelAxis.setAll(baseAxis);
-            rotation.setAll(pickedUserActorModel.orientation);
+            rotation.setAll(pickedActorModel.orientation);
             // Conjugate because rotateBy is wrong...
             rotation.conjugate();
             modelAxis.rotateBy(rotation);
 
             axisRotation.fromAngleAxis(modelAxis, scaledAngle);
-            pickedUserActorModel.orientation.multiply(axisRotation);
+            pickedActorModel.orientation.multiply(axisRotation);
         }
 
         EditAxesModel editAxesModel = new EditAxesModel();
-        editAxesModel.position.setAll(pickedUserActorModel.position);
-        editAxesModel.orientation.setAll(pickedUserActorModel.orientation);
+        editAxesModel.position.setAll(pickedActorModel.position);
+        editAxesModel.orientation.setAll(pickedActorModel.orientation);
 
-        renderer.updateUserActorModel(pickedUserActorModel);
+        renderer.updateActorModel(pickedActorModel);
         renderer.updateEditAxesModel(editAxesModel);
     }
 
@@ -535,13 +543,13 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
                 ratio = Math.max(1 - Math.abs(scaledSize) * 0.01f, MIN_RATIO);
             }
 
-            scale.setAll(pickedUserActorModel.scale);
+            scale.setAll(pickedActorModel.scale);
             scale.multiply(ratio);
 
-            pickedUserActorModel.scale.setAll(scale);
+            pickedActorModel.scale.setAll(scale);
         }
 
-        renderer.updateUserActorModel(pickedUserActorModel);
+        renderer.updateActorModel(pickedActorModel);
     }
 
     @NonNull
@@ -576,57 +584,57 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     }
 
     @NonNull
-    private static UserActorImageModel map(@NonNull UserActor userActor) {
-        UserActorImageModel model = new UserActorImageModel(userActor.userId,
-                                                            userActor.sceneId,
-                                                            userActor.actorId,
-                                                            userActor.assetId);
-        model.position.setAll(userActor.positionX, userActor.positionY, userActor.positionZ);
-        model.orientation.setAll(userActor.orientationW,
-                                 userActor.orientationX,
-                                 userActor.orientationY,
-                                 userActor.orientationZ);
-        model.scale.setAll(userActor.scaleX, userActor.scaleY, userActor.scaleZ);
-        model.createdAt = userActor.createdAt;
-        model.updatedAt = userActor.updatedAt;
+    private static ImageActorModel map(@NonNull Actor actor) {
+        ImageActorModel model = new ImageActorModel(actor.getUserId(),
+                                                    actor.getSceneId(),
+                                                    actor.getId(),
+                                                    actor.getAssetId());
+        model.position.setAll(actor.getPositionX(), actor.getPositionY(), actor.getPositionZ());
+        model.orientation.setAll(actor.getOrientationW(),
+                                 actor.getOrientationX(),
+                                 actor.getOrientationY(),
+                                 actor.getOrientationZ());
+        model.scale.setAll(actor.getScaleX(), actor.getScaleY(), actor.getScaleZ());
+        model.createdAt = actor.getCreatedAtAsLong();
+        model.updatedAt = actor.getUpdatedAtAsLong();
         return model;
     }
 
     @NonNull
-    private static UserActor map(@NonNull UserActorImageModel userActorImageModel) {
-        UserActor userActor = new UserActor(userActorImageModel.userId,
-                                            userActorImageModel.sceneId,
-                                            userActorImageModel.actorId);
-        userActor.assetType = UserActor.AssetType.IMAGE;
-        userActor.assetId = userActorImageModel.assetId;
-        userActor.positionX = userActorImageModel.position.x;
-        userActor.positionY = userActorImageModel.position.y;
-        userActor.positionZ = userActorImageModel.position.z;
-        userActor.orientationX = userActorImageModel.orientation.x;
-        userActor.orientationY = userActorImageModel.orientation.y;
-        userActor.orientationZ = userActorImageModel.orientation.z;
-        userActor.orientationW = userActorImageModel.orientation.w;
-        userActor.scaleX = userActorImageModel.scale.x;
-        userActor.scaleY = userActorImageModel.scale.y;
-        userActor.scaleZ = userActorImageModel.scale.z;
-        userActor.createdAt = userActorImageModel.createdAt;
-        userActor.updatedAt = userActorImageModel.updatedAt;
-        return userActor;
+    private static Actor map(@NonNull ImageActorModel model) {
+        Actor actor = new Actor();
+        actor.setId(model.actorId);
+        actor.setUserId(model.userId);
+        actor.setSceneId(model.sceneId);
+        actor.setAssetType(Actor.AssetType.IMAGE);
+        actor.setAssetId(model.assetId);
+        actor.setPositionX(model.position.x);
+        actor.setPositionY(model.position.y);
+        actor.setPositionZ(model.position.z);
+        actor.setOrientationX(model.orientation.x);
+        actor.setOrientationY(model.orientation.y);
+        actor.setOrientationZ(model.orientation.x);
+        actor.setOrientationW(model.orientation.w);
+        actor.setScaleX(model.scale.x);
+        actor.setScaleY(model.scale.y);
+        actor.setScaleZ(model.scale.z);
+        actor.setCreatedAtAsLong(model.createdAt);
+        actor.setUpdatedAtAsLong(model.updatedAt);
+        return actor;
     }
 
-    private final class UserActorManager {
+    private final class ActorManager {
 
         final Set<Target> targetMap = new HashSet<>();
 
         Picasso picasso;
 
-        UserActorManager(@NonNull Context context) {
+        ActorManager(@NonNull Context context) {
             picasso = new Picasso.Builder(context).build();
         }
 
-        void handle(@NonNull DataListEvent<UserActor> event) {
-            getLog().v("DataListEvent<UserActor>: type = %s, actorId = %s", event.getType(),
-                       event.getData().actorId);
+        void handle(@NonNull DataListEvent<Actor> event) {
+            getLog().v("DataListEvent<Actor>: type = %s, actorId = %s", event.getType(), event.getData().getId());
 
             switch (event.getType()) {
                 case ADDED:
@@ -644,36 +652,40 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
             }
         }
 
-        void onAdded(@NonNull UserActor userActor) {
-            switch (userActor.assetType) {
+        void onAdded(@NonNull Actor actor) {
+            switch (actor.getAssetType()) {
                 case IMAGE:
-                    onUserActorImageAdded(userActor);
+                    onImageActorAdded(actor);
                     break;
                 default:
-                    throw new IllegalStateException("Unknown asset type: " + userActor.assetType);
+                    getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
+                    break;
             }
         }
 
-        void onChanged(@NonNull UserActor userActor) {
-            switch (userActor.assetType) {
+        void onChanged(@NonNull Actor actor) {
+            switch (actor.getAssetType()) {
                 case IMAGE:
-                    onUserActorImageChanged(userActor);
+                    onImageActorChanged(actor);
                     break;
                 default:
-                    throw new IllegalStateException("Unknown asset type: " + userActor.assetType);
+                    getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
+                    break;
             }
         }
 
-        void onRemoved(@NonNull UserActor userActor) {
-            renderer.removeUserActor(userActor);
+        void onRemoved(@NonNull Actor actor) {
+            renderer.removeActor(actor);
         }
 
-        void onUserActorImageAdded(@NonNull UserActor userActor) {
-            Disposable disposable = getUserAssetImageFileUriUseCase
-                    .execute(userActor.assetId)
+        void onImageActorAdded(@NonNull Actor actor) {
+            if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
+
+            Disposable disposable = getUserImageAssetFileUriUseCase
+                    .execute(actor.getAssetId())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(uri -> {
-                        final UserActorImageModel model = map(userActor);
+                        final ImageActorModel model = map(actor);
 
                         Target target = new Target() {
                             @Override
@@ -682,7 +694,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
                                 model.bitmap = bitmap;
 
-                                renderer.addUserActorModel(model);
+                                renderer.addActorModel(model);
 
                                 // Dereference.
                                 targetMap.remove(this);
@@ -714,9 +726,9 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
             manageDisposable(disposable);
         }
 
-        void onUserActorImageChanged(@NonNull UserActor userActor) {
-            UserActorImageModel model = map(userActor);
-            renderer.updateUserActorModel(model);
+        void onImageActorChanged(@NonNull Actor actor) {
+            ImageActorModel model = map(actor);
+            renderer.updateActorModel(model);
         }
     }
 }

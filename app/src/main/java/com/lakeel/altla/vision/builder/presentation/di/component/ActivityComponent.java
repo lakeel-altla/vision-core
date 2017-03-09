@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditF
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAssetImageListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.UserImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -46,7 +46,7 @@ public interface ActivityComponent {
 
     void inject(UserSceneBuildFragment fragment);
 
-    void inject(UserAssetImageListFragment fragment);
+    void inject(UserImageAssetListFragment fragment);
 
     void inject(UserActorFragment fragment);
 
