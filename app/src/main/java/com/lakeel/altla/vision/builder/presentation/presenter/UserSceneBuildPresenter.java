@@ -67,8 +67,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private static final String ARG_AREA_DESCRIPTION_ID = "areaDescriptionId";
 
-    private static final String ARG_SCENE_ID = "sceneId";
-
     private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
 
     private static final float TRANSLATE_OBJECT_DISTANCE_SCALE = 0.005f;
@@ -109,8 +107,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private String areaDescriptionId;
 
-    private String sceneId;
-
     private ActorManager actorManager;
 
     private MainRenderer renderer;
@@ -136,7 +132,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         Bundle bundle = new Bundle();
         bundle.putString(ARG_AREA_ID, sceneBuildModel.areaId);
         bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneBuildModel.areaDescriptionId);
-        bundle.putString(ARG_SCENE_ID, sceneBuildModel.sceneId);
         return bundle;
     }
 
@@ -157,12 +152,6 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
             throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_DESCRIPTION_ID));
         }
         this.areaDescriptionId = areaDescriptionId;
-
-        String sceneId = arguments.getString(ARG_SCENE_ID);
-        if (sceneId == null) {
-            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_SCENE_ID));
-        }
-        this.sceneId = sceneId;
 
         tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
     }
@@ -195,7 +184,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         actorManager = new ActorManager(context);
 
         Disposable disposable = observeAllUserActorsUserCase
-                .execute(sceneId)
+                .execute(areaId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
                     actorManager.handle(event);
@@ -298,7 +287,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     public void onTouchButtonDetail() {
         if (pickedActorModel == null) return;
 
-        getView().onShowUserActorView(pickedActorModel.sceneId, pickedActorModel.actorId);
+        getView().onShowUserActorView(pickedActorModel.areaId, pickedActorModel.actorId);
     }
 
     public void onClickButtonDelete() {
@@ -307,7 +296,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         // TODO: confirmation.
 
         Disposable disposable = deleteUserActorUseCase
-                .execute(sceneId, pickedActorModel.actorId)
+                .execute(areaId, pickedActorModel.actorId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -329,10 +318,12 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         Actor actor = new Actor();
         actor.setUserId(currentUserResolver.getUserId());
-        actor.setSceneId(sceneId);
+        actor.setAreaId(areaId);
         // TODO: handle other asset types.
-        actor.setAssetType(Actor.AssetType.IMAGE);
+        actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
         actor.setAssetId(asset.getId());
+        // TODO: commercial too.
+        actor.setLayer(Actor.LAYER_NONCOMMERCIAL);
         actor.setName(asset.getName());
 
         // Decide the position and the orientation of the dropped user actor.
@@ -586,7 +577,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     @NonNull
     private static ImageActorModel map(@NonNull Actor actor) {
         ImageActorModel model = new ImageActorModel(actor.getUserId(),
-                                                    actor.getSceneId(),
+                                                    actor.getAreaId(),
                                                     actor.getId(),
                                                     actor.getAssetId());
         model.position.setAll(actor.getPositionX(), actor.getPositionY(), actor.getPositionZ());
@@ -605,9 +596,10 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         Actor actor = new Actor();
         actor.setId(model.actorId);
         actor.setUserId(model.userId);
-        actor.setSceneId(model.sceneId);
-        actor.setAssetType(Actor.AssetType.IMAGE);
+        actor.setAreaId(model.areaId);
+        actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
         actor.setAssetId(model.assetId);
+        actor.setLayer(Actor.LAYER_NONCOMMERCIAL);
         actor.setPositionX(model.position.x);
         actor.setPositionY(model.position.y);
         actor.setPositionZ(model.position.z);
@@ -654,7 +646,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         void onAdded(@NonNull Actor actor) {
             switch (actor.getAssetType()) {
-                case IMAGE:
+                case Actor.ASSET_TYPE_IMAGE:
                     onImageActorAdded(actor);
                     break;
                 default:
@@ -665,7 +657,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         void onChanged(@NonNull Actor actor) {
             switch (actor.getAssetType()) {
-                case IMAGE:
+                case Actor.ASSET_TYPE_IMAGE:
                     onImageActorChanged(actor);
                     break;
                 default:

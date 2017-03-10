@@ -15,7 +15,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescri
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.di.ActivityScope;
 
 import dagger.Subcomponent;
@@ -41,8 +40,6 @@ public interface ActivityComponent {
     void inject(UserAreaListFragment fragment);
 
     void inject(UserAreaDescriptionListInAreaFragment fragment);
-
-    void inject(UserSceneListInAreaFragmentInArea fragment);
 
     void inject(UserSceneBuildFragment fragment);
 

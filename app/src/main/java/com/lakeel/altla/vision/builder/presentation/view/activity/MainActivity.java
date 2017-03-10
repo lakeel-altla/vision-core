@@ -21,7 +21,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragm
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneListInAreaFragmentInArea;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -60,7 +59,6 @@ public final class MainActivity extends AppCompatActivity
                    ProjectFragment.InteractionListener,
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
-                   UserSceneListInAreaFragmentInArea.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
                    UserActorFragment.InteractionListener,
                    UserActorEditFragment.InteractionListener,
@@ -247,11 +245,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserSceneListInAreaView(@NonNull String areaId) {
-        replaceFragmentAndAddToBackStack(UserSceneListInAreaFragmentInArea.newInstance(areaId));
-    }
-
-    @Override
     public void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId) {
         replaceFragmentAndAddToBackStack(UserActorFragment.newInstance(sceneId, actorId));
     }
@@ -289,16 +282,6 @@ public final class MainActivity extends AppCompatActivity
         ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
         if (fragment != null) {
             fragment.onUserAreaDescriptionSelected(areaDescriptionId);
-        }
-    }
-
-    @Override
-    public void onUserSceneSelected(@NonNull String sceneId) {
-        getSupportFragmentManager().popBackStack();
-
-        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
-        if (fragment != null) {
-            fragment.onUserSceneSelected(sceneId);
         }
     }
 

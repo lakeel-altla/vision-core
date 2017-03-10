@@ -21,7 +21,7 @@ import io.reactivex.disposables.Disposable;
 
 public final class UserActorEditPresenter extends BasePresenter<UserActorEditView> {
 
-    private static final String ARG_SCENE_ID = "sceneId";
+    private static final String ARG_AREA_ID = "areaId";
 
     private static final String ARG_ACTOR_ID = "actorId";
 
@@ -33,7 +33,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     @Inject
     SaveUserActorUseCase saveUserActorUseCase;
 
-    private String sceneId;
+    private String areaId;
 
     private String actorId;
 
@@ -46,7 +46,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     @NonNull
     public static Bundle createArguments(@NonNull String sceneId, @NonNull String actorId) {
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_SCENE_ID, sceneId);
+        bundle.putString(ARG_AREA_ID, sceneId);
         bundle.putString(ARG_ACTOR_ID, actorId);
         return bundle;
     }
@@ -57,9 +57,9 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        String sceneId = arguments.getString(ARG_SCENE_ID);
-        if (sceneId == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_SCENE_ID));
+        String areaId = arguments.getString(ARG_AREA_ID);
+        if (areaId == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
         }
 
         String actorId = arguments.getString(ARG_ACTOR_ID);
@@ -67,7 +67,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
             throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_ACTOR_ID));
         }
 
-        this.sceneId = sceneId;
+        this.areaId = areaId;
         this.actorId = actorId;
 
         if (savedInstanceState == null) {
@@ -101,7 +101,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
         if (actor == null) {
             Disposable disposable = findUserActorUseCase
-                    .execute(sceneId, actorId)
+                    .execute(areaId, actorId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(actor -> {
                         this.actor = actor;

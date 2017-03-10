@@ -9,7 +9,7 @@ public class ActorModel {
 
     public final String userId;
 
-    public final String sceneId;
+    public final String areaId;
 
     public final String actorId;
 
@@ -25,10 +25,10 @@ public class ActorModel {
 
     public long updatedAt = -1;
 
-    protected ActorModel(@NonNull String userId, @NonNull String sceneId, @NonNull String actorId,
+    protected ActorModel(@NonNull String userId, @NonNull String areaId, @NonNull String actorId,
                          @NonNull String assetId) {
         this.userId = userId;
-        this.sceneId = sceneId;
+        this.areaId = areaId;
         this.actorId = actorId;
         this.assetId = assetId;
     }

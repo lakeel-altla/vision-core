@@ -9,7 +9,6 @@ import com.lakeel.altla.vision.domain.model.CurrentProject;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserCurrentProjectUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserSceneUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserCurrentProjectUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -40,9 +39,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
 
     @Inject
     FindUserAreaDescriptionUseCase findUserAreaDescriptionUseCase;
-
-    @Inject
-    FindUserSceneUseCase findUserSceneUseCase;
 
     @Inject
     CurrentUserResolver currentUserResolver;
@@ -80,7 +76,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         super.onCreateViewOverride();
 
         getView().onUpdateAreaDescriptionPickerEnabled(false);
-        getView().onUpdateScenePickerEnabled(false);
         getView().onUpdateEditButtonEnabled(false);
     }
 
@@ -97,10 +92,8 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
                         this.model = model;
                         this.model.areaNameDirty = true;
                         this.model.areaDescriptionNameDirty = true;
-                        this.model.sceneNameDirty = true;
                         refreshAreaName();
                         refreshAreaDescriptionName();
-                        refreshSceneName();
                     }, e -> {
                         getLog().e("Failed.", e);
                         getView().onSnackbar(R.string.snackbar_failed);
@@ -111,14 +104,12 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
                         getLog().d("No current project: userId = %s", model.currentProject.getUserId());
                         refreshAreaName();
                         refreshAreaDescriptionName();
-                        refreshSceneName();
                     });
             manageDisposable(disposable);
         } else {
             getLog().d("Current project in memory: userId = %s", model.currentProject.getUserId());
             refreshAreaName();
             refreshAreaDescriptionName();
-            refreshSceneName();
         }
     }
 
@@ -130,10 +121,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         getView().onShowUserAreaDescriptionListInAreaView(model.currentProject.getAreaId());
     }
 
-    public void onClickImageButtonSelectScene() {
-        getView().onShowUserSceneListInAreaView(model.currentProject.getAreaId());
-    }
-
     public void onClickButtonEdit() {
         getView().onUpdateEditButtonEnabled(false);
 
@@ -142,8 +129,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                     SceneBuildModel sceneBuildModel = new SceneBuildModel(model.currentProject.getAreaId(),
-                                                                          model.currentProject.getAreaDescriptionId(),
-                                                                          model.currentProject.getSceneId());
+                                                                          model.currentProject.getAreaDescriptionId());
                     getView().onShowUserSceneEditView(sceneBuildModel);
                 }, e -> {
                     getLog().e("Failed.", e);
@@ -161,7 +147,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
             model.areaNameDirty = true;
 
             onUserAreaDescriptionSelected(null);
-            onUserSceneSelected(null);
         }
 
         refreshAreaName();
@@ -178,18 +163,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         }
 
         refreshAreaDescriptionName();
-    }
-
-    public void onUserSceneSelected(@Nullable String sceneId) {
-        if ((model.currentProject.getSceneId() != null && model.currentProject.getSceneId().equals(sceneId)) ||
-            (model.currentProject.getSceneId() == null && sceneId == null)) {
-            model.sceneNameDirty = false;
-        } else {
-            model.currentProject.setSceneId(sceneId);
-            model.sceneNameDirty = true;
-        }
-
-        refreshSceneName();
     }
 
     private void refreshAreaName() {
@@ -248,37 +221,8 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         }
     }
 
-    private void refreshSceneName() {
-        if (model.sceneNameDirty) {
-            model.sceneName = null;
-            getView().onUpdateSceneName(null);
-            updateActionViews();
-
-            if (model.currentProject.getSceneId() == null) {
-                model.sceneNameDirty = false;
-            } else {
-                Disposable disposable = findUserSceneUseCase
-                        .execute(model.currentProject.getSceneId())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(scene -> {
-                            model.sceneName = scene.getName();
-                            model.sceneNameDirty = false;
-                            getView().onUpdateSceneName(model.sceneName);
-                            updateActionViews();
-                        }, e -> {
-                            getLog().e("Failed.", e);
-                        });
-                manageDisposable(disposable);
-            }
-        } else {
-            getView().onUpdateSceneName(model.sceneName);
-            updateActionViews();
-        }
-    }
-
     private void updateActionViews() {
         getView().onUpdateAreaDescriptionPickerEnabled(canPickUserAreaDescription());
-        getView().onUpdateScenePickerEnabled(canPickUserScene());
         getView().onUpdateEditButtonEnabled(canEdit());
     }
 
@@ -293,8 +237,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     private boolean canEdit() {
         return model.currentProject.getAreaId() != null && model.areaName != null && !model.areaNameDirty &&
                model.currentProject.getAreaDescriptionId() != null && model.areaDescriptionName != null &&
-               !model.areaDescriptionNameDirty &&
-               model.currentProject.getSceneId() != null && model.sceneName != null && !model.sceneNameDirty;
+               !model.areaDescriptionNameDirty;
     }
 
     @Parcel
@@ -309,10 +252,6 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         String areaDescriptionName;
 
         boolean areaDescriptionNameDirty;
-
-        String sceneName;
-
-        boolean sceneNameDirty;
 
         public Model() {
             this(new CurrentProject());

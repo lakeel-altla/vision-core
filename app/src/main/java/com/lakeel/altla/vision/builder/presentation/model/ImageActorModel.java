@@ -7,8 +7,8 @@ public final class ImageActorModel extends ActorModel {
 
     public Bitmap bitmap;
 
-    public ImageActorModel(@NonNull String userId, @NonNull String sceneId, @NonNull String actorId,
+    public ImageActorModel(@NonNull String userId, @NonNull String areaId, @NonNull String actorId,
                            @NonNull String assetId) {
-        super(userId, sceneId, actorId, assetId);
+        super(userId, areaId, actorId, assetId);
     }
 }

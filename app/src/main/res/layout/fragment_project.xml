@@ -66,25 +66,6 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>
 
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content">
-
-        <ImageButton android:id="@+id/image_button_select_scene"
-                     android:src="@drawable/ic_image_black_24dp"
-                     android:background="?android:attr/actionBarItemBackground"
-                     android:tint="@color/tint_image_button_enabled"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
-
-        <TextView android:id="@+id/text_view_scene_name"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_gravity="center_vertical"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-
     <Button android:id="@+id/button_edit"
             android:text="@string/button_edit"
             android:layout_width="match_parent"

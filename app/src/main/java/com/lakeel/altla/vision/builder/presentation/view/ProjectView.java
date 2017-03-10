@@ -12,19 +12,13 @@ public interface ProjectView {
 
     void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName);
 
-    void onUpdateSceneName(@Nullable String sceneName);
-
     void onUpdateAreaDescriptionPickerEnabled(boolean enabled);
-
-    void onUpdateScenePickerEnabled(boolean enabled);
 
     void onUpdateEditButtonEnabled(boolean enabled);
 
     void onShowUserAreaListView();
 
     void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
-
-    void onShowUserSceneListInAreaView(@NonNull String areaId);
 
     void onShowUserSceneEditView(@NonNull SceneBuildModel sceneBuildModel);
 

@@ -41,14 +41,8 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     @BindView(R.id.text_view_area_description_name)
     TextView textViewAreaDescriptionName;
 
-    @BindView(R.id.text_view_scene_name)
-    TextView textViewSceneName;
-
     @BindView(R.id.image_button_select_area_description)
     ImageButton imageButtonSelectAreaDescription;
-
-    @BindView(R.id.image_button_select_scene)
-    ImageButton imageButtonSelectScene;
 
     @BindView(R.id.button_edit)
     Button buttonStart;
@@ -112,20 +106,9 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     }
 
     @Override
-    public void onUpdateSceneName(@Nullable String sceneName) {
-        textViewSceneName.setText(sceneName);
-    }
-
-    @Override
     public void onUpdateAreaDescriptionPickerEnabled(boolean enabled) {
         imageButtonSelectAreaDescription.setEnabled(enabled);
         imageButtonSelectAreaDescription.setColorFilter(resolveImageButtonTint(enabled));
-    }
-
-    @Override
-    public void onUpdateScenePickerEnabled(boolean enabled) {
-        imageButtonSelectScene.setEnabled(enabled);
-        imageButtonSelectScene.setColorFilter(resolveImageButtonTint(enabled));
     }
 
     @Override
@@ -141,11 +124,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     @Override
     public void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId) {
         interactionListener.onShowUserAreaDescriptionListInAreaView(areaId);
-    }
-
-    @Override
-    public void onShowUserSceneListInAreaView(@NonNull String areaId) {
-        interactionListener.onShowUserSceneListInAreaView(areaId);
     }
 
     @Override
@@ -168,11 +146,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
         presenter.onClickImageButtonSelectAreaDescription();
     }
 
-    @OnClick(R.id.image_button_select_scene)
-    void onClickImageButtonSelectScene() {
-        presenter.onClickImageButtonSelectScene();
-    }
-
     @OnClick(R.id.button_edit)
     void onClickButtonEdit() {
         presenter.onClickButtonEdit();
@@ -186,10 +159,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
         presenter.onUserAreaDescriptionSelected(areaDescriptionId);
     }
 
-    public void onUserSceneSelected(@NonNull String sceneId) {
-        presenter.onUserSceneSelected(sceneId);
-    }
-
     @ColorInt
     private int resolveImageButtonTint(boolean enabled) {
         int resId = enabled ? R.color.tint_image_button_enabled : R.color.tint_image_button_disabled;
@@ -201,8 +170,6 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
         void onShowUserAreaListView();
 
         void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
-
-        void onShowUserSceneListInAreaView(@NonNull String areaId);
 
         void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel);
     }

@@ -8,11 +8,8 @@ public final class SceneBuildModel {
 
     public final String areaDescriptionId;
 
-    public final String sceneId;
-
-    public SceneBuildModel(@NonNull String areaId, @NonNull String areaDescriptionId, @NonNull String sceneId) {
+    public SceneBuildModel(@NonNull String areaId, @NonNull String areaDescriptionId) {
         this.areaId = areaId;
         this.areaDescriptionId = areaDescriptionId;
-        this.sceneId = sceneId;
     }
 }
