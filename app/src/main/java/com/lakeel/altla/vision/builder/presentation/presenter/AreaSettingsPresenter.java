@@ -5,6 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
+import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
@@ -92,6 +93,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         this.model = model;
                         this.model.areaNameDirty = true;
                         this.model.areaDescriptionNameDirty = true;
+                        refreshCheckedAreaType();
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     }, e -> {
@@ -101,20 +103,51 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         model = new Model();
                         model.currentAreaSettings.setId(currentDeviceResolver.getInstanceId());
                         model.currentAreaSettings.setUserId(currentUserResolver.getUserId());
+                        model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
                         getLog().d("No current project: userId = %s", model.currentAreaSettings.getUserId());
+                        refreshCheckedAreaType();
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     });
             manageDisposable(disposable);
         } else {
             getLog().d("Current project in memory: userId = %s", model.currentAreaSettings.getUserId());
+            refreshCheckedAreaType();
             refreshAreaName();
             refreshAreaDescriptionName();
         }
     }
 
-    public void onClickImageButtonSelectArea() {
-        getView().onShowUserAreaListView();
+    public void onCheckedChangedRadioButtonPublic(boolean isChecked) {
+        if (isChecked) {
+            if (model.currentAreaSettings.getAreaScopeAsEnum() != AreaScope.PUBLIC) {
+                model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.PUBLIC);
+                model.currentAreaSettings.setAreaId(null);
+                model.currentAreaSettings.setAreaDescriptionId(null);
+                refreshAreaName();
+                refreshAreaDescriptionName();
+            }
+        }
+    }
+
+    public void onCheckedChangedRadioButtonUser(boolean isChecked) {
+        if (isChecked) {
+            if (model.currentAreaSettings.getAreaScopeAsEnum() != AreaScope.USER) {
+                model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
+                model.currentAreaSettings.setAreaId(null);
+                model.currentAreaSettings.setAreaDescriptionId(null);
+                refreshAreaName();
+                refreshAreaDescriptionName();
+            }
+        }
+    }
+
+    public void onClickButtonFindByPlace() {
+        getView().onShowAreaFindByPlaceView(model.currentAreaSettings.getAreaScopeAsEnum());
+    }
+
+    public void onClickButtonFindByName() {
+        getView().onShowAreaFindByNameView(model.currentAreaSettings.getAreaScopeAsEnum());
     }
 
     public void onClickImageButtonSelectAreaDescription() {
@@ -128,8 +161,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                 .execute(model.currentAreaSettings)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                    SceneBuildModel sceneBuildModel = new SceneBuildModel(model.currentAreaSettings.getAreaId(),
-                                                                          model.currentAreaSettings.getAreaDescriptionId());
+                    SceneBuildModel sceneBuildModel = new SceneBuildModel(
+                            model.currentAreaSettings.getAreaId(), model.currentAreaSettings.getAreaDescriptionId());
                     getView().onShowUserSceneEditView(sceneBuildModel);
                 }, e -> {
                     getLog().e("Failed.", e);
@@ -163,6 +196,20 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         }
 
         refreshAreaDescriptionName();
+    }
+
+    private void refreshCheckedAreaType() {
+        switch (model.currentAreaSettings.getAreaScopeAsEnum()) {
+            case PUBLIC:
+                getView().onUpdateRadioGroupChecked(R.id.radio_button_public);
+                break;
+            case USER:
+                getView().onUpdateRadioGroupChecked(R.id.radio_button_user);
+                break;
+            default:
+                throw new IllegalStateException(
+                        "Unknown area scope: scope = " + model.currentAreaSettings.getAreaScopeAsEnum());
+        }
     }
 
     private void refreshAreaName() {

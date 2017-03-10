@@ -1,8 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaItemView;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,15 +15,15 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaListAdapter.ViewHolder> {
+public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPlaceListAdapter.ViewHolder> {
 
-    private final UserAreaListPresenter presenter;
+    private final AreaByPlaceListPresenter presenter;
 
     private RecyclerView recyclerView;
 
     private LayoutInflater inflater;
 
-    public UserAreaListAdapter(@NonNull UserAreaListPresenter presenter) {
+    public AreaByPlaceListAdapter(@NonNull AreaByPlaceListPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -44,7 +44,7 @@ public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaList
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
-        View itemView = inflater.inflate(R.layout.item_user_area, parent, false);
+        View itemView = inflater.inflate(R.layout.item_area, parent, false);
         itemView.setOnClickListener(v -> {
             if (recyclerView != null) {
                 int position = recyclerView.getChildAdapterPosition(v);
@@ -64,7 +64,7 @@ public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaList
         return presenter.getItemCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements UserAreaItemView {
+    class ViewHolder extends RecyclerView.ViewHolder implements AreaByPlaceItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;
@@ -72,16 +72,10 @@ public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaList
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        @BindView(R.id.text_view_place_name)
-        TextView textViewPlaceName;
-
-        @BindView(R.id.text_view_place_address)
-        TextView textViewPlaceAddress;
-
         @BindView(R.id.text_view_level)
         TextView textViewLevel;
 
-        private UserAreaListPresenter.ItemPresenter itemPresenter;
+        private AreaByPlaceListPresenter.ItemPresenter itemPresenter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,18 +92,8 @@ public final class UserAreaListAdapter extends RecyclerView.Adapter<UserAreaList
         }
 
         @Override
-        public void onUpdateName(@NonNull String name) {
+        public void onUpdateName(@Nullable String name) {
             textViewName.setText(name);
-        }
-
-        @Override
-        public void onUpdatePlaceName(@Nullable String placeName) {
-            textViewPlaceName.setText(placeName);
-        }
-
-        @Override
-        public void onUpdatePladeAddress(@Nullable String placeAddress) {
-            textViewPlaceAddress.setText(placeAddress);
         }
 
         @Override

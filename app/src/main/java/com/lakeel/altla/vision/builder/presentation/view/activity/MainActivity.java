@@ -13,14 +13,15 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
+import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
 import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
 import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
@@ -57,7 +58,7 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    AreaSettingsFragment.InteractionListener,
-                   UserAreaListFragment.InteractionListener,
+                   AreaByPlaceListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
                    UserActorFragment.InteractionListener,
@@ -235,8 +236,13 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserAreaListView() {
-        replaceFragmentAndAddToBackStack(UserAreaListFragment.newInstance());
+    public void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope) {
+        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(areaScope));
+    }
+
+    @Override
+    public void onShowAreaFindByNameView(@NonNull AreaScope areaScope) {
+        // TODO
     }
 
     @Override

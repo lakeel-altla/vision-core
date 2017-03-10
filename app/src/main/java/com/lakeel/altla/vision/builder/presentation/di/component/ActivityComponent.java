@@ -5,6 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.AndroidRepositoryM
 import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseRepositoryModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.DebugConsoleFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
@@ -12,7 +13,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissio
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.di.ActivityScope;
@@ -37,7 +37,7 @@ public interface ActivityComponent {
 
     void inject(AreaSettingsFragment fragment);
 
-    void inject(UserAreaListFragment fragment);
+    void inject(AreaByPlaceListFragment fragment);
 
     void inject(UserAreaDescriptionListInAreaFragment fragment);
 

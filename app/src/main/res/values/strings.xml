@@ -11,6 +11,12 @@
     <string name="button_create">Create</string>
     <string name="button_delete">DELETE</string>
     <string name="button_detail">Detail</string>
+    <string name="button_find_by_name">Find by Name</string>
+    <string name="button_find_by_place">Find by Place</string>
+
+    <string name="radio_button_public">Public</string>
+    <string name="radio_button_group">Group</string>
+    <string name="radio_button_user">User</string>
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
@@ -48,20 +54,23 @@
     <string name="label_scale">Scale</string>
     <string name="label_created_at">Created At</string>
     <string name="label_updated_at">Updated At</string>
+    <string name="label_x">X</string>
+    <string name="label_y">Y</string>
+    <string name="label_z">Z</string>
+    <string name="label_w">W</string>
+    <string name="label_area_scope">Area Scope</string>
 
     <string name="title_project">Project</string>
-    <string name="title_user_area_list">Select a User Area</string>
-    <string name="title_user_area_description_list_in_area">Select a User Area Description</string>
+    <string name="title_select_area">Select Area</string>
+    <string name="title_user_area_description_list_in_area">Select Area Description</string>
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
     <string name="action_close">Close</string>
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
-    <string name="label_x">X</string>
-    <string name="label_y">Y</string>
-    <string name="label_z">Z</string>
-    <string name="label_w">W</string>
+    <string name="action_pick_place">Pick Place</string>
+
     <string name="input_error_required">Required.</string>
 
 </resources>

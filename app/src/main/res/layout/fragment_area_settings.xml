@@ -10,27 +10,54 @@
               android:layout_height="match_parent"
               tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment">
 
-    <TextView android:text="@string/label_area"
+    <TextView android:text="@string/label_area_scope"
               android:textAppearance="@style/TextAppearance.AppCompat.Body1"
               android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <RadioGroup android:id="@+id/radio_group_area_scope"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+        <RadioButton android:id="@+id/radio_button_public"
+                     android:text="@string/radio_button_public"
+                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"/>
+
+        <RadioButton android:id="@+id/radio_button_user"
+                     android:text="@string/radio_button_user"
+                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"/>
+
+    </RadioGroup>
+
+    <TextView android:text="@string/label_area"
+              android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+              android:layout_marginTop="@dimen/content_vertical_margin"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_area_name"
+              android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+              android:layout_gravity="center_vertical"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"/>
 
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content">
 
-        <ImageButton android:id="@+id/image_button_select_area"
-                     android:src="@drawable/ic_map_black_24dp"
-                     android:background="?android:attr/actionBarItemBackground"
-                     android:tint="@color/tint_image_button_enabled"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
+        <Button android:id="@+id/button_find_by_place"
+                android:text="@string/button_find_by_place"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-        <TextView android:id="@+id/text_view_area_name"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_gravity="center_vertical"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
+        <Button android:id="@+id/button_find_by_name"
+                android:text="@string/button_find_by_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

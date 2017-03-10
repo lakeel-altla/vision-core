@@ -5,6 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
+import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -18,13 +19,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
@@ -35,6 +39,9 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
     @BindView(R.id.view_top)
     View viewTop;
+
+    @BindView(R.id.radio_group_area_scope)
+    RadioGroup radioGroupType;
 
     @BindView(R.id.text_view_area_name)
     TextView textViewAreaName;
@@ -97,6 +104,11 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
+    public void onUpdateRadioGroupChecked(int checkedId) {
+        radioGroupType.check(checkedId);
+    }
+
+    @Override
     public void onUpdateAreaName(@Nullable String areaName) {
         textViewAreaName.setText(areaName);
     }
@@ -118,8 +130,13 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onShowUserAreaListView() {
-        interactionListener.onShowUserAreaListView();
+    public void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope) {
+        interactionListener.onShowAreaFindByPlaceView(areaScope);
+    }
+
+    @Override
+    public void onShowAreaFindByNameView(@NonNull AreaScope areaScope) {
+        interactionListener.onShowAreaFindByNameView(areaScope);
     }
 
     @Override
@@ -137,9 +154,24 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.image_button_select_area)
-    void onClickImageButtonSelectArea() {
-        presenter.onClickImageButtonSelectArea();
+    @OnCheckedChanged(R.id.radio_button_public)
+    void onCheckedChangedRadioButtonPublic(CompoundButton buttonView, boolean isChecked) {
+        presenter.onCheckedChangedRadioButtonPublic(isChecked);
+    }
+
+    @OnCheckedChanged(R.id.radio_button_user)
+    void onCheckedChangedRadioButtonUser(CompoundButton buttonView, boolean isChecked) {
+        presenter.onCheckedChangedRadioButtonUser(isChecked);
+    }
+
+    @OnClick(R.id.button_find_by_place)
+    void onClickButtonFindByPlace() {
+        presenter.onClickButtonFindByPlace();
+    }
+
+    @OnClick(R.id.button_find_by_name)
+    void onClickButtonFindByName() {
+        presenter.onClickButtonFindByName();
     }
 
     @OnClick(R.id.image_button_select_area_description)
@@ -168,7 +200,9 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
     public interface InteractionListener {
 
-        void onShowUserAreaListView();
+        void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope);
+
+        void onShowAreaFindByNameView(@NonNull AreaScope areaScope);
 
         void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
 

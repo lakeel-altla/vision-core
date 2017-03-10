@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view;
 
 import android.support.annotation.StringRes;
 
-public interface UserAreaListView {
+public interface AreaByPlaceListView {
 
     void onItemInserted(int position);
 
@@ -15,6 +15,8 @@ public interface UserAreaListView {
     void onDataSetChanged();
 
     void onItemSelected(String areaId);
+
+    void onShowPlacePicker();
 
     void onSnackbar(@StringRes int resId);
 }
