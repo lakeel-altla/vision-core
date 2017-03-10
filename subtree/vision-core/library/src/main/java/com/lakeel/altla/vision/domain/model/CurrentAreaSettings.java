@@ -5,7 +5,7 @@ import org.parceler.Parcel;
 import android.support.annotation.Nullable;
 
 @Parcel(Parcel.Serialization.BEAN)
-public final class CurrentProject extends BaseEntity {
+public final class CurrentAreaSettings extends BaseEntity {
 
     private String areaId;
 

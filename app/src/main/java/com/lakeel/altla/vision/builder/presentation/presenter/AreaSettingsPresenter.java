@@ -2,14 +2,14 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
+import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
-import com.lakeel.altla.vision.domain.model.CurrentProject;
+import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserCurrentProjectUseCase;
-import com.lakeel.altla.vision.domain.usecase.SaveUserCurrentProjectUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindUserCurrentAreaSettingsUseCase;
+import com.lakeel.altla.vision.domain.usecase.SaveUserCurrentAreaSettingsUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcel;
@@ -24,15 +24,15 @@ import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public final class ProjectPresenter extends BasePresenter<ProjectView> {
+public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
 
     private static final String STATE_MODEL = "model";
 
     @Inject
-    FindUserCurrentProjectUseCase findUserCurrentProjectUseCase;
+    FindUserCurrentAreaSettingsUseCase findUserCurrentAreaSettingsUseCase;
 
     @Inject
-    SaveUserCurrentProjectUseCase saveUserCurrentProjectUseCase;
+    SaveUserCurrentAreaSettingsUseCase saveUserCurrentAreaSettingsUseCase;
 
     @Inject
     FindUserAreaUseCase findUserAreaUseCase;
@@ -49,7 +49,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     private Model model;
 
     @Inject
-    public ProjectPresenter() {
+    public AreaSettingsPresenter() {
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         super.onStartOverride();
 
         if (model == null) {
-            Disposable disposable = findUserCurrentProjectUseCase
+            Disposable disposable = findUserCurrentAreaSettingsUseCase
                     .execute()
                     .map(Model::new)
                     .observeOn(AndroidSchedulers.mainThread())
@@ -99,15 +99,15 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
                         getView().onSnackbar(R.string.snackbar_failed);
                     }, () -> {
                         model = new Model();
-                        model.currentProject.setId(currentDeviceResolver.getInstanceId());
-                        model.currentProject.setUserId(currentUserResolver.getUserId());
-                        getLog().d("No current project: userId = %s", model.currentProject.getUserId());
+                        model.currentAreaSettings.setId(currentDeviceResolver.getInstanceId());
+                        model.currentAreaSettings.setUserId(currentUserResolver.getUserId());
+                        getLog().d("No current project: userId = %s", model.currentAreaSettings.getUserId());
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     });
             manageDisposable(disposable);
         } else {
-            getLog().d("Current project in memory: userId = %s", model.currentProject.getUserId());
+            getLog().d("Current project in memory: userId = %s", model.currentAreaSettings.getUserId());
             refreshAreaName();
             refreshAreaDescriptionName();
         }
@@ -118,18 +118,18 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onClickImageButtonSelectAreaDescription() {
-        getView().onShowUserAreaDescriptionListInAreaView(model.currentProject.getAreaId());
+        getView().onShowUserAreaDescriptionListInAreaView(model.currentAreaSettings.getAreaId());
     }
 
     public void onClickButtonEdit() {
         getView().onUpdateEditButtonEnabled(false);
 
-        Disposable disposable = saveUserCurrentProjectUseCase
-                .execute(model.currentProject)
+        Disposable disposable = saveUserCurrentAreaSettingsUseCase
+                .execute(model.currentAreaSettings)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                    SceneBuildModel sceneBuildModel = new SceneBuildModel(model.currentProject.getAreaId(),
-                                                                          model.currentProject.getAreaDescriptionId());
+                    SceneBuildModel sceneBuildModel = new SceneBuildModel(model.currentAreaSettings.getAreaId(),
+                                                                          model.currentAreaSettings.getAreaDescriptionId());
                     getView().onShowUserSceneEditView(sceneBuildModel);
                 }, e -> {
                     getLog().e("Failed.", e);
@@ -139,11 +139,11 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onUserAreaSelected(@Nullable String areaId) {
-        if ((model.currentProject.getAreaId() != null && model.currentProject.getAreaId().equals(areaId)) ||
-            (model.currentProject.getAreaId() == null && areaId == null)) {
+        if ((model.currentAreaSettings.getAreaId() != null && model.currentAreaSettings.getAreaId().equals(areaId)) ||
+            (model.currentAreaSettings.getAreaId() == null && areaId == null)) {
             model.areaNameDirty = false;
         } else {
-            model.currentProject.setAreaId(areaId);
+            model.currentAreaSettings.setAreaId(areaId);
             model.areaNameDirty = true;
 
             onUserAreaDescriptionSelected(null);
@@ -153,12 +153,12 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     public void onUserAreaDescriptionSelected(@Nullable String areaDescriptionId) {
-        if ((model.currentProject.getAreaDescriptionId() != null &&
-             model.currentProject.getAreaDescriptionId().equals(areaDescriptionId)) ||
-            (model.currentProject.getAreaDescriptionId() == null && areaDescriptionId == null)) {
+        if ((model.currentAreaSettings.getAreaDescriptionId() != null &&
+             model.currentAreaSettings.getAreaDescriptionId().equals(areaDescriptionId)) ||
+            (model.currentAreaSettings.getAreaDescriptionId() == null && areaDescriptionId == null)) {
             model.areaDescriptionNameDirty = false;
         } else {
-            model.currentProject.setAreaDescriptionId(areaDescriptionId);
+            model.currentAreaSettings.setAreaDescriptionId(areaDescriptionId);
             model.areaDescriptionNameDirty = true;
         }
 
@@ -171,11 +171,11 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
             getView().onUpdateAreaName(null);
             updateActionViews();
 
-            if (model.currentProject.getAreaId() == null) {
+            if (model.currentAreaSettings.getAreaId() == null) {
                 model.areaNameDirty = false;
             } else {
                 Disposable disposable = findUserAreaUseCase
-                        .execute(model.currentProject.getAreaId())
+                        .execute(model.currentAreaSettings.getAreaId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(area -> {
                             model.areaName = area.getName();
@@ -199,11 +199,11 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
             getView().onUpdateAreaDescriptionName(null);
             updateActionViews();
 
-            if (model.currentProject.getAreaDescriptionId() == null) {
+            if (model.currentAreaSettings.getAreaDescriptionId() == null) {
                 model.areaDescriptionNameDirty = false;
             } else {
                 Disposable disposable = findUserAreaDescriptionUseCase
-                        .execute(model.currentProject.getAreaDescriptionId())
+                        .execute(model.currentAreaSettings.getAreaDescriptionId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(areaDescription -> {
                             model.areaDescriptionName = areaDescription.getName();
@@ -227,23 +227,19 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
     }
 
     private boolean canPickUserAreaDescription() {
-        return model.currentProject.getAreaId() != null && model.areaName != null && !model.areaNameDirty;
-    }
-
-    private boolean canPickUserScene() {
-        return model.currentProject.getAreaId() != null && model.areaName != null && !model.areaNameDirty;
+        return model.currentAreaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty;
     }
 
     private boolean canEdit() {
-        return model.currentProject.getAreaId() != null && model.areaName != null && !model.areaNameDirty &&
-               model.currentProject.getAreaDescriptionId() != null && model.areaDescriptionName != null &&
+        return model.currentAreaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty &&
+               model.currentAreaSettings.getAreaDescriptionId() != null && model.areaDescriptionName != null &&
                !model.areaDescriptionNameDirty;
     }
 
     @Parcel
     public static final class Model {
 
-        CurrentProject currentProject;
+        CurrentAreaSettings currentAreaSettings;
 
         String areaName;
 
@@ -254,11 +250,11 @@ public final class ProjectPresenter extends BasePresenter<ProjectView> {
         boolean areaDescriptionNameDirty;
 
         public Model() {
-            this(new CurrentProject());
+            this(new CurrentAreaSettings());
         }
 
-        public Model(@NonNull CurrentProject currentProject) {
-            this.currentProject = currentProject;
+        public Model(@NonNull CurrentAreaSettings currentAreaSettings) {
+            this.currentAreaSettings = currentAreaSettings;
         }
     }
 }

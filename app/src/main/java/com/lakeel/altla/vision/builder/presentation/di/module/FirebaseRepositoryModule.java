@@ -8,7 +8,7 @@ import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserCurrentProjectRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserCurrentAreaSettingsRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserDeviceConnectionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserDeviceRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileRepository;
@@ -66,8 +66,8 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    UserCurrentProjectRepository provideUserCurrentProjectRepository(FirebaseDatabase database) {
-        return new UserCurrentProjectRepository(database);
+    UserCurrentAreaSettingsRepository provideUserCurrentProjectRepository(FirebaseDatabase database) {
+        return new UserCurrentAreaSettingsRepository(database);
     }
 
     @ActivityScope

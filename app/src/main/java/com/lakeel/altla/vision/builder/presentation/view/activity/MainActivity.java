@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ProjectFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
@@ -56,7 +56,7 @@ public final class MainActivity extends AppCompatActivity
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
-                   ProjectFragment.InteractionListener,
+                   AreaSettingsFragment.InteractionListener,
                    UserAreaListFragment.InteractionListener,
                    UserAreaDescriptionListInAreaFragment.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
@@ -231,7 +231,7 @@ public final class MainActivity extends AppCompatActivity
     public void onCloseTangoPermissionView() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(ProjectFragment.newInstance());
+        replaceFragment(AreaSettingsFragment.newInstance());
     }
 
     @Override
@@ -251,7 +251,7 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onCloseUserSceneBuildView() {
-        replaceFragment(ProjectFragment.newInstance());
+        replaceFragment(AreaSettingsFragment.newInstance());
     }
 
     @Override
@@ -269,7 +269,7 @@ public final class MainActivity extends AppCompatActivity
     public void onUserAreaSelected(@NonNull String areaId) {
         getSupportFragmentManager().popBackStack();
 
-        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
+        AreaSettingsFragment fragment = (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
         if (fragment != null) {
             fragment.onUserAreaSelected(areaId);
         }
@@ -279,7 +279,7 @@ public final class MainActivity extends AppCompatActivity
     public void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId) {
         getSupportFragmentManager().popBackStack();
 
-        ProjectFragment fragment = (ProjectFragment) findFragment(ProjectFragment.class);
+        AreaSettingsFragment fragment = (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
         if (fragment != null) {
             fragment.onUserAreaDescriptionSelected(areaDescriptionId);
         }

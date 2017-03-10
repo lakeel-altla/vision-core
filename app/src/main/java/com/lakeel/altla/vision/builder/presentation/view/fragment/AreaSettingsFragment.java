@@ -3,8 +3,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.ProjectPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.ProjectView;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -27,10 +27,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public final class ProjectFragment extends AbstractFragment<ProjectView, ProjectPresenter> implements ProjectView {
+public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
+        implements AreaSettingsView {
 
     @Inject
-    ProjectPresenter presenter;
+    AreaSettingsPresenter presenter;
 
     @BindView(R.id.view_top)
     View viewTop;
@@ -50,17 +51,17 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     private InteractionListener interactionListener;
 
     @NonNull
-    public static ProjectFragment newInstance() {
-        return new ProjectFragment();
+    public static AreaSettingsFragment newInstance() {
+        return new AreaSettingsFragment();
     }
 
     @Override
-    protected ProjectPresenter getPresenter() {
+    protected AreaSettingsPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected ProjectView getViewInterface() {
+    protected AreaSettingsView getViewInterface() {
         return this;
     }
 
@@ -83,7 +84,7 @@ public final class ProjectFragment extends AbstractFragment<ProjectView, Project
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_project, container, false);
+        return inflater.inflate(R.layout.fragment_area_settings, container, false);
     }
 
     @Override
