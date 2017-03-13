@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.domain.usecase;
 
 import com.lakeel.altla.vision.data.repository.firebase.UserCurrentAreaSettingsRepository;
-import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 
 import android.support.annotation.NonNull;
 
@@ -20,7 +20,7 @@ public final class SaveUserCurrentAreaSettingsUseCase {
     }
 
     @NonNull
-    public Completable execute(@NonNull CurrentAreaSettings settings) {
+    public Completable execute(@NonNull AreaSettings settings) {
         return Completable.create(e -> {
             userCurrentAreaSettingsRepository.save(settings);
             e.onComplete();

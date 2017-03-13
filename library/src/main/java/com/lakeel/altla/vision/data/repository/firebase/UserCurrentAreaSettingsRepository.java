@@ -7,7 +7,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import com.lakeel.altla.vision.domain.helper.OnFailureListener;
 import com.lakeel.altla.vision.domain.helper.OnSuccessListener;
-import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 
 import android.support.annotation.NonNull;
 
@@ -19,18 +19,18 @@ public final class UserCurrentAreaSettingsRepository extends BaseDatabaseReposit
         super(database);
     }
 
-    public void save(@NonNull CurrentAreaSettings currentAreaSettings) {
-        if (currentAreaSettings.getUserId() == null) {
-            throw new IllegalArgumentException("currentAreaSettings.getUserId() must be not null.");
+    public void save(@NonNull AreaSettings areaSettings) {
+        if (areaSettings.getUserId() == null) {
+            throw new IllegalArgumentException("areaSettings.getUserId() must be not null.");
         }
 
-        currentAreaSettings.setUpdatedAtAsLong(-1);
+        areaSettings.setUpdatedAtAsLong(-1);
 
         getDatabase().getReference()
                      .child(BASE_PATH)
-                     .child(currentAreaSettings.getUserId())
-                     .child(currentAreaSettings.getId())
-                     .setValue(currentAreaSettings, (error, reference) -> {
+                     .child(areaSettings.getUserId())
+                     .child(areaSettings.getId())
+                     .setValue(areaSettings, (error, reference) -> {
                          if (error != null) {
                              getLog().e(String.format("Failed to save: reference = %s", reference),
                                         error.toException());
@@ -39,7 +39,7 @@ public final class UserCurrentAreaSettingsRepository extends BaseDatabaseReposit
     }
 
     public void find(@NonNull String userId, @NonNull String instanceId,
-                     OnSuccessListener<CurrentAreaSettings> onSuccessListener, OnFailureListener onFailureListener) {
+                     OnSuccessListener<AreaSettings> onSuccessListener, OnFailureListener onFailureListener) {
         getDatabase().getReference()
                      .child(BASE_PATH)
                      .child(userId)
@@ -47,8 +47,8 @@ public final class UserCurrentAreaSettingsRepository extends BaseDatabaseReposit
                      .addListenerForSingleValueEvent(new ValueEventListener() {
                          @Override
                          public void onDataChange(DataSnapshot snapshot) {
-                             CurrentAreaSettings currentAreaSettings = snapshot.getValue(CurrentAreaSettings.class);
-                             if (onSuccessListener != null) onSuccessListener.onSuccess(currentAreaSettings);
+                             AreaSettings areaSettings = snapshot.getValue(AreaSettings.class);
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(areaSettings);
                          }
 
                          @Override
