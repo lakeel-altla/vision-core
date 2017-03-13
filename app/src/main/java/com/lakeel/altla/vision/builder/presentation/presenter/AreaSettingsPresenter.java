@@ -124,6 +124,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                 model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.PUBLIC);
                 model.currentAreaSettings.setAreaId(null);
                 model.currentAreaSettings.setAreaDescriptionId(null);
+                model.areaName = null;
+                model.areaDescriptionName = null;
                 refreshAreaName();
                 refreshAreaDescriptionName();
             }
@@ -136,6 +138,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                 model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
                 model.currentAreaSettings.setAreaId(null);
                 model.currentAreaSettings.setAreaDescriptionId(null);
+                model.areaName = null;
+                model.areaDescriptionName = null;
                 refreshAreaName();
                 refreshAreaDescriptionName();
             }
@@ -151,10 +155,17 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     public void onClickImageButtonSelectAreaDescription() {
+        if (model.currentAreaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
+
         getView().onShowUserAreaDescriptionListInAreaView(model.currentAreaSettings.getAreaId());
     }
 
     public void onClickButtonEdit() {
+        if (model.currentAreaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
+        if (model.currentAreaSettings.getAreaDescriptionId() == null) {
+            throw new IllegalStateException("Area description ID is null.");
+        }
+
         getView().onUpdateEditButtonEnabled(false);
 
         Disposable disposable = saveUserCurrentAreaSettingsUseCase
