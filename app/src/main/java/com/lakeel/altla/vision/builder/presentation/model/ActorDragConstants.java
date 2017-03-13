@@ -1,8 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-public interface ActorDragConstants {
+public final class ActorDragConstants {
 
-    String INTENT_LABEL = "actorDrag";
+    public static final String INTENT_LABEL = "actorDrag";
 
-    String INTENT_EXTRA_ASSET = "asset";
+    public static final String INTENT_EXTRA_ASSET = "asset";
+
+    private ActorDragConstants() {
+    }
 }
