@@ -157,7 +157,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     public void onClickImageButtonSelectAreaDescription() {
         if (model.currentAreaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
 
-        getView().onShowUserAreaDescriptionListInAreaView(model.currentAreaSettings.getAreaId());
+        getView().onShowAreaDescriptionInAreaListView(model.currentAreaSettings.getAreaScopeAsEnum(),
+                                                      model.currentAreaSettings.getAreaId());
     }
 
     public void onClickButtonEdit() {

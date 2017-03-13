@@ -140,8 +140,8 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId) {
-        interactionListener.onShowUserAreaDescriptionListInAreaView(areaId);
+    public void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId) {
+        interactionListener.onShowAreaDescriptionInAreaListView(areaScope, areaId);
     }
 
     @Override
@@ -204,7 +204,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
         void onShowAreaFindByNameView(@NonNull AreaScope areaScope);
 
-        void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
+        void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId);
 
         void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel);
     }

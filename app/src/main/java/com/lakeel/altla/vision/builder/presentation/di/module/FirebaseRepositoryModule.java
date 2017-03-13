@@ -4,6 +4,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
+import com.lakeel.altla.vision.data.repository.firebase.PublicAreaDescriptionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.PublicAreaRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
@@ -63,6 +64,12 @@ public final class FirebaseRepositoryModule {
     @Provides
     UserAreaDescriptionRepository provideUserAreaDescriptionRepository(FirebaseDatabase database) {
         return new UserAreaDescriptionRepository(database);
+    }
+
+    @ActivityScope
+    @Provides
+    PublicAreaDescriptionRepository providePublicAreaDescriptionRepository(FirebaseDatabase database) {
+        return new PublicAreaDescriptionRepository(database);
     }
 
     @ActivityScope

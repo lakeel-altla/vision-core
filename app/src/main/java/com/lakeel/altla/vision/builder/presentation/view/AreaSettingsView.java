@@ -23,7 +23,7 @@ public interface AreaSettingsView {
 
     void onShowAreaFindByNameView(@NonNull AreaScope areaScope);
 
-    void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId);
+    void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId);
 
     void onShowUserSceneEditView(@NonNull SceneBuildModel sceneBuildModel);
 

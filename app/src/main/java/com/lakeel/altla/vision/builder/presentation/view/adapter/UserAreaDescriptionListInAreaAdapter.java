@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListInAreaPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionInAreaListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 
 import android.support.annotation.NonNull;
@@ -17,13 +17,13 @@ import butterknife.ButterKnife;
 public final class UserAreaDescriptionListInAreaAdapter
         extends RecyclerView.Adapter<UserAreaDescriptionListInAreaAdapter.ViewHolder> {
 
-    private final UserAreaDescriptionListInAreaPresenter presenter;
+    private final AreaDescriptionInAreaListPresenter presenter;
 
     private RecyclerView recyclerView;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionListInAreaAdapter(@NonNull UserAreaDescriptionListInAreaPresenter presenter) {
+    public UserAreaDescriptionListInAreaAdapter(@NonNull AreaDescriptionInAreaListPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -72,7 +72,7 @@ public final class UserAreaDescriptionListInAreaAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        private UserAreaDescriptionListInAreaPresenter.ItemPresenter itemPresenter;
+        private AreaDescriptionInAreaListPresenter.ItemPresenter itemPresenter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

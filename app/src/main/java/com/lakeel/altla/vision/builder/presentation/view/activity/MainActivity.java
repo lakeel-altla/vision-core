@@ -14,12 +14,12 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionInAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserAreaDescriptionListInAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserSceneBuildFragment;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
@@ -59,7 +59,7 @@ public final class MainActivity extends AppCompatActivity
                    TangoPermissionFragment.InteractionListener,
                    AreaSettingsFragment.InteractionListener,
                    AreaByPlaceListFragment.InteractionListener,
-                   UserAreaDescriptionListInAreaFragment.InteractionListener,
+                   AreaDescriptionInAreaListFragment.InteractionListener,
                    UserSceneBuildFragment.InteractionListener,
                    UserActorFragment.InteractionListener,
                    UserActorEditFragment.InteractionListener,
@@ -246,8 +246,8 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserAreaDescriptionListInAreaView(@NonNull String areaId) {
-        replaceFragmentAndAddToBackStack(UserAreaDescriptionListInAreaFragment.newInstance(areaId));
+    public void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId) {
+        replaceFragmentAndAddToBackStack(AreaDescriptionInAreaListFragment.newInstance(areaScope, areaId));
     }
 
     @Override

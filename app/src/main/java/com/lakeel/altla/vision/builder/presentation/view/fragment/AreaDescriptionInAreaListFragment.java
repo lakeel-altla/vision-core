@@ -2,9 +2,10 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserAreaDescriptionListInAreaPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionListInAreaView;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionInAreaListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionInAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionListInAreaAdapter;
+import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -24,12 +25,12 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionListInAreaFragment
-        extends AbstractFragment<UserAreaDescriptionListInAreaView, UserAreaDescriptionListInAreaPresenter>
-        implements UserAreaDescriptionListInAreaView {
+public final class AreaDescriptionInAreaListFragment
+        extends AbstractFragment<AreaDescriptionInAreaListView, AreaDescriptionInAreaListPresenter>
+        implements AreaDescriptionInAreaListView {
 
     @Inject
-    UserAreaDescriptionListInAreaPresenter presenter;
+    AreaDescriptionInAreaListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -37,20 +38,20 @@ public final class UserAreaDescriptionListInAreaFragment
     private InteractionListener interactionListener;
 
     @NonNull
-    public static UserAreaDescriptionListInAreaFragment newInstance(@NonNull String areaId) {
-        UserAreaDescriptionListInAreaFragment fragment = new UserAreaDescriptionListInAreaFragment();
-        Bundle bundle = UserAreaDescriptionListInAreaPresenter.createArguments(areaId);
+    public static AreaDescriptionInAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull String areaId) {
+        AreaDescriptionInAreaListFragment fragment = new AreaDescriptionInAreaListFragment();
+        Bundle bundle = AreaDescriptionInAreaListPresenter.createArguments(areaScope, areaId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserAreaDescriptionListInAreaPresenter getPresenter() {
+    protected AreaDescriptionInAreaListPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserAreaDescriptionListInAreaView getViewInterface() {
+    protected AreaDescriptionInAreaListView getViewInterface() {
         return this;
     }
 

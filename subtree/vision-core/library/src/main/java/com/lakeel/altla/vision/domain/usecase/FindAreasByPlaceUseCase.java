@@ -34,6 +34,8 @@ public final class FindAreasByPlaceUseCase {
 
     @NonNull
     public Single<List<Area>> execute(@NonNull AreaScope areaScope, @NonNull String placeId) {
+        if (areaScope == AreaScope.UNKNOWN) throw new IllegalArgumentException("Unknown area scope.");
+
         String userId = currentUserResolver.getUserId();
 
         return Single.<List<Area>>create(e -> {
