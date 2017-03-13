@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionInAreaListView;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 import com.lakeel.altla.vision.domain.model.AreaDescription;
 import com.lakeel.altla.vision.domain.model.AreaScope;
@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public final class AreaDescriptionInAreaListPresenter extends BasePresenter<AreaDescriptionInAreaListView>
+public final class AreaDescriptionByAreaListPresenter extends BasePresenter<AreaDescriptionByAreaListView>
         implements DataList.OnItemListener {
 
     @Inject
@@ -43,7 +43,7 @@ public final class AreaDescriptionInAreaListPresenter extends BasePresenter<Area
     private String areaId;
 
     @Inject
-    public AreaDescriptionInAreaListPresenter() {
+    public AreaDescriptionByAreaListPresenter() {
     }
 
     @NonNull

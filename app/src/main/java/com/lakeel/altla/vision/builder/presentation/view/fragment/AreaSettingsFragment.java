@@ -2,10 +2,10 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.domain.model.AreaScope;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -52,7 +52,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     @BindView(R.id.image_button_select_area_description)
     ImageButton imageButtonSelectAreaDescription;
 
-    @BindView(R.id.button_edit)
+    @BindView(R.id.button_start)
     Button buttonStart;
 
     private InteractionListener interactionListener;
@@ -145,8 +145,8 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onShowUserSceneEditView(@NonNull SceneBuildModel sceneBuildModel) {
-        interactionListener.onShowUserSceneBuildView(sceneBuildModel);
+    public void onShowArView(@NonNull AreaSettings settings) {
+        interactionListener.onShowArView(settings);
     }
 
     @Override
@@ -179,9 +179,9 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         presenter.onClickImageButtonSelectAreaDescription();
     }
 
-    @OnClick(R.id.button_edit)
-    void onClickButtonEdit() {
-        presenter.onClickButtonEdit();
+    @OnClick(R.id.button_start)
+    void onClickButtonStart() {
+        presenter.onClickButtonStart();
     }
 
     public void onUserAreaSelected(@NonNull String areaId) {
@@ -206,6 +206,6 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
         void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId);
 
-        void onShowUserSceneBuildView(@NonNull SceneBuildModel sceneBuildModel);
+        void onShowArView(@NonNull AreaSettings settings);
     }
 }

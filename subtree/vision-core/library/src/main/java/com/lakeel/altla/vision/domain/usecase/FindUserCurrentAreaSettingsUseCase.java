@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.domain.usecase;
 import com.lakeel.altla.vision.data.repository.firebase.UserCurrentAreaSettingsRepository;
 import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
-import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 
 import android.support.annotation.NonNull;
 
@@ -28,11 +28,11 @@ public final class FindUserCurrentAreaSettingsUseCase {
     }
 
     @NonNull
-    public Maybe<CurrentAreaSettings> execute() {
+    public Maybe<AreaSettings> execute() {
         String userId = currentUserResolver.getUserId();
         String instanceId = currentDeviceResolver.getInstanceId();
 
-        return Maybe.<CurrentAreaSettings>create(e -> {
+        return Maybe.<AreaSettings>create(e -> {
             userCurrentAreaSettingsRepository.find(userId, instanceId, userCurrentProject -> {
                 if (userCurrentProject == null) {
                     e.onComplete();

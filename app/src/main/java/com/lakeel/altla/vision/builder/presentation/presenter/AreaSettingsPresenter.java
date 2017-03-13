@@ -1,12 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
 import com.lakeel.altla.vision.domain.model.AreaScope;
-import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.domain.usecase.FindAreaDescriptionUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindAreaUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserCurrentAreaSettingsUseCase;
@@ -101,17 +100,17 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         getView().onSnackbar(R.string.snackbar_failed);
                     }, () -> {
                         model = new Model();
-                        model.currentAreaSettings.setId(currentDeviceResolver.getInstanceId());
-                        model.currentAreaSettings.setUserId(currentUserResolver.getUserId());
-                        model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
-                        getLog().d("No current project: userId = %s", model.currentAreaSettings.getUserId());
+                        model.areaSettings.setId(currentDeviceResolver.getInstanceId());
+                        model.areaSettings.setUserId(currentUserResolver.getUserId());
+                        model.areaSettings.setAreaScopeAsEnum(AreaScope.USER);
+                        getLog().d("No current project: userId = %s", model.areaSettings.getUserId());
                         refreshCheckedAreaScope();
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     });
             manageDisposable(disposable);
         } else {
-            getLog().d("Current project in memory: userId = %s", model.currentAreaSettings.getUserId());
+            getLog().d("Current project in memory: userId = %s", model.areaSettings.getUserId());
             refreshCheckedAreaScope();
             refreshAreaName();
             refreshAreaDescriptionName();
@@ -120,10 +119,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     public void onCheckedChangedRadioButtonPublic(boolean isChecked) {
         if (isChecked) {
-            if (model.currentAreaSettings.getAreaScopeAsEnum() != AreaScope.PUBLIC) {
-                model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.PUBLIC);
-                model.currentAreaSettings.setAreaId(null);
-                model.currentAreaSettings.setAreaDescriptionId(null);
+            if (model.areaSettings.getAreaScopeAsEnum() != AreaScope.PUBLIC) {
+                model.areaSettings.setAreaScopeAsEnum(AreaScope.PUBLIC);
+                model.areaSettings.setAreaId(null);
+                model.areaSettings.setAreaDescriptionId(null);
                 model.areaName = null;
                 model.areaDescriptionName = null;
                 refreshAreaName();
@@ -134,10 +133,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     public void onCheckedChangedRadioButtonUser(boolean isChecked) {
         if (isChecked) {
-            if (model.currentAreaSettings.getAreaScopeAsEnum() != AreaScope.USER) {
-                model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
-                model.currentAreaSettings.setAreaId(null);
-                model.currentAreaSettings.setAreaDescriptionId(null);
+            if (model.areaSettings.getAreaScopeAsEnum() != AreaScope.USER) {
+                model.areaSettings.setAreaScopeAsEnum(AreaScope.USER);
+                model.areaSettings.setAreaId(null);
+                model.areaSettings.setAreaDescriptionId(null);
                 model.areaName = null;
                 model.areaDescriptionName = null;
                 refreshAreaName();
@@ -147,35 +146,33 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     public void onClickButtonFindByPlace() {
-        getView().onShowAreaFindByPlaceView(model.currentAreaSettings.getAreaScopeAsEnum());
+        getView().onShowAreaFindByPlaceView(model.areaSettings.getAreaScopeAsEnum());
     }
 
     public void onClickButtonFindByName() {
-        getView().onShowAreaFindByNameView(model.currentAreaSettings.getAreaScopeAsEnum());
+        getView().onShowAreaFindByNameView(model.areaSettings.getAreaScopeAsEnum());
     }
 
     public void onClickImageButtonSelectAreaDescription() {
-        if (model.currentAreaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
+        if (model.areaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
 
-        getView().onShowAreaDescriptionInAreaListView(model.currentAreaSettings.getAreaScopeAsEnum(),
-                                                      model.currentAreaSettings.getAreaId());
+        getView().onShowAreaDescriptionInAreaListView(model.areaSettings.getAreaScopeAsEnum(),
+                                                      model.areaSettings.getAreaId());
     }
 
-    public void onClickButtonEdit() {
-        if (model.currentAreaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
-        if (model.currentAreaSettings.getAreaDescriptionId() == null) {
+    public void onClickButtonStart() {
+        if (model.areaSettings.getAreaId() == null) throw new IllegalStateException("Area ID is null.");
+        if (model.areaSettings.getAreaDescriptionId() == null) {
             throw new IllegalStateException("Area description ID is null.");
         }
 
         getView().onUpdateEditButtonEnabled(false);
 
         Disposable disposable = saveUserCurrentAreaSettingsUseCase
-                .execute(model.currentAreaSettings)
+                .execute(model.areaSettings)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                    SceneBuildModel sceneBuildModel = new SceneBuildModel(
-                            model.currentAreaSettings.getAreaId(), model.currentAreaSettings.getAreaDescriptionId());
-                    getView().onShowUserSceneEditView(sceneBuildModel);
+                    getView().onShowArView(model.areaSettings);
                 }, e -> {
                     getLog().e("Failed.", e);
                     getView().onSnackbar(R.string.snackbar_failed);
@@ -184,11 +181,11 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     public void onUserAreaSelected(@Nullable String areaId) {
-        if ((model.currentAreaSettings.getAreaId() != null && model.currentAreaSettings.getAreaId().equals(areaId)) ||
-            (model.currentAreaSettings.getAreaId() == null && areaId == null)) {
+        if ((model.areaSettings.getAreaId() != null && model.areaSettings.getAreaId().equals(areaId)) ||
+            (model.areaSettings.getAreaId() == null && areaId == null)) {
             model.areaNameDirty = false;
         } else {
-            model.currentAreaSettings.setAreaId(areaId);
+            model.areaSettings.setAreaId(areaId);
             model.areaNameDirty = true;
 
             onUserAreaDescriptionSelected(null);
@@ -198,12 +195,12 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     public void onUserAreaDescriptionSelected(@Nullable String areaDescriptionId) {
-        if ((model.currentAreaSettings.getAreaDescriptionId() != null &&
-             model.currentAreaSettings.getAreaDescriptionId().equals(areaDescriptionId)) ||
-            (model.currentAreaSettings.getAreaDescriptionId() == null && areaDescriptionId == null)) {
+        if ((model.areaSettings.getAreaDescriptionId() != null &&
+             model.areaSettings.getAreaDescriptionId().equals(areaDescriptionId)) ||
+            (model.areaSettings.getAreaDescriptionId() == null && areaDescriptionId == null)) {
             model.areaDescriptionNameDirty = false;
         } else {
-            model.currentAreaSettings.setAreaDescriptionId(areaDescriptionId);
+            model.areaSettings.setAreaDescriptionId(areaDescriptionId);
             model.areaDescriptionNameDirty = true;
         }
 
@@ -211,7 +208,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     private void refreshCheckedAreaScope() {
-        switch (model.currentAreaSettings.getAreaScopeAsEnum()) {
+        switch (model.areaSettings.getAreaScopeAsEnum()) {
             case PUBLIC:
                 getView().onUpdateRadioGroupChecked(R.id.radio_button_public);
                 break;
@@ -220,7 +217,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                 break;
             default:
                 throw new IllegalStateException(
-                        "Unknown area scope: scope = " + model.currentAreaSettings.getAreaScopeAsEnum());
+                        "Unknown area scope: scope = " + model.areaSettings.getAreaScopeAsEnum());
         }
     }
 
@@ -230,11 +227,11 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             getView().onUpdateAreaName(null);
             updateActionViews();
 
-            if (model.currentAreaSettings.getAreaId() == null) {
+            if (model.areaSettings.getAreaId() == null) {
                 model.areaNameDirty = false;
             } else {
                 Disposable disposable = findAreaUseCase
-                        .execute(model.currentAreaSettings.getAreaScopeAsEnum(), model.currentAreaSettings.getAreaId())
+                        .execute(model.areaSettings.getAreaScopeAsEnum(), model.areaSettings.getAreaId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(area -> {
                             model.areaName = area.getName();
@@ -258,12 +255,12 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             getView().onUpdateAreaDescriptionName(null);
             updateActionViews();
 
-            if (model.currentAreaSettings.getAreaDescriptionId() == null) {
+            if (model.areaSettings.getAreaDescriptionId() == null) {
                 model.areaDescriptionNameDirty = false;
             } else {
                 Disposable disposable = findAreaDescriptionUseCase
-                        .execute(model.currentAreaSettings.getAreaScopeAsEnum(),
-                                 model.currentAreaSettings.getAreaDescriptionId())
+                        .execute(model.areaSettings.getAreaScopeAsEnum(),
+                                 model.areaSettings.getAreaDescriptionId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(areaDescription -> {
                             model.areaDescriptionName = areaDescription.getName();
@@ -287,19 +284,19 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     private boolean canPickUserAreaDescription() {
-        return model.currentAreaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty;
+        return model.areaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty;
     }
 
     private boolean canEdit() {
-        return model.currentAreaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty &&
-               model.currentAreaSettings.getAreaDescriptionId() != null && model.areaDescriptionName != null &&
+        return model.areaSettings.getAreaId() != null && model.areaName != null && !model.areaNameDirty &&
+               model.areaSettings.getAreaDescriptionId() != null && model.areaDescriptionName != null &&
                !model.areaDescriptionNameDirty;
     }
 
     @Parcel
     public static final class Model {
 
-        CurrentAreaSettings currentAreaSettings;
+        AreaSettings areaSettings;
 
         String areaName;
 
@@ -310,11 +307,11 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         boolean areaDescriptionNameDirty;
 
         public Model() {
-            this(new CurrentAreaSettings());
+            this(new AreaSettings());
         }
 
-        public Model(@NonNull CurrentAreaSettings currentAreaSettings) {
-            this.currentAreaSettings = currentAreaSettings;
+        public Model(@NonNull AreaSettings areaSettings) {
+            this.areaSettings = areaSettings;
         }
     }
 }

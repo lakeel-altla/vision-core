@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionInAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionInAreaListView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.UserAreaDescriptionListInAreaAdapter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionByAreaListAdapter;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -25,12 +25,12 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaDescriptionInAreaListFragment
-        extends AbstractFragment<AreaDescriptionInAreaListView, AreaDescriptionInAreaListPresenter>
-        implements AreaDescriptionInAreaListView {
+public final class AreaDescriptionByAreaListFragment
+        extends AbstractFragment<AreaDescriptionByAreaListView, AreaDescriptionByAreaListPresenter>
+        implements AreaDescriptionByAreaListView {
 
     @Inject
-    AreaDescriptionInAreaListPresenter presenter;
+    AreaDescriptionByAreaListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -38,20 +38,20 @@ public final class AreaDescriptionInAreaListFragment
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaDescriptionInAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull String areaId) {
-        AreaDescriptionInAreaListFragment fragment = new AreaDescriptionInAreaListFragment();
-        Bundle bundle = AreaDescriptionInAreaListPresenter.createArguments(areaScope, areaId);
+    public static AreaDescriptionByAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull String areaId) {
+        AreaDescriptionByAreaListFragment fragment = new AreaDescriptionByAreaListFragment();
+        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(areaScope, areaId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected AreaDescriptionInAreaListPresenter getPresenter() {
+    protected AreaDescriptionByAreaListPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected AreaDescriptionInAreaListView getViewInterface() {
+    protected AreaDescriptionByAreaListView getViewInterface() {
         return this;
     }
 
@@ -74,7 +74,7 @@ public final class AreaDescriptionInAreaListFragment
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_area_description_list_in_area, container, false);
+        return inflater.inflate(R.layout.fragment_area_description_by_area_list, container, false);
     }
 
     @Override
@@ -83,7 +83,7 @@ public final class AreaDescriptionInAreaListFragment
 
         ButterKnife.bind(this, view);
 
-        recyclerView.setAdapter(new UserAreaDescriptionListInAreaAdapter(presenter));
+        recyclerView.setAdapter(new AreaDescriptionByAreaListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         getActivity().setTitle(R.string.title_user_area_description_list_in_area);

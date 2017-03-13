@@ -87,14 +87,8 @@
 
     </LinearLayout>
 
-    <TextView android:text="@string/label_scene"
-              android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-              android:layout_marginTop="@dimen/content_vertical_margin"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"/>
-
-    <Button android:id="@+id/button_edit"
-            android:text="@string/button_edit"
+    <Button android:id="@+id/button_start"
+            android:text="@string/button_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

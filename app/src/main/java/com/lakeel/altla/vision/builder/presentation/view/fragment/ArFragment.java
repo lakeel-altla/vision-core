@@ -7,9 +7,9 @@ import com.google.atap.tango.ux.TangoUxLayout;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserSceneBuildPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
+import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ArView;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -43,11 +43,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuildView, UserSceneBuildPresenter>
-        implements UserSceneBuildView {
+public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
+        implements ArView {
 
     @Inject
-    UserSceneBuildPresenter presenter;
+    ArPresenter presenter;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -94,20 +94,20 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     private InteractionListener interactionListener;
 
     @NonNull
-    public static Fragment newInstance(@NonNull SceneBuildModel sceneBuildModel) {
-        UserSceneBuildFragment fragment = new UserSceneBuildFragment();
-        Bundle bundle = UserSceneBuildPresenter.createArguments(sceneBuildModel);
+    public static Fragment newInstance(@NonNull AreaSettings settings) {
+        ArFragment fragment = new ArFragment();
+        Bundle bundle = ArPresenter.createArguments(settings);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserSceneBuildPresenter getPresenter() {
+    protected ArPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserSceneBuildView getViewInterface() {
+    protected ArView getViewInterface() {
         return this;
     }
 
@@ -130,7 +130,7 @@ public final class UserSceneBuildFragment extends AbstractFragment<UserSceneBuil
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_scene_build, container, false);
+        return inflater.inflate(R.layout.fragment_ar, container, false);
     }
 
     @Override

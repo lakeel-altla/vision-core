@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-public interface AreaDescriptionInAreaListView {
+public interface AreaDescriptionByAreaListView {
 
     void onItemInserted(int position);
 

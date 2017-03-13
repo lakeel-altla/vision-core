@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 @Parcel(Parcel.Serialization.BEAN)
-public final class CurrentAreaSettings extends BaseEntity {
+public final class AreaSettings extends BaseEntity {
 
     private int areaScope;
 

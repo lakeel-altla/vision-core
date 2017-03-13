@@ -72,5 +72,6 @@
     <string name="action_pick_place">Pick Place</string>
 
     <string name="input_error_required">Required.</string>
+    <string name="button_start">Start</string>
 
 </resources>

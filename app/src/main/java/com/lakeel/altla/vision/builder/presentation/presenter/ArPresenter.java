@@ -18,12 +18,12 @@ import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
-import com.lakeel.altla.vision.builder.presentation.model.SceneBuildModel;
-import com.lakeel.altla.vision.builder.presentation.view.UserSceneBuildView;
+import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
 import com.lakeel.altla.vision.domain.model.Actor;
+import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.domain.model.Asset;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserActorUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetUserImageAssetFileUriUseCase;
@@ -57,15 +57,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Defines the presenter for {@link UserSceneBuildView}.
+ * Defines the presenter for {@link ArView}.
  */
-public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildView>
+public final class ArPresenter extends BasePresenter<ArView>
         implements OnFrameAvailableListener, MainRenderer.OnCurrentCameraTransformUpdatedListener,
                    MainRenderer.OnActorPickedListener {
 
-    private static final String ARG_AREA_ID = "areaId";
-
-    private static final String ARG_AREA_DESCRIPTION_ID = "areaDescriptionId";
+    private static final String ARG_AREA_SETTINGS = "areaSettings";
 
     private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
 
@@ -103,9 +101,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
     private final Vector3 cameraForward = new Vector3();
 
-    private String areaId;
-
-    private String areaDescriptionId;
+    private AreaSettings areaSettings;
 
     private ActorManager actorManager;
 
@@ -124,14 +120,13 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
     private boolean debugConsoleVisible;
 
     @Inject
-    public UserSceneBuildPresenter() {
+    public ArPresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull SceneBuildModel sceneBuildModel) {
+    public static Bundle createArguments(@NonNull AreaSettings settings) {
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_AREA_ID, sceneBuildModel.areaId);
-        bundle.putString(ARG_AREA_DESCRIPTION_ID, sceneBuildModel.areaDescriptionId);
+        bundle.putParcelable(ARG_AREA_SETTINGS, Parcels.wrap(settings));
         return bundle;
     }
 
@@ -141,17 +136,12 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        String areaId = arguments.getString(ARG_AREA_ID);
-        if (areaId == null) {
-            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
+        AreaSettings areaSettings = Parcels.unwrap(arguments.getParcelable(ARG_AREA_SETTINGS));
+        if (areaSettings == null) {
+            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_SETTINGS));
         }
-        this.areaId = areaId;
 
-        String areaDescriptionId = arguments.getString(ARG_AREA_DESCRIPTION_ID);
-        if (areaDescriptionId == null) {
-            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_DESCRIPTION_ID));
-        }
-        this.areaDescriptionId = areaDescriptionId;
+        this.areaSettings = areaSettings;
 
         tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
     }
@@ -184,7 +174,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         actorManager = new ActorManager(context);
 
         Disposable disposable = observeAllUserActorsUserCase
-                .execute(areaId)
+                .execute(areaSettings.getAreaId())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
                     actorManager.handle(event);
@@ -296,7 +286,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         // TODO: confirmation.
 
         Disposable disposable = deleteUserActorUseCase
-                .execute(areaId, pickedActorModel.actorId)
+                .execute(areaSettings.getAreaId(), pickedActorModel.actorId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -318,7 +308,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
 
         Actor actor = new Actor();
         actor.setUserId(currentUserResolver.getUserId());
-        actor.setAreaId(areaId);
+        actor.setAreaId(areaSettings.getAreaId());
         // TODO: handle other asset types.
         actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
         actor.setAssetId(asset.getId());
@@ -557,9 +547,7 @@ public final class UserSceneBuildPresenter extends BasePresenter<UserSceneBuildV
         // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
-        if (areaDescriptionId != null) {
-            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaDescriptionId);
-        }
+        config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
 
         return config;
     }

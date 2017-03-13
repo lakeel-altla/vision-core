@@ -1,10 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionInAreaListPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,16 +15,16 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserAreaDescriptionListInAreaAdapter
-        extends RecyclerView.Adapter<UserAreaDescriptionListInAreaAdapter.ViewHolder> {
+public final class AreaDescriptionByAreaListAdapter
+        extends RecyclerView.Adapter<AreaDescriptionByAreaListAdapter.ViewHolder> {
 
-    private final AreaDescriptionInAreaListPresenter presenter;
+    private final AreaDescriptionByAreaListPresenter presenter;
 
     private RecyclerView recyclerView;
 
     private LayoutInflater inflater;
 
-    public UserAreaDescriptionListInAreaAdapter(@NonNull AreaDescriptionInAreaListPresenter presenter) {
+    public AreaDescriptionByAreaListAdapter(@NonNull AreaDescriptionByAreaListPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -44,7 +45,7 @@ public final class UserAreaDescriptionListInAreaAdapter
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
-        View itemView = inflater.inflate(R.layout.item_user_area_description_in_area, parent, false);
+        View itemView = inflater.inflate(R.layout.item_area_description, parent, false);
         itemView.setOnClickListener(v -> {
             if (recyclerView != null) {
                 int position = recyclerView.getChildAdapterPosition(itemView);
@@ -72,7 +73,7 @@ public final class UserAreaDescriptionListInAreaAdapter
         @BindView(R.id.text_view_id)
         TextView textViewId;
 
-        private AreaDescriptionInAreaListPresenter.ItemPresenter itemPresenter;
+        private AreaDescriptionByAreaListPresenter.ItemPresenter itemPresenter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,7 +90,7 @@ public final class UserAreaDescriptionListInAreaAdapter
         }
 
         @Override
-        public void onUpdateName(@NonNull String name) {
+        public void onUpdateName(@Nullable String name) {
             textViewName.setText(name);
         }
     }
