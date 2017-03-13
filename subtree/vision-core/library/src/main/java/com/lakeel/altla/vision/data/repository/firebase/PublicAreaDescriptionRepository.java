@@ -24,6 +24,25 @@ public final class PublicAreaDescriptionRepository extends BaseDatabaseRepositor
         super(database);
     }
 
+    public void find(@NonNull String areaDescriptionId,
+                     OnSuccessListener<AreaDescription> onSuccessListener, OnFailureListener onFailureListener) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(areaDescriptionId)
+                     .addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot snapshot) {
+                             AreaDescription areaDescription = snapshot.getValue(AreaDescription.class);
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(areaDescription);
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError error) {
+                             if (onFailureListener != null) onFailureListener.onFailure(error.toException());
+                         }
+                     });
+    }
+
     public void findByAreaId(@NonNull String areaId,
                              OnSuccessListener<List<AreaDescription>> onSuccessListener,
                              OnFailureListener onFailureListener) {

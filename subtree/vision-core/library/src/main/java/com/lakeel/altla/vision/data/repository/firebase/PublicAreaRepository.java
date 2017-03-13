@@ -25,6 +25,26 @@ public final class PublicAreaRepository extends BaseDatabaseRepository {
         super(database);
     }
 
+    public void find(@NonNull String areaId,
+                     @Nullable OnSuccessListener<Area> onSuccessListener,
+                     @Nullable OnFailureListener onFailureListener) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(areaId)
+                     .addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot snapshot) {
+                             Area area = snapshot.getValue(Area.class);
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(area);
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError error) {
+                             if (onFailureListener != null) onFailureListener.onFailure(error.toException());
+                         }
+                     });
+    }
+
     public void findByPlaceId(@NonNull String placeId,
                               @Nullable OnSuccessListener<List<Area>> onSuccessListener,
                               @Nullable OnFailureListener onFailureListener) {

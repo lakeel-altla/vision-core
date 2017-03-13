@@ -7,8 +7,8 @@ import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.model.CurrentAreaSettings;
-import com.lakeel.altla.vision.domain.usecase.FindUserAreaDescriptionUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindAreaDescriptionUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindAreaUseCase;
 import com.lakeel.altla.vision.domain.usecase.FindUserCurrentAreaSettingsUseCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserCurrentAreaSettingsUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -36,10 +36,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     SaveUserCurrentAreaSettingsUseCase saveUserCurrentAreaSettingsUseCase;
 
     @Inject
-    FindUserAreaUseCase findUserAreaUseCase;
+    FindAreaUseCase findAreaUseCase;
 
     @Inject
-    FindUserAreaDescriptionUseCase findUserAreaDescriptionUseCase;
+    FindAreaDescriptionUseCase findAreaDescriptionUseCase;
 
     @Inject
     CurrentUserResolver currentUserResolver;
@@ -93,7 +93,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         this.model = model;
                         this.model.areaNameDirty = true;
                         this.model.areaDescriptionNameDirty = true;
-                        refreshCheckedAreaType();
+                        refreshCheckedAreaScope();
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     }, e -> {
@@ -105,14 +105,14 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         model.currentAreaSettings.setUserId(currentUserResolver.getUserId());
                         model.currentAreaSettings.setAreaScopeAsEnum(AreaScope.USER);
                         getLog().d("No current project: userId = %s", model.currentAreaSettings.getUserId());
-                        refreshCheckedAreaType();
+                        refreshCheckedAreaScope();
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     });
             manageDisposable(disposable);
         } else {
             getLog().d("Current project in memory: userId = %s", model.currentAreaSettings.getUserId());
-            refreshCheckedAreaType();
+            refreshCheckedAreaScope();
             refreshAreaName();
             refreshAreaDescriptionName();
         }
@@ -210,7 +210,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         refreshAreaDescriptionName();
     }
 
-    private void refreshCheckedAreaType() {
+    private void refreshCheckedAreaScope() {
         switch (model.currentAreaSettings.getAreaScopeAsEnum()) {
             case PUBLIC:
                 getView().onUpdateRadioGroupChecked(R.id.radio_button_public);
@@ -233,8 +233,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             if (model.currentAreaSettings.getAreaId() == null) {
                 model.areaNameDirty = false;
             } else {
-                Disposable disposable = findUserAreaUseCase
-                        .execute(model.currentAreaSettings.getAreaId())
+                Disposable disposable = findAreaUseCase
+                        .execute(model.currentAreaSettings.getAreaScopeAsEnum(), model.currentAreaSettings.getAreaId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(area -> {
                             model.areaName = area.getName();
@@ -261,8 +261,9 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             if (model.currentAreaSettings.getAreaDescriptionId() == null) {
                 model.areaDescriptionNameDirty = false;
             } else {
-                Disposable disposable = findUserAreaDescriptionUseCase
-                        .execute(model.currentAreaSettings.getAreaDescriptionId())
+                Disposable disposable = findAreaDescriptionUseCase
+                        .execute(model.currentAreaSettings.getAreaScopeAsEnum(),
+                                 model.currentAreaSettings.getAreaDescriptionId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(areaDescription -> {
                             model.areaDescriptionName = areaDescription.getName();

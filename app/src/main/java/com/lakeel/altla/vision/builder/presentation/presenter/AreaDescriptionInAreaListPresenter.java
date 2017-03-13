@@ -7,7 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItem
 import com.lakeel.altla.vision.domain.model.AreaDescription;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.usecase.FindAreaDescriptionsByAreaIdUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserAreaUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindAreaUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
@@ -30,7 +30,7 @@ public final class AreaDescriptionInAreaListPresenter extends BasePresenter<Area
     FindAreaDescriptionsByAreaIdUseCase findAreaDescriptionsByAreaIdUseCase;
 
     @Inject
-    FindUserAreaUseCase findUserAreaUseCase;
+    FindAreaUseCase findAreaUseCase;
 
     private static final String ARG_AREA_SCOPE_VALUE = "areaScropeValue";
 
