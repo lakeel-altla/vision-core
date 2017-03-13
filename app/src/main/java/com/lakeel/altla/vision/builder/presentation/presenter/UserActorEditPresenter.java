@@ -101,7 +101,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
         if (actor == null) {
             Disposable disposable = findUserActorUseCase
-                    .execute(areaId, actorId)
+                    .execute(actorId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(actor -> {
                         this.actor = actor;

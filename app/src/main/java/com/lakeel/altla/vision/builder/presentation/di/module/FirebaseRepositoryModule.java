@@ -4,6 +4,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
+import com.lakeel.altla.vision.data.repository.firebase.PublicActorRepository;
 import com.lakeel.altla.vision.data.repository.firebase.PublicAreaDescriptionRepository;
 import com.lakeel.altla.vision.data.repository.firebase.PublicAreaRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
@@ -50,26 +51,26 @@ public final class FirebaseRepositoryModule {
 
     @ActivityScope
     @Provides
-    UserAreaRepository provideUserAreaRepository(FirebaseDatabase database) {
-        return new UserAreaRepository(database);
-    }
-
-    @ActivityScope
-    @Provides
     PublicAreaRepository providePublicAreaRepository(FirebaseDatabase database) {
         return new PublicAreaRepository(database);
     }
 
     @ActivityScope
     @Provides
-    UserAreaDescriptionRepository provideUserAreaDescriptionRepository(FirebaseDatabase database) {
-        return new UserAreaDescriptionRepository(database);
+    UserAreaRepository provideUserAreaRepository(FirebaseDatabase database) {
+        return new UserAreaRepository(database);
     }
 
     @ActivityScope
     @Provides
     PublicAreaDescriptionRepository providePublicAreaDescriptionRepository(FirebaseDatabase database) {
         return new PublicAreaDescriptionRepository(database);
+    }
+
+    @ActivityScope
+    @Provides
+    UserAreaDescriptionRepository provideUserAreaDescriptionRepository(FirebaseDatabase database) {
+        return new UserAreaDescriptionRepository(database);
     }
 
     @ActivityScope
@@ -94,6 +95,12 @@ public final class FirebaseRepositoryModule {
     @Provides
     UserImageAssetFileRepository provideUserImageAssetFileRepository(FirebaseStorage storage) {
         return new UserImageAssetFileRepository(storage);
+    }
+
+    @ActivityScope
+    @Provides
+    PublicActorRepository providePublicActorRepository(FirebaseDatabase database) {
+        return new PublicActorRepository(database);
     }
 
     @ActivityScope

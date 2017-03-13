@@ -8,7 +8,6 @@ import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
-import com.lakeel.altla.vision.domain.model.Actor;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
@@ -236,9 +235,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         }
     }
 
-    public void removeActor(Actor actor) {
+    public void removeActor(@NonNull String actorId) {
         synchronized (deleteActorIdQueue) {
-            deleteActorIdQueue.add(actor.getId());
+            deleteActorIdQueue.add(actorId);
         }
     }
 

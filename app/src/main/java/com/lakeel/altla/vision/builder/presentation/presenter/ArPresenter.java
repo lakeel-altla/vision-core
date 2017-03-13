@@ -21,13 +21,12 @@ import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
-import com.lakeel.altla.vision.domain.helper.DataListEvent;
 import com.lakeel.altla.vision.domain.model.Actor;
 import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.domain.model.Asset;
 import com.lakeel.altla.vision.domain.usecase.DeleteUserActorUseCase;
+import com.lakeel.altla.vision.domain.usecase.FindActorsByAreaUseCase;
 import com.lakeel.altla.vision.domain.usecase.GetUserImageAssetFileUriUseCase;
-import com.lakeel.altla.vision.domain.usecase.ObserveAllUserActorsUserCase;
 import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
@@ -48,6 +47,7 @@ import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -81,7 +81,7 @@ public final class ArPresenter extends BasePresenter<ArView>
     TangoWrapper tangoWrapper;
 
     @Inject
-    ObserveAllUserActorsUserCase observeAllUserActorsUserCase;
+    FindActorsByAreaUseCase findActorsByAreaUseCase;
 
     @Inject
     GetUserImageAssetFileUriUseCase getUserImageAssetFileUriUseCase;
@@ -173,11 +173,11 @@ public final class ArPresenter extends BasePresenter<ArView>
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
 
-        Disposable disposable = observeAllUserActorsUserCase
-                .execute(areaSettings.getAreaId())
+        Disposable disposable = findActorsByAreaUseCase
+                .execute(areaSettings.getAreaScopeAsEnum(), areaSettings.getAreaId())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(event -> {
-                    actorManager.handle(event);
+                .subscribe(actors -> {
+                    actorManager.addActors(actors);
                 }, e -> {
                     getLog().e("Failed.", e);
                 });
@@ -285,8 +285,10 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         // TODO: confirmation.
 
+        actorManager.removeActor(pickedActorModel.actorId);
+
         Disposable disposable = deleteUserActorUseCase
-                .execute(areaSettings.getAreaId(), pickedActorModel.actorId)
+                .execute(pickedActorModel.actorId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                 }, e -> {
@@ -348,6 +350,10 @@ public final class ArPresenter extends BasePresenter<ArView>
             actor.setOrientationW(orientation.w);
         }
 
+        // Add it into the memory.
+        actorManager.addActor(actor);
+
+        // Add it into the server.
         Disposable disposable = saveUserActorUseCase
                 .execute(actor)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -613,29 +619,20 @@ public final class ArPresenter extends BasePresenter<ArView>
             picasso = new Picasso.Builder(context).build();
         }
 
-        void handle(@NonNull DataListEvent<Actor> event) {
-            getLog().v("DataListEvent<Actor>: type = %s, actorId = %s", event.getType(), event.getData().getId());
+        void addActors(@NonNull List<Actor> actors) {
+            getLog().v("Adding actors: count = %s", actors.size());
 
-            switch (event.getType()) {
-                case ADDED:
-                    onAdded(event.getData());
-                    break;
-                case CHANGED:
-                    onChanged(event.getData());
-                    break;
-                case MOVED:
-                    // Ignore.
-                    break;
-                case REMOVED:
-                    onRemoved(event.getData());
-                    break;
+            for (Actor actor : actors) {
+                addActor(actor);
             }
         }
 
-        void onAdded(@NonNull Actor actor) {
+        void addActor(@NonNull Actor actor) {
+            getLog().v("Adding the actor: id = %s", actor.getId());
+
             switch (actor.getAssetType()) {
                 case Actor.ASSET_TYPE_IMAGE:
-                    onImageActorAdded(actor);
+                    addImageActor(actor);
                     break;
                 default:
                     getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
@@ -643,10 +640,12 @@ public final class ArPresenter extends BasePresenter<ArView>
             }
         }
 
-        void onChanged(@NonNull Actor actor) {
+        void updateActor(@NonNull Actor actor) {
+            getLog().v("Updating the actor: id = %s", actor.getId());
+
             switch (actor.getAssetType()) {
                 case Actor.ASSET_TYPE_IMAGE:
-                    onImageActorChanged(actor);
+                    updateImageActor(actor);
                     break;
                 default:
                     getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
@@ -654,11 +653,13 @@ public final class ArPresenter extends BasePresenter<ArView>
             }
         }
 
-        void onRemoved(@NonNull Actor actor) {
-            renderer.removeActor(actor);
+        void removeActor(@NonNull String actorId) {
+            getLog().v("Removing the actor: id = %s", actorId);
+
+            renderer.removeActor(actorId);
         }
 
-        void onImageActorAdded(@NonNull Actor actor) {
+        void addImageActor(@NonNull Actor actor) {
             if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
 
             Disposable disposable = getUserImageAssetFileUriUseCase
@@ -706,7 +707,7 @@ public final class ArPresenter extends BasePresenter<ArView>
             manageDisposable(disposable);
         }
 
-        void onImageActorChanged(@NonNull Actor actor) {
+        void updateImageActor(@NonNull Actor actor) {
             ImageActorModel model = map(actor);
             renderer.updateActorModel(model);
         }

@@ -17,14 +17,14 @@ import io.reactivex.disposables.Disposable;
 
 public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
-    private static final String ARG_SCENE_ID = "sceneId";
+    private static final String ARG_AREA_ID = "areaId";
 
     private static final String ARG_ACTOR_ID = "actorId";
 
     @Inject
     ObserveUserActorUseCase observeUserActorUseCase;
 
-    private String sceneId;
+    private String areaId;
 
     private String actorId;
 
@@ -33,9 +33,9 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull String sceneId, @NonNull String actorId) {
+    public static Bundle createArguments(@NonNull String areaId, @NonNull String actorId) {
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_SCENE_ID, sceneId);
+        bundle.putString(ARG_AREA_ID, areaId);
         bundle.putString(ARG_ACTOR_ID, actorId);
         return bundle;
     }
@@ -46,9 +46,9 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        String sceneId = arguments.getString(ARG_SCENE_ID);
-        if (sceneId == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_SCENE_ID));
+        String areaId = arguments.getString(ARG_AREA_ID);
+        if (areaId == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
         }
 
         String actorId = arguments.getString(ARG_ACTOR_ID);
@@ -56,7 +56,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
             throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_ACTOR_ID));
         }
 
-        this.sceneId = sceneId;
+        this.areaId = areaId;
         this.actorId = actorId;
     }
 
@@ -67,7 +67,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
         getView().onUpdateTitle(null);
 
         Disposable disposable = observeUserActorUseCase
-                .execute(sceneId, actorId)
+                .execute(actorId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(actor -> {
                     getView().onUpdateTitle(actor.getName());
@@ -89,6 +89,6 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     }
 
     public void onEdit() {
-        getView().onShowUserActorEditView(sceneId, actorId);
+        getView().onShowUserActorEditView(areaId, actorId);
     }
 }
