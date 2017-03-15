@@ -1,17 +1,40 @@
 package com.lakeel.altla.vision.domain.model;
 
-import org.parceler.Parcel;
+import com.google.firebase.database.Exclude;
 
+import org.parceler.Parcel;
+import org.parceler.Transient;
+
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 @Parcel(Parcel.Serialization.BEAN)
-public final class CurrentProject extends BaseEntity {
+public final class AreaSettings extends BaseEntity {
+
+    private int areaScope;
 
     private String areaId;
 
     private String areaDescriptionId;
 
-    private String sceneId;
+    public int getAreaScope() {
+        return areaScope;
+    }
+
+    public void setAreaScope(int areaScope) {
+        this.areaScope = areaScope;
+    }
+
+    @Exclude
+    @Transient
+    @NonNull
+    public AreaScope getAreaScopeAsEnum() {
+        return AreaScope.toAreaScope(areaScope);
+    }
+
+    public void setAreaScopeAsEnum(@NonNull AreaScope areaScope) {
+        this.areaScope = areaScope.getValue();
+    }
 
     @Nullable
     public String getAreaId() {
@@ -29,14 +52,5 @@ public final class CurrentProject extends BaseEntity {
 
     public void setAreaDescriptionId(@Nullable String areaDescriptionId) {
         this.areaDescriptionId = areaDescriptionId;
-    }
-
-    @Nullable
-    public String getSceneId() {
-        return sceneId;
-    }
-
-    public void setSceneId(@Nullable String sceneId) {
-        this.sceneId = sceneId;
     }
 }

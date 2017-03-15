@@ -25,11 +25,11 @@ public final class ObserveUserActorUseCase {
     }
 
     @NonNull
-    public Observable<Actor> execute(@NonNull String sceneId, @NonNull String actorId) {
+    public Observable<Actor> execute(@NonNull String actorId) {
         String userId = currentUserResolver.getUserId();
 
         return ObservableData
-                .using(() -> userActorRepository.observe(userId, sceneId, actorId))
+                .using(() -> userActorRepository.observe(userId, actorId))
                 .subscribeOn(Schedulers.io());
     }
 
