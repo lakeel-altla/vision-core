@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 public final class UserAreaDescriptionApi extends BaseVisionApi {
 
@@ -39,6 +40,13 @@ public final class UserAreaDescriptionApi extends BaseVisionApi {
                                         @Nullable OnFailureListener onFailureListener) {
         userAreaDescriptionRepository.find(CurrentUser.getInstance().getUserId(), areaDescriptionId,
                                            onSuccessListener, onFailureListener);
+    }
+
+    public void findAreaDescriptionsByAreaId(@NonNull String areaId,
+                                             @Nullable OnSuccessListener<List<AreaDescription>> onSuccessListener,
+                                             @Nullable OnFailureListener onFailureListener) {
+        userAreaDescriptionRepository.findByAreaId(CurrentUser.getInstance().getUserId(), areaId,
+                                                   onSuccessListener, onFailureListener);
     }
 
     @NonNull
