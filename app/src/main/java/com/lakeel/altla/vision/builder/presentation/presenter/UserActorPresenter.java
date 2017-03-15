@@ -1,9 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
-import com.lakeel.altla.vision.domain.usecase.ObserveUserActorUseCase;
+import com.lakeel.altla.vision.domain.helper.ObservableData;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -22,7 +23,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     private static final String ARG_ACTOR_ID = "actorId";
 
     @Inject
-    ObserveUserActorUseCase observeUserActorUseCase;
+    VisionService visionService;
 
     private String areaId;
 
@@ -66,8 +67,8 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
         getView().onUpdateTitle(null);
 
-        Disposable disposable = observeUserActorUseCase
-                .execute(actorId)
+        Disposable disposable = ObservableData
+                .using(() -> visionService.getUserActorApi().observeUserActorById(actorId))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(actor -> {
                     getView().onUpdateTitle(actor.getName());

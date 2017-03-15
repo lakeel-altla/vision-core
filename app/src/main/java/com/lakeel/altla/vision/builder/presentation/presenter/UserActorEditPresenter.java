@@ -1,11 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorEditView;
 import com.lakeel.altla.vision.domain.model.Actor;
-import com.lakeel.altla.vision.domain.usecase.FindUserActorUseCase;
-import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcels;
@@ -16,7 +15,7 @@ import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Maybe;
 import io.reactivex.disposables.Disposable;
 
 public final class UserActorEditPresenter extends BasePresenter<UserActorEditView> {
@@ -28,10 +27,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     private static final String STATE_ACTOR = "actor";
 
     @Inject
-    FindUserActorUseCase findUserActorUseCase;
-
-    @Inject
-    SaveUserActorUseCase saveUserActorUseCase;
+    VisionService visionService;
 
     private String areaId;
 
@@ -100,18 +96,26 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
         getView().onUpdateActionSave(false);
 
         if (actor == null) {
-            Disposable disposable = findUserActorUseCase
-                    .execute(actorId)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(actor -> {
-                        this.actor = actor;
-                        updateViews(actor);
-                        getView().onUpdateViewsEnabled(true);
-                        getView().onUpdateActionSave(canSave());
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                        getView().onSnackbar(R.string.snackbar_failed);
-                    });
+            Disposable disposable = Maybe.<Actor>create(e -> {
+                visionService.getUserActorApi().findUserActorById(actorId, actor -> {
+                    if (actor == null) {
+                        e.onComplete();
+                    } else {
+                        e.onSuccess(actor);
+                    }
+                }, e::onError);
+            }).subscribe(actor -> {
+                this.actor = actor;
+                updateViews(actor);
+                getView().onUpdateViewsEnabled(true);
+                getView().onUpdateActionSave(canSave());
+            }, e -> {
+                getLog().e("Failed.", e);
+                getView().onSnackbar(R.string.snackbar_failed);
+            }, () -> {
+                getLog().e("Entity not found.");
+                getView().onSnackbar(R.string.snackbar_failed);
+            });
             manageDisposable(disposable);
         } else {
             updateViews(actor);
@@ -189,17 +193,9 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
         getView().onUpdateViewsEnabled(false);
         getView().onUpdateActionSave(false);
 
-        Disposable disposable = saveUserActorUseCase
-                .execute(actor)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                    getView().onSnackbar(R.string.snackbar_done);
-                    getView().onBackView();
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        manageDisposable(disposable);
+        visionService.getUserActorApi().saveUserActor(actor);
+        getView().onSnackbar(R.string.snackbar_done);
+        getView().onBackView();
     }
 
     private boolean canSave() {

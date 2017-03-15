@@ -36,7 +36,7 @@ public interface ArView {
 
     void onUpdateDebugConsoleVisible(boolean visible);
 
-    void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId);
+    void onShowUserActorView(@NonNull String areaId, @NonNull String actorId);
 
     void onCloseView();
 

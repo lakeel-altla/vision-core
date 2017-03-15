@@ -1,5 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
+import com.lakeel.altla.rajawali.pool.Pool;
+import com.lakeel.altla.rajawali.pool.QuaternionPool;
+import com.lakeel.altla.vision.domain.model.Actor;
+
+import org.rajawali3d.Object3D;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -7,29 +12,59 @@ import android.support.annotation.NonNull;
 
 public class ActorModel {
 
-    public final String userId;
+    public final Actor actor;
 
-    public final String areaId;
+    protected ActorModel(@NonNull Actor actor) {
+        this.actor = actor;
+    }
 
-    public final String actorId;
+    public void setPositionTo(@NonNull Vector3 position) {
+        position.setAll(actor.getPositionX(),
+                        actor.getPositionY(),
+                        actor.getPositionZ());
+    }
 
-    public final String assetId;
+    public void setOrientationTo(@NonNull Quaternion quaternion) {
+        quaternion.setAll(actor.getOrientationW(),
+                          actor.getOrientationX(),
+                          actor.getOrientationY(),
+                          actor.getOrientationZ());
+    }
 
-    public final Vector3 position = new Vector3();
+    public void setScaleTo(@NonNull Vector3 scale) {
+        scale.setAll(actor.getScaleX(),
+                     actor.getScaleY(),
+                     actor.getScaleZ());
+    }
 
-    public final Quaternion orientation = new Quaternion();
+    public void setPoseTo(@NonNull Object3D object3D) {
+        setPositionTo(object3D.getPosition());
 
-    public final Vector3 scale = new Vector3();
+        try (Pool.Holder<Quaternion> holder = QuaternionPool.get()) {
+            Quaternion orientation = holder.get();
+            setOrientationTo(orientation);
+            object3D.setOrientation(orientation);
+        }
 
-    public long createdAt = -1;
+        setScaleTo(object3D.getScale());
+    }
 
-    public long updatedAt = -1;
+    public void setPosition(@NonNull Vector3 position) {
+        actor.setPositionX(position.x);
+        actor.setPositionY(position.y);
+        actor.setPositionZ(position.z);
+    }
 
-    protected ActorModel(@NonNull String userId, @NonNull String areaId, @NonNull String actorId,
-                         @NonNull String assetId) {
-        this.userId = userId;
-        this.areaId = areaId;
-        this.actorId = actorId;
-        this.assetId = assetId;
+    public void setOrientation(@NonNull Quaternion orientation) {
+        actor.setOrientationX(orientation.x);
+        actor.setOrientationY(orientation.y);
+        actor.setOrientationZ(orientation.z);
+        actor.setOrientationW(orientation.w);
+    }
+
+    public void setScale(@NonNull Vector3 scale) {
+        actor.setScaleX(scale.x);
+        actor.setScaleY(scale.y);
+        actor.setScaleZ(scale.z);
     }
 }

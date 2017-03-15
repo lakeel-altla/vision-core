@@ -3,12 +3,13 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.google.android.gms.location.places.Place;
 
 import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceListView;
+import com.lakeel.altla.vision.domain.helper.AreaNameComparater;
 import com.lakeel.altla.vision.domain.model.Area;
 import com.lakeel.altla.vision.domain.model.AreaScope;
-import com.lakeel.altla.vision.domain.usecase.FindAreasByPlaceUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
@@ -17,11 +18,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceListView>
@@ -29,10 +31,10 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
 
-    private final List<Area> items = new ArrayList<>();
-
     @Inject
-    FindAreasByPlaceUseCase findAreasByPlaceUseCase;
+    VisionService visionService;
+
+    private final List<Area> items = new ArrayList<>();
 
     private AreaScope areaScope;
 
@@ -117,16 +119,30 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         items.clear();
         getView().onDataSetChanged();
 
-        Disposable disposable = findAreasByPlaceUseCase
-                .execute(areaScope, place.getId())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(areas -> {
-                    items.addAll(areas);
-                    getView().onDataSetChanged();
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
+        Disposable disposable = Single.<List<Area>>create(e -> {
+            switch (areaScope) {
+                case PUBLIC: {
+                    visionService.getPublicAreaApi().findAreasByPlaceId(place.getId(), areas -> {
+                        Collections.sort(areas, AreaNameComparater.INSTANCE);
+                        e.onSuccess(areas);
+                    }, e::onError);
+                    break;
+                }
+                case USER: {
+                    visionService.getUserAreaApi().findAreasByPlaceId(place.getId(), areas -> {
+                        Collections.sort(areas, AreaNameComparater.INSTANCE);
+                        e.onSuccess(areas);
+                    }, e::onError);
+                    break;
+                }
+            }
+        }).subscribe(areas -> {
+            items.addAll(areas);
+            getView().onDataSetChanged();
+        }, e -> {
+            getLog().e("Failed.", e);
+            getView().onSnackbar(R.string.snackbar_failed);
+        });
         manageDisposable(disposable);
     }
 

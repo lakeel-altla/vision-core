@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.TangoWrapper;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -20,11 +21,9 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
+import com.lakeel.altla.vision.domain.helper.ObservableData;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.model.AreaSettings;
-import com.lakeel.altla.vision.domain.usecase.ObserveConnectionUseCase;
-import com.lakeel.altla.vision.domain.usecase.ObserveUserProfileUseCase;
-import com.lakeel.altla.vision.domain.usecase.SignOutUseCase;
 import com.squareup.picasso.Picasso;
 
 import android.net.Uri;
@@ -47,7 +46,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Completable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -68,13 +67,7 @@ public final class MainActivity extends AppCompatActivity
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
     @Inject
-    ObserveUserProfileUseCase observeUserProfileUseCase;
-
-    @Inject
-    ObserveConnectionUseCase observeConnectionUseCase;
-
-    @Inject
-    SignOutUseCase signOutUseCase;
+    VisionService visionService;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -129,7 +122,7 @@ public final class MainActivity extends AppCompatActivity
         navigationViewHeader = new NavigationViewHeader(navigationView);
 
         if (savedInstanceState == null) {
-            showSignInFragment();
+            showSignInView();
         }
     }
 
@@ -299,14 +292,17 @@ public final class MainActivity extends AppCompatActivity
     }
 
     private void onSignOut() {
-        Disposable disposable = signOutUseCase
-                .execute()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showSignInFragment);
-        compositeDisposable.add(disposable);
+        visionService.getUserDeviceConnectionApi().markUserDeviceConnectionAsOffline(aVoid -> {
+            FirebaseAuth.getInstance().signOut();
+            showSignInView();
+        }, e -> {
+            LOG.e("Failed.", e);
+            FirebaseAuth.getInstance().signOut();
+            showSignInView();
+        });
     }
 
-    private void showSignInFragment() {
+    private void showSignInView() {
         toolbar.setVisibility(View.INVISIBLE);
 
         replaceFragment(SignInFragment.newInstance());
@@ -351,17 +347,28 @@ public final class MainActivity extends AppCompatActivity
             if (user != null) {
                 // Subscribe the connection.
                 if (observeConnectionDisposable == null) {
-                    observeConnectionDisposable = observeConnectionUseCase
-                            .execute()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe();
+                    observeConnectionDisposable = ObservableData
+                            .using(() -> visionService.getFirebaseConnectionApi().observeConnection())
+                            .doOnNext(connected -> LOG
+                                    .i("The user device connection state changed: connected = %b", connected))
+                            .flatMapCompletable(connected -> {
+                                return Completable.create(e -> {
+                                    if (connected) {
+                                        visionService.getUserDeviceConnectionApi()
+                                                     .markUserDeviceConnectionAsOnline(aVoid -> {
+                                                         e.onComplete();
+                                                     }, e::onError);
+                                    } else {
+                                        e.onComplete();
+                                    }
+                                });
+                            }).subscribe();
                 }
 
                 // Subscribe the user profile.
                 if (observeUserProfileDisposable == null) {
-                    observeUserProfileDisposable = observeUserProfileUseCase
-                            .execute()
-                            .observeOn(AndroidSchedulers.mainThread())
+                    observeUserProfileDisposable = ObservableData
+                            .using(() -> visionService.getUserProfileApi().observeUserProfileById(user.getUid()))
                             .subscribe(profile -> {
                                 // Update UI each time the user profile is updated.
                                 if (profile.getPhotoUri() != null) {
@@ -370,6 +377,8 @@ public final class MainActivity extends AppCompatActivity
                                 }
                                 textViewUserName.setText(profile.getDisplayName());
                                 textViewUserEmail.setText(profile.getEmail());
+                            }, e -> {
+                                LOG.e("Failed.", e);
                             });
                 }
             } else {

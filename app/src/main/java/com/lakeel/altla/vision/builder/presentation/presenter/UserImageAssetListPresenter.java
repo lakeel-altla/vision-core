@@ -1,20 +1,21 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
 import com.lakeel.altla.vision.domain.helper.DataListEvent;
+import com.lakeel.altla.vision.domain.helper.ObservableDataList;
 import com.lakeel.altla.vision.domain.model.ImageAsset;
-import com.lakeel.altla.vision.domain.usecase.GetUserImageAssetFileUriUseCase;
-import com.lakeel.altla.vision.domain.usecase.ObserveAllUserImageAssetUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 public final class UserImageAssetListPresenter extends BasePresenter<UserImageAssetListView>
@@ -23,10 +24,7 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
     private final DataList<Item> items = new DataList<>(this);
 
     @Inject
-    ObserveAllUserImageAssetUseCase observeAllUserImageAssetUseCase;
-
-    @Inject
-    GetUserImageAssetFileUriUseCase getUserImageAssetFileUriUseCase;
+    VisionService visionService;
 
     private Disposable getUserImageAssetFileUriUseCaseDisposable;
 
@@ -49,10 +47,9 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
         items.clear();
 
-        Disposable disposable = observeAllUserImageAssetUseCase
-                .execute()
+        Disposable disposable = ObservableDataList
+                .using(() -> visionService.getUserAssetApi().observeAllUserImageAssets())
                 .map(Event::new)
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
                     items.change(event.type, event.item, event.previousId);
                 }, e -> {
@@ -127,14 +124,14 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
             Item item = items.get(position);
             itemView.onUpdateName(item.asset.getName());
 
-            Disposable disposable = getUserImageAssetFileUriUseCase
-                    .execute(item.asset.getId())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(uri -> {
-                        itemView.onUpdateThumbnail(uri);
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                    });
+            Disposable disposable = Single.<Uri>create(e -> {
+                visionService.getUserAssetApi()
+                             .getUserImageAssetFileUriById(item.asset.getId(), e::onSuccess, e::onError);
+            }).subscribe(uri -> {
+                itemView.onUpdateThumbnail(uri);
+            }, e -> {
+                getLog().e("Failed.", e);
+            });
             manageDisposable(disposable);
         }
 

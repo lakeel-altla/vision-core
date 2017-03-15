@@ -322,8 +322,8 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId) {
-        interactionListener.onShowUserActorView(sceneId, actorId);
+    public void onShowUserActorView(@NonNull String areaId, @NonNull String actorId) {
+        interactionListener.onShowUserActorView(areaId, actorId);
     }
 
     @Override

@@ -1,15 +1,15 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import com.lakeel.altla.vision.api.CurrentUser;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
-import com.lakeel.altla.vision.domain.helper.CurrentDeviceResolver;
-import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
+import com.lakeel.altla.vision.domain.model.Area;
+import com.lakeel.altla.vision.domain.model.AreaDescription;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.model.AreaSettings;
-import com.lakeel.altla.vision.domain.usecase.FindAreaDescriptionUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindAreaUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindUserCurrentAreaSettingsUseCase;
-import com.lakeel.altla.vision.domain.usecase.SaveUserCurrentAreaSettingsUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcel;
@@ -21,7 +21,7 @@ import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Maybe;
 import io.reactivex.disposables.Disposable;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
@@ -29,22 +29,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     private static final String STATE_MODEL = "model";
 
     @Inject
-    FindUserCurrentAreaSettingsUseCase findUserCurrentAreaSettingsUseCase;
-
-    @Inject
-    SaveUserCurrentAreaSettingsUseCase saveUserCurrentAreaSettingsUseCase;
-
-    @Inject
-    FindAreaUseCase findAreaUseCase;
-
-    @Inject
-    FindAreaDescriptionUseCase findAreaDescriptionUseCase;
-
-    @Inject
-    CurrentUserResolver currentUserResolver;
-
-    @Inject
-    CurrentDeviceResolver currentDeviceResolver;
+    VisionService visionService;
 
     private Model model;
 
@@ -84,10 +69,17 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         super.onStartOverride();
 
         if (model == null) {
-            Disposable disposable = findUserCurrentAreaSettingsUseCase
-                    .execute()
+            Disposable disposable = Maybe
+                    .<AreaSettings>create(e -> {
+                        visionService.getUserAreaSettingsApi().findUserCurrentAreaSettings(areaSettings -> {
+                            if (areaSettings == null) {
+                                e.onComplete();
+                            } else {
+                                e.onSuccess(areaSettings);
+                            }
+                        }, e::onError);
+                    })
                     .map(Model::new)
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(model -> {
                         this.model = model;
                         this.model.areaNameDirty = true;
@@ -100,8 +92,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         getView().onSnackbar(R.string.snackbar_failed);
                     }, () -> {
                         model = new Model();
-                        model.areaSettings.setId(currentDeviceResolver.getInstanceId());
-                        model.areaSettings.setUserId(currentUserResolver.getUserId());
+                        model.areaSettings.setId(FirebaseInstanceId.getInstance().getId());
+                        model.areaSettings.setUserId(CurrentUser.getInstance().getUserId());
                         model.areaSettings.setAreaScopeAsEnum(AreaScope.USER);
                         getLog().d("No current project: userId = %s", model.areaSettings.getUserId());
                         refreshCheckedAreaScope();
@@ -168,16 +160,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
         getView().onUpdateEditButtonEnabled(false);
 
-        Disposable disposable = saveUserCurrentAreaSettingsUseCase
-                .execute(model.areaSettings)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                    getView().onShowArView(model.areaSettings);
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        manageDisposable(disposable);
+        visionService.getUserAreaSettingsApi().saveUserCurrentAreaSettings(model.areaSettings);
+        getView().onShowArView(model.areaSettings);
     }
 
     public void onUserAreaSelected(@Nullable String areaId) {
@@ -230,17 +214,43 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             if (model.areaSettings.getAreaId() == null) {
                 model.areaNameDirty = false;
             } else {
-                Disposable disposable = findAreaUseCase
-                        .execute(model.areaSettings.getAreaScopeAsEnum(), model.areaSettings.getAreaId())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(area -> {
-                            model.areaName = area.getName();
-                            model.areaNameDirty = false;
-                            getView().onUpdateAreaName(model.areaName);
-                            updateActionViews();
-                        }, e -> {
-                            getLog().e("Failed.", e);
-                        });
+                Disposable disposable = Maybe.<Area>create(e -> {
+                    switch (model.areaSettings.getAreaScopeAsEnum()) {
+                        case PUBLIC: {
+                            visionService.getPublicAreaApi().findAreaById(
+                                    model.areaSettings.getAreaId(), area -> {
+                                        if (area == null) {
+                                            e.onComplete();
+                                        } else {
+                                            e.onSuccess(area);
+                                        }
+                                    }, e::onError);
+                            break;
+                        }
+                        case USER: {
+                            visionService.getUserAreaApi().findAreaById(
+                                    model.areaSettings.getAreaId(), area -> {
+                                        if (area == null) {
+                                            e.onComplete();
+                                        } else {
+                                            e.onSuccess(area);
+                                        }
+                                    }, e::onError);
+                            break;
+                        }
+                    }
+                }).subscribe(area -> {
+                    model.areaName = area.getName();
+                    model.areaNameDirty = false;
+                    getView().onUpdateAreaName(model.areaName);
+                    updateActionViews();
+                }, e -> {
+                    getLog().e("Failed.", e);
+                    getView().onSnackbar(R.string.snackbar_failed);
+                }, () -> {
+                    getLog().e("Entity not found.");
+                    getView().onSnackbar(R.string.snackbar_failed);
+                });
                 manageDisposable(disposable);
             }
         } else {
@@ -258,18 +268,45 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             if (model.areaSettings.getAreaDescriptionId() == null) {
                 model.areaDescriptionNameDirty = false;
             } else {
-                Disposable disposable = findAreaDescriptionUseCase
-                        .execute(model.areaSettings.getAreaScopeAsEnum(),
-                                 model.areaSettings.getAreaDescriptionId())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(areaDescription -> {
-                            model.areaDescriptionName = areaDescription.getName();
-                            model.areaDescriptionNameDirty = false;
-                            getView().onUpdateAreaDescriptionName(model.areaDescriptionName);
-                            updateActionViews();
-                        }, e -> {
-                            getLog().e("Failed.", e);
-                        });
+                Disposable disposable = Maybe.<AreaDescription>create(e -> {
+                    switch (model.areaSettings.getAreaScopeAsEnum()) {
+                        case PUBLIC: {
+                            visionService.getPublicAreaDescriptionApi().findAreaDescriptionById(
+                                    model.areaSettings.getAreaDescriptionId(),
+                                    areaDescription -> {
+                                        if (areaDescription == null) {
+                                            e.onComplete();
+                                        } else {
+                                            e.onSuccess(areaDescription);
+                                        }
+                                    }, e::onError);
+                            break;
+                        }
+                        case USER: {
+                            visionService.getUserAreaDescriptionApi().findAreaDescriptionById(
+                                    model.areaSettings.getAreaDescriptionId(),
+                                    areaDescription -> {
+                                        if (areaDescription == null) {
+                                            e.onComplete();
+                                        } else {
+                                            e.onSuccess(areaDescription);
+                                        }
+                                    }, e::onError);
+                            break;
+                        }
+                    }
+                }).subscribe(areaDescription -> {
+                    model.areaDescriptionName = areaDescription.getName();
+                    model.areaDescriptionNameDirty = false;
+                    getView().onUpdateAreaDescriptionName(model.areaDescriptionName);
+                    updateActionViews();
+                }, e -> {
+                    getLog().e("Failed.", e);
+                    getView().onSnackbar(R.string.snackbar_failed);
+                }, () -> {
+                    getLog().e("Entity not found.");
+                    getView().onSnackbar(R.string.snackbar_failed);
+                });
                 manageDisposable(disposable);
             }
         } else {

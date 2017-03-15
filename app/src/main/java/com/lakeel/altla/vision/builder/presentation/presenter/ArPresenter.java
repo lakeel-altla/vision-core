@@ -3,14 +3,16 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoCoordinateFramePair;
+import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
 import com.lakeel.altla.rajawali.pool.Vector3Pool;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.ArgumentNullException;
-import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.api.CurrentUser;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
@@ -20,14 +22,9 @@ import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
-import com.lakeel.altla.vision.domain.helper.CurrentUserResolver;
 import com.lakeel.altla.vision.domain.model.Actor;
 import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.lakeel.altla.vision.domain.model.Asset;
-import com.lakeel.altla.vision.domain.usecase.DeleteUserActorUseCase;
-import com.lakeel.altla.vision.domain.usecase.FindActorsByAreaUseCase;
-import com.lakeel.altla.vision.domain.usecase.GetUserImageAssetFileUriUseCase;
-import com.lakeel.altla.vision.domain.usecase.SaveUserActorUseCase;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -41,11 +38,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +52,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 /**
@@ -73,27 +72,27 @@ public final class ArPresenter extends BasePresenter<ArView>
 
     private static final float SCALE_OBJECT_SIZE_SCALE = 0.5f;
 
+    private static final List<TangoCoordinateFramePair> FRAME_PAIRS;
+
+    static {
+        FRAME_PAIRS = new ArrayList<>();
+
+        FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                                                     TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                                                     TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                                                     TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
+    }
+
     @Named(Names.ACTIVITY_CONTEXT)
     @Inject
     Context context;
 
     @Inject
-    TangoWrapper tangoWrapper;
-
-    @Inject
-    FindActorsByAreaUseCase findActorsByAreaUseCase;
-
-    @Inject
-    GetUserImageAssetFileUriUseCase getUserImageAssetFileUriUseCase;
-
-    @Inject
-    SaveUserActorUseCase saveUserActorUseCase;
-
-    @Inject
-    DeleteUserActorUseCase deleteUserActorUseCase;
-
-    @Inject
-    CurrentUserResolver currentUserResolver;
+    VisionService visionService;
 
     private final Vector3 cameraPosition = new Vector3();
 
@@ -143,14 +142,16 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         this.areaSettings = areaSettings;
 
-        tangoWrapper.setTangoConfigFactory(this::createTangoConfig);
+        visionService.getTangoWrapper().setStartTangoUx(false);
+        visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
+        visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
     }
 
     @Override
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        getView().setTangoUxLayout(tangoWrapper.getTangoUx());
+        getView().setTangoUxLayout(visionService.getTangoWrapper().getTangoUx());
 
         renderer = new MainRenderer(context);
         renderer.setOnCurrentCameraTransformUpdatedListener(this);
@@ -173,14 +174,26 @@ public final class ArPresenter extends BasePresenter<ArView>
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
 
-        Disposable disposable = findActorsByAreaUseCase
-                .execute(areaSettings.getAreaScopeAsEnum(), areaSettings.getAreaId())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(actors -> {
-                    actorManager.addActors(actors);
-                }, e -> {
-                    getLog().e("Failed.", e);
-                });
+        Disposable disposable = Single.<List<Actor>>create(e -> {
+            switch (areaSettings.getAreaScopeAsEnum()) {
+                case PUBLIC: {
+                    visionService.getPublicActorApi().findUserActorsByAreaId(areaSettings.getAreaId(), actors -> {
+                        e.onSuccess(actors);
+                    }, e::onError);
+                    break;
+                }
+                case USER: {
+                    visionService.getUserActorApi().findUserActorsByAreaId(areaSettings.getAreaId(), actors -> {
+                        e.onSuccess(actors);
+                    }, e::onError);
+                    break;
+                }
+            }
+        }).subscribe(actors -> {
+            actorManager.addActors(actors);
+        }, e -> {
+            getLog().e("Failed.", e);
+        });
         manageDisposable(disposable);
     }
 
@@ -188,9 +201,9 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onResumeOverride() {
         super.onResumeOverride();
 
-        tangoWrapper.addOnTangoReadyListener(renderer::connectToTangoCamera);
-        tangoWrapper.addOnFrameAvailableListener(this);
-        tangoWrapper.connect();
+        visionService.getTangoWrapper().addOnTangoReadyListener(renderer::connectToTangoCamera);
+        visionService.getTangoWrapper().addOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().connect();
         active = true;
     }
 
@@ -200,9 +213,9 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         active = false;
         renderer.disconnectFromTangoCamera();
-        tangoWrapper.removeOnTangoReadyListener(renderer::connectToTangoCamera);
-        tangoWrapper.removeOnFrameAvailableListener(this);
-        tangoWrapper.disconnect();
+        visionService.getTangoWrapper().removeOnTangoReadyListener(renderer::connectToTangoCamera);
+        visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().disconnect();
     }
 
     @Override
@@ -277,7 +290,7 @@ public final class ArPresenter extends BasePresenter<ArView>
     public void onTouchButtonDetail() {
         if (pickedActorModel == null) return;
 
-        getView().onShowUserActorView(pickedActorModel.areaId, pickedActorModel.actorId);
+        getView().onShowUserActorView(pickedActorModel.actor.getAreaId(), pickedActorModel.actor.getId());
     }
 
     public void onClickButtonDelete() {
@@ -285,16 +298,9 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         // TODO: confirmation.
 
-        actorManager.removeActor(pickedActorModel.actorId);
+        actorManager.removeActor(pickedActorModel.actor.getId());
 
-        Disposable disposable = deleteUserActorUseCase
-                .execute(pickedActorModel.actorId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                }, e -> {
-                    getLog().e("Failed.", e);
-                });
-        manageDisposable(disposable);
+        visionService.getUserActorApi().deleteUserActorById(pickedActorModel.actor.getId());
     }
 
     public void onDropModel(@NonNull ClipData clipData) {
@@ -309,7 +315,7 @@ public final class ArPresenter extends BasePresenter<ArView>
         if (asset == null) throw new IllegalStateException("No actor.");
 
         Actor actor = new Actor();
-        actor.setUserId(currentUserResolver.getUserId());
+        actor.setUserId(CurrentUser.getInstance().getUserId());
         actor.setAreaId(areaSettings.getAreaId());
         // TODO: handle other asset types.
         actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
@@ -354,15 +360,7 @@ public final class ArPresenter extends BasePresenter<ArView>
         actorManager.addActor(actor);
 
         // Add it into the server.
-        Disposable disposable = saveUserActorUseCase
-                .execute(actor)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        manageDisposable(disposable);
+        visionService.getUserActorApi().saveUserActor(actor);
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
@@ -400,23 +398,8 @@ public final class ArPresenter extends BasePresenter<ArView>
     public void onScrollFinished(MotionEvent event) {
         if (pickedActorModel == null) return;
 
-        Actor actor;
-        if (pickedActorModel instanceof ImageActorModel) {
-            actor = map((ImageActorModel) pickedActorModel);
-        } else {
-            throw new IllegalStateException(
-                    "Unknown ActorModel sub-class: " + pickedActorModel.getClass().getName());
-        }
-
         // Save.
-        Disposable disposable = saveUserActorUseCase
-                .execute(actor)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                }, e -> {
-                    getLog().e("Failed.", e);
-                });
-        manageDisposable(disposable);
+        visionService.getUserActorApi().saveUserActor(pickedActorModel.actor);
     }
 
     private void translateUserActor(float distance) {
@@ -445,7 +428,7 @@ public final class ArPresenter extends BasePresenter<ArView>
                     break;
             }
 
-            rotation.setAll(pickedActorModel.orientation);
+            pickedActorModel.setOrientationTo(rotation);
             // Conjugate because rotateBy is wrong...
             rotation.conjugate();
 
@@ -453,15 +436,15 @@ public final class ArPresenter extends BasePresenter<ArView>
             translation.normalize();
             translation.multiply(scaledDistance);
 
-            position.setAll(pickedActorModel.position);
+            pickedActorModel.setPositionTo(position);
             position.add(translation);
 
-            pickedActorModel.position.setAll(position);
+            pickedActorModel.setPosition(position);
         }
 
         EditAxesModel editAxesModel = new EditAxesModel();
-        editAxesModel.position.setAll(pickedActorModel.position);
-        editAxesModel.orientation.setAll(pickedActorModel.orientation);
+        pickedActorModel.setPositionTo(editAxesModel.position);
+        pickedActorModel.setOrientationTo(editAxesModel.orientation);
 
         renderer.updateActorModel(pickedActorModel);
         renderer.updateEditAxesModel(editAxesModel);
@@ -475,12 +458,14 @@ public final class ArPresenter extends BasePresenter<ArView>
         try (Pool.Holder<Vector3> baseAxisHolder = Vector3Pool.get();
              Pool.Holder<Vector3> modelAxisHolder = Vector3Pool.get();
              Pool.Holder<Quaternion> rotationHolder = QuaternionPool.get();
-             Pool.Holder<Quaternion> axisRotationHolder = QuaternionPool.get()) {
+             Pool.Holder<Quaternion> axisRotationHolder = QuaternionPool.get();
+             Pool.Holder<Quaternion> actorOrientationHolder = QuaternionPool.get()) {
 
             Vector3 baseAxis = baseAxisHolder.get();
             Vector3 modelAxis = modelAxisHolder.get();
             Quaternion rotation = rotationHolder.get();
             Quaternion axisRotation = axisRotationHolder.get();
+            Quaternion actorOrientation = actorOrientationHolder.get();
 
             switch (rotateAxis) {
                 case X:
@@ -496,18 +481,20 @@ public final class ArPresenter extends BasePresenter<ArView>
             }
 
             modelAxis.setAll(baseAxis);
-            rotation.setAll(pickedActorModel.orientation);
+            pickedActorModel.setOrientationTo(rotation);
             // Conjugate because rotateBy is wrong...
             rotation.conjugate();
             modelAxis.rotateBy(rotation);
 
             axisRotation.fromAngleAxis(modelAxis, scaledAngle);
-            pickedActorModel.orientation.multiply(axisRotation);
+            pickedActorModel.setOrientationTo(actorOrientation);
+            actorOrientation.multiply(axisRotation);
+            pickedActorModel.setOrientation(actorOrientation);
         }
 
         EditAxesModel editAxesModel = new EditAxesModel();
-        editAxesModel.position.setAll(pickedActorModel.position);
-        editAxesModel.orientation.setAll(pickedActorModel.orientation);
+        pickedActorModel.setPositionTo(editAxesModel.position);
+        pickedActorModel.setOrientationTo(editAxesModel.orientation);
 
         renderer.updateActorModel(pickedActorModel);
         renderer.updateEditAxesModel(editAxesModel);
@@ -530,10 +517,10 @@ public final class ArPresenter extends BasePresenter<ArView>
                 ratio = Math.max(1 - Math.abs(scaledSize) * 0.01f, MIN_RATIO);
             }
 
-            scale.setAll(pickedActorModel.scale);
+            pickedActorModel.setScaleTo(scale);
             scale.multiply(ratio);
 
-            pickedActorModel.scale.setAll(scale);
+            pickedActorModel.setScale(scale);
         }
 
         renderer.updateActorModel(pickedActorModel);
@@ -566,47 +553,6 @@ public final class ArPresenter extends BasePresenter<ArView>
     public void onActionDebugSelected() {
         debugConsoleVisible = !debugConsoleVisible;
         getView().onUpdateDebugConsoleVisible(debugConsoleVisible);
-    }
-
-    @NonNull
-    private static ImageActorModel map(@NonNull Actor actor) {
-        ImageActorModel model = new ImageActorModel(actor.getUserId(),
-                                                    actor.getAreaId(),
-                                                    actor.getId(),
-                                                    actor.getAssetId());
-        model.position.setAll(actor.getPositionX(), actor.getPositionY(), actor.getPositionZ());
-        model.orientation.setAll(actor.getOrientationW(),
-                                 actor.getOrientationX(),
-                                 actor.getOrientationY(),
-                                 actor.getOrientationZ());
-        model.scale.setAll(actor.getScaleX(), actor.getScaleY(), actor.getScaleZ());
-        model.createdAt = actor.getCreatedAtAsLong();
-        model.updatedAt = actor.getUpdatedAtAsLong();
-        return model;
-    }
-
-    @NonNull
-    private static Actor map(@NonNull ImageActorModel model) {
-        Actor actor = new Actor();
-        actor.setId(model.actorId);
-        actor.setUserId(model.userId);
-        actor.setAreaId(model.areaId);
-        actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
-        actor.setAssetId(model.assetId);
-        actor.setLayer(Actor.LAYER_NONCOMMERCIAL);
-        actor.setPositionX(model.position.x);
-        actor.setPositionY(model.position.y);
-        actor.setPositionZ(model.position.z);
-        actor.setOrientationX(model.orientation.x);
-        actor.setOrientationY(model.orientation.y);
-        actor.setOrientationZ(model.orientation.x);
-        actor.setOrientationW(model.orientation.w);
-        actor.setScaleX(model.scale.x);
-        actor.setScaleY(model.scale.y);
-        actor.setScaleZ(model.scale.z);
-        actor.setCreatedAtAsLong(model.createdAt);
-        actor.setUpdatedAtAsLong(model.updatedAt);
-        return actor;
     }
 
     private final class ActorManager {
@@ -662,53 +608,53 @@ public final class ArPresenter extends BasePresenter<ArView>
         void addImageActor(@NonNull Actor actor) {
             if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
 
-            Disposable disposable = getUserImageAssetFileUriUseCase
-                    .execute(actor.getAssetId())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(uri -> {
-                        final ImageActorModel model = map(actor);
+            Disposable disposable = Single.<Uri>create(e -> {
+                visionService.getUserAssetApi()
+                             .getUserImageAssetFileUriById(actor.getAssetId(), e::onSuccess, e::onError);
+            }).subscribe(uri -> {
+                final ImageActorModel model = new ImageActorModel(actor);
 
-                        Target target = new Target() {
-                            @Override
-                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                getLog().d("onBitmapLoaded: actorId = %s, uri = %s", model.actorId, uri);
+                Target target = new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        getLog().d("onBitmapLoaded: actorId = %s, uri = %s", model.actor.getId(), uri);
 
-                                model.bitmap = bitmap;
+                        model.bitmap = bitmap;
 
-                                renderer.addActorModel(model);
+                        renderer.addActorModel(model);
 
-                                // Dereference.
-                                targetMap.remove(this);
-                            }
+                        // Dereference.
+                        targetMap.remove(this);
+                    }
 
-                            @Override
-                            public void onBitmapFailed(Drawable errorDrawable) {
-                                getLog().e("onBitmapFailed: actorId = %s, uri = %s", model.actorId, uri);
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        getLog().e("onBitmapFailed: actorId = %s, uri = %s", model.actor.getId(), uri);
 
-                                // TODO
+                        // TODO
 
-                                // Dereference.
-                                targetMap.remove(this);
-                            }
+                        // Dereference.
+                        targetMap.remove(this);
+                    }
 
-                            @Override
-                            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                            }
-                        };
-                        // Hold the strong reference to the Target instance,
-                        // because Piccaso uses it as a weak reference.
-                        targetMap.add(target);
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    }
+                };
+                // Hold the strong reference to the Target instance,
+                // because Piccaso uses it as a weak reference.
+                targetMap.add(target);
 
-                        picasso.load(uri)
-                               .into(target);
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                    });
+                picasso.load(uri)
+                       .into(target);
+            }, e -> {
+                getLog().e("Failed.", e);
+            });
             manageDisposable(disposable);
         }
 
         void updateImageActor(@NonNull Actor actor) {
-            ImageActorModel model = map(actor);
+            ImageActorModel model = new ImageActorModel(actor);
             renderer.updateActorModel(model);
         }
     }

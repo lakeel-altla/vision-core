@@ -2,8 +2,11 @@ package com.lakeel.altla.vision.builder.presentation.di.module;
 
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.tango.TangoWrapper;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.di.ActivityScope;
 
 import android.content.ContentResolver;
@@ -69,5 +72,11 @@ public final class ActivityModule {
         tangoWrapper.setStartTangoUx(false);
         tangoWrapper.setCoordinateFramePairs(FRAME_PAIRS);
         return tangoWrapper;
+    }
+
+    @ActivityScope
+    @Provides
+    VisionService provideVisionService(FirebaseDatabase firebaseDatabase, FirebaseStorage firebaseStorage) {
+        return new VisionService(activity, firebaseDatabase, firebaseStorage);
     }
 }

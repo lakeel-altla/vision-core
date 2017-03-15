@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.di.component;
 
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.di.module.AndroidModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.ApplicationModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.ConfigModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.FirebaseModule;
@@ -19,7 +18,6 @@ import dagger.Component;
 @Singleton
 @Component(modules = { ApplicationModule.class,
                        ConfigModule.class,
-                       AndroidModule.class,
                        GoogleSignInModule.class,
                        FirebaseModule.class })
 public interface ApplicationComponent {

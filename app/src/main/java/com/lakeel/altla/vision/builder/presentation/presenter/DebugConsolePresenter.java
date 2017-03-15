@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.tango.OnPoseAvailableListener;
-import com.lakeel.altla.tango.TangoWrapper;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.view.DebugConsoleView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -20,7 +20,7 @@ public final class DebugConsolePresenter extends BasePresenter<DebugConsoleView>
     private static final double UPDATE_DEBUG_CONSOLE_INTERVAL = 100;
 
     @Inject
-    TangoWrapper tangoWrapper;
+    VisionService visionService;
 
     private final Handler handlerMain = new Handler(Looper.getMainLooper());
 
@@ -56,14 +56,14 @@ public final class DebugConsolePresenter extends BasePresenter<DebugConsoleView>
     protected void onResumeOverride() {
         super.onResumeOverride();
 
-        tangoWrapper.addOnPoseAvailableListener(this);
+        visionService.getTangoWrapper().addOnPoseAvailableListener(this);
     }
 
     @Override
     protected void onPauseOverride() {
         super.onPauseOverride();
 
-        tangoWrapper.removeOnPoseAvailableListener(this);
+        visionService.getTangoWrapper().removeOnPoseAvailableListener(this);
     }
 
     @Override

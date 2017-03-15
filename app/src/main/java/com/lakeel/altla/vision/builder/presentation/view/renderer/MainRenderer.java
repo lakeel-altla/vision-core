@@ -102,9 +102,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                 Object3D object3D;
                 if (model instanceof ImageActorModel) {
                     object3D = bitmapPlaneFactory.create(((ImageActorModel) model).bitmap);
-                    object3D.setPosition(model.position);
-                    object3D.setOrientation(model.orientation);
-                    object3D.setScale(model.scale);
+                    model.setPoseTo(object3D);
                 } else {
                     LOG.e("Unknown ActorModel sub-class: " + model.getClass().getName());
                     continue;
@@ -113,7 +111,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                 getCurrentScene().addChild(object3D);
                 objectColorPicker.registerObject(object3D);
                 actorModelMap.put(object3D, model);
-                object3DMap.put(model.actorId, object3D);
+                object3DMap.put(model.actor.getId(), object3D);
             }
         }
 
@@ -125,15 +123,13 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                     break;
                 }
 
-                Object3D object3D = object3DMap.get(model.actorId);
+                Object3D object3D = object3DMap.get(model.actor.getId());
                 if (object3D == null) {
-                    LOG.e("Object3D not found: actorId = %s", model.actorId);
+                    LOG.e("Object3D not found: actorId = %s", model.actor.getId());
                     continue;
                 }
 
-                object3D.setPosition(model.position);
-                object3D.setOrientation(model.orientation);
-                object3D.setScale(model.scale);
+                model.setPoseTo(object3D);
             }
         }
 
@@ -216,7 +212,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     }
 
     public void addActorModel(@NonNull ActorModel actorModel) {
-        LOG.v("Added ActorModel: actorId = %s", actorModel.actorId);
+        LOG.v("Added ActorModel: actorId = %s", actorModel.actor.getId());
 
         synchronized (addActorModelQueue) {
             addActorModelQueue.add(actorModel);
