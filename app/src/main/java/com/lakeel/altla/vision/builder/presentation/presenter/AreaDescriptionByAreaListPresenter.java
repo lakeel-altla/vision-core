@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
-import com.lakeel.altla.vision.domain.helper.AreaDescriptionNameComparater;
+import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.domain.model.AreaDescription;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;

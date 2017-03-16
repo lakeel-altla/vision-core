@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
-import com.lakeel.altla.vision.domain.helper.ObservableData;
+import com.lakeel.altla.vision.helper.ObservableData;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.domain.helper;
+package com.lakeel.altla.vision.helper;
 
 public interface OnProgressListener {
 

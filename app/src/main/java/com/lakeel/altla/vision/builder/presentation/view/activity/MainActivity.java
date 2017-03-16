@@ -21,7 +21,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
-import com.lakeel.altla.vision.domain.helper.ObservableData;
+import com.lakeel.altla.vision.helper.ObservableData;
 import com.lakeel.altla.vision.domain.model.AreaScope;
 import com.lakeel.altla.vision.domain.model.AreaSettings;
 import com.squareup.picasso.Picasso;

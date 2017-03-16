@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissio
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserImageAssetListFragment;
-import com.lakeel.altla.vision.di.ActivityScope;
+import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 
 import dagger.Subcomponent;
 

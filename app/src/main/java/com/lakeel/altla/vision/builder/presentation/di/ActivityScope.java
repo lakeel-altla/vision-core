@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.di;
+package com.lakeel.altla.vision.builder.presentation.di;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
