@@ -24,6 +24,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceListView>
@@ -33,6 +34,8 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     @Inject
     VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<Area> items = new ArrayList<>();
 
@@ -69,6 +72,13 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
         items.clear();
         getView().onDataSetChanged();
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        compositeDisposable.clear();
     }
 
     @Override
@@ -143,7 +153,7 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
             getLog().e("Failed.", e);
             getView().onSnackbar(R.string.snackbar_failed);
         });
-        manageDisposable(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public final class ItemPresenter {

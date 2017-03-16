@@ -13,6 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
+import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
@@ -21,7 +22,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
-import com.lakeel.altla.vision.helper.ObservableData;
 import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.squareup.picasso.Picasso;
@@ -347,8 +347,8 @@ public final class MainActivity extends AppCompatActivity
             if (user != null) {
                 // Subscribe the connection.
                 if (observeConnectionDisposable == null) {
-                    observeConnectionDisposable = ObservableData
-                            .using(() -> visionService.getFirebaseConnectionApi().observeConnection())
+                    observeConnectionDisposable = RxHelper
+                            .usingData(() -> visionService.getFirebaseConnectionApi().observeConnection())
                             .doOnNext(connected -> LOG
                                     .i("The user device connection state changed: connected = %b", connected))
                             .flatMapCompletable(connected -> {
@@ -367,8 +367,8 @@ public final class MainActivity extends AppCompatActivity
 
                 // Subscribe the user profile.
                 if (observeUserProfileDisposable == null) {
-                    observeUserProfileDisposable = ObservableData
-                            .using(() -> visionService.getUserProfileApi().observeUserProfileById(user.getUid()))
+                    observeUserProfileDisposable = RxHelper
+                            .usingData(() -> visionService.getUserProfileApi().observeUserProfileById(user.getUid()))
                             .subscribe(profile -> {
                                 // Update UI each time the user profile is updated.
                                 if (profile.getPhotoUri() != null) {

@@ -2,10 +2,10 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
 import com.lakeel.altla.vision.helper.DataListEvent;
-import com.lakeel.altla.vision.helper.ObservableDataList;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
@@ -16,6 +16,7 @@ import android.support.annotation.NonNull;
 import javax.inject.Inject;
 
 import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class UserImageAssetListPresenter extends BasePresenter<UserImageAssetListView>
@@ -25,6 +26,8 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
     @Inject
     VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private Disposable getUserImageAssetFileUriUseCaseDisposable;
 
@@ -47,8 +50,8 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
         items.clear();
 
-        Disposable disposable = ObservableDataList
-                .using(() -> visionService.getUserAssetApi().observeAllUserImageAssets())
+        Disposable disposable = RxHelper
+                .usingList(() -> visionService.getUserAssetApi().observeAllUserImageAssets())
                 .map(Event::new)
                 .subscribe(event -> {
                     items.change(event.type, event.item, event.previousId);
@@ -56,7 +59,14 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
                     getLog().e("Failed.", e);
                     getView().onSnackbar(R.string.snackbar_failed);
                 });
-        manageDisposable(disposable);
+        compositeDisposable.add(disposable);
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        compositeDisposable.clear();
     }
 
     @Override
@@ -132,7 +142,7 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
             }, e -> {
                 getLog().e("Failed.", e);
             });
-            manageDisposable(disposable);
+            compositeDisposable.add(disposable);
         }
 
         public void onLongClickViewTop(int position) {

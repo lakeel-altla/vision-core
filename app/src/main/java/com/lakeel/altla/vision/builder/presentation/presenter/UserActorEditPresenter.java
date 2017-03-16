@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 
 import io.reactivex.Maybe;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class UserActorEditPresenter extends BasePresenter<UserActorEditView> {
@@ -28,6 +29,8 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
 
     @Inject
     VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private String areaId;
 
@@ -116,7 +119,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
                 getLog().e("Entity not found.");
                 getView().onSnackbar(R.string.snackbar_failed);
             });
-            manageDisposable(disposable);
+            compositeDisposable.add(disposable);
         } else {
             updateViews(actor);
             getView().onUpdateViewsEnabled(true);
@@ -128,6 +131,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     protected void onStopOverride() {
         super.onStopOverride();
 
+        compositeDisposable.clear();
         getView().onUpdateHomeAsUpIndicator(null);
     }
 

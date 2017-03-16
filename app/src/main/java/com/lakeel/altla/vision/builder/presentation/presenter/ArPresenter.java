@@ -53,6 +53,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 /**
@@ -93,6 +94,8 @@ public final class ArPresenter extends BasePresenter<ArView>
 
     @Inject
     VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final Vector3 cameraPosition = new Vector3();
 
@@ -194,7 +197,14 @@ public final class ArPresenter extends BasePresenter<ArView>
         }, e -> {
             getLog().e("Failed.", e);
         });
-        manageDisposable(disposable);
+        compositeDisposable.add(disposable);
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        compositeDisposable.clear();
     }
 
     @Override
@@ -650,7 +660,7 @@ public final class ArPresenter extends BasePresenter<ArView>
             }, e -> {
                 getLog().e("Failed.", e);
             });
-            manageDisposable(disposable);
+            compositeDisposable.add(disposable);
         }
 
         void updateImageActor(@NonNull Actor actor) {

@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.view.helper;
+package com.lakeel.altla.vision.builder.presentation.helper;
 
 import com.lakeel.altla.vision.builder.R;
 import com.squareup.picasso.Picasso;

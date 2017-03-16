@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserImageAssetListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
-import com.lakeel.altla.vision.builder.presentation.view.helper.ThumbnailLoader;
+import com.lakeel.altla.vision.builder.presentation.helper.ThumbnailLoader;
 import com.lakeel.altla.vision.model.ImageAsset;
 
 import org.parceler.Parcels;

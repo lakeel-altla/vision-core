@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.UserActorPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
-import com.lakeel.altla.vision.builder.presentation.view.helper.DateFormatHelper;
+import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;

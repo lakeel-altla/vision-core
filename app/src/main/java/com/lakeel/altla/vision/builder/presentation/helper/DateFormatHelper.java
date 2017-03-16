@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.view.helper;
+package com.lakeel.altla.vision.builder.presentation.helper;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

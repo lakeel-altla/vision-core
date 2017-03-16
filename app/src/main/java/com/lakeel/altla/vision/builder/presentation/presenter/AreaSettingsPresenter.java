@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 
 import io.reactivex.Maybe;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
@@ -30,6 +31,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     @Inject
     VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private Model model;
 
@@ -100,13 +103,20 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                         refreshAreaName();
                         refreshAreaDescriptionName();
                     });
-            manageDisposable(disposable);
+            compositeDisposable.add(disposable);
         } else {
             getLog().d("Current project in memory: userId = %s", model.areaSettings.getUserId());
             refreshCheckedAreaScope();
             refreshAreaName();
             refreshAreaDescriptionName();
         }
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        compositeDisposable.clear();
     }
 
     public void onCheckedChangedRadioButtonPublic(boolean isChecked) {
@@ -251,7 +261,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                     getLog().e("Entity not found.");
                     getView().onSnackbar(R.string.snackbar_failed);
                 });
-                manageDisposable(disposable);
+                compositeDisposable.add(disposable);
             }
         } else {
             getView().onUpdateAreaName(model.areaName);
@@ -307,7 +317,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                     getLog().e("Entity not found.");
                     getView().onSnackbar(R.string.snackbar_failed);
                 });
-                manageDisposable(disposable);
+                compositeDisposable.add(disposable);
             }
         } else {
             getView().onUpdateAreaDescriptionName(model.areaDescriptionName);
