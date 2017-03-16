@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.domain.helper;
+package com.lakeel.altla.vision.helper;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
