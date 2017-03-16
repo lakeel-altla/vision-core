@@ -4,8 +4,8 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
-import com.lakeel.altla.vision.domain.model.AreaScope;
-import com.lakeel.altla.vision.domain.model.AreaSettings;
+import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;

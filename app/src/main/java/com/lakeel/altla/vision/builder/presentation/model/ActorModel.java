@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
-import com.lakeel.altla.vision.domain.model.Actor;
+import com.lakeel.altla.vision.model.Actor;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.math.Quaternion;

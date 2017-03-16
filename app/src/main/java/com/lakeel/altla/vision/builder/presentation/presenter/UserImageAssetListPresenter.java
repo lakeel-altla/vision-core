@@ -6,7 +6,7 @@ import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
 import com.lakeel.altla.vision.helper.DataListEvent;
 import com.lakeel.altla.vision.helper.ObservableDataList;
-import com.lakeel.altla.vision.domain.model.ImageAsset;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 

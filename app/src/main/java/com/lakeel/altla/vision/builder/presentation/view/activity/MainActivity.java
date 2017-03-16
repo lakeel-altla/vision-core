@@ -22,8 +22,8 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissio
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.lakeel.altla.vision.helper.ObservableData;
-import com.lakeel.altla.vision.domain.model.AreaScope;
-import com.lakeel.altla.vision.domain.model.AreaSettings;
+import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.squareup.picasso.Picasso;
 
 import android.net.Uri;

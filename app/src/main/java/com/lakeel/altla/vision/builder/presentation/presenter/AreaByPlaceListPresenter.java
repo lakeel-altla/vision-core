@@ -8,8 +8,8 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceListView;
 import com.lakeel.altla.vision.helper.AreaNameComparater;
-import com.lakeel.altla.vision.domain.model.Area;
-import com.lakeel.altla.vision.domain.model.AreaScope;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 

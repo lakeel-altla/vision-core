@@ -6,10 +6,10 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
-import com.lakeel.altla.vision.domain.model.Area;
-import com.lakeel.altla.vision.domain.model.AreaDescription;
-import com.lakeel.altla.vision.domain.model.AreaScope;
-import com.lakeel.altla.vision.domain.model.AreaSettings;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.AreaDescription;
+import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcel;

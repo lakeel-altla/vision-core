@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
-import com.lakeel.altla.vision.domain.model.Actor;
-import com.lakeel.altla.vision.domain.model.ImageAsset;
+import com.lakeel.altla.vision.model.ImageAsset;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
