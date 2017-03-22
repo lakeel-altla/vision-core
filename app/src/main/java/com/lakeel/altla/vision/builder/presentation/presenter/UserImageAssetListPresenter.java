@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
-import com.lakeel.altla.vision.helper.DataListEvent;
+import com.lakeel.altla.vision.helper.ObservableListEvent;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
@@ -163,13 +163,13 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
     private final class Event {
 
-        final DataListEvent.Type type;
+        final ObservableListEvent.Type type;
 
         final Item item;
 
         final String previousId;
 
-        Event(@NonNull DataListEvent<ImageAsset> event) {
+        Event(@NonNull ObservableListEvent<ImageAsset> event) {
             type = event.getType();
             item = new Item(event.getData());
             previousId = event.getPreviousChildName();
