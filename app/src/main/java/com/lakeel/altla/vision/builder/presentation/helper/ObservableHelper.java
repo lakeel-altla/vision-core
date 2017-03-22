@@ -10,9 +10,9 @@ import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 
-public final class RxHelper {
+public final class ObservableHelper {
 
-    private RxHelper() {
+    private ObservableHelper() {
     }
 
     @NonNull

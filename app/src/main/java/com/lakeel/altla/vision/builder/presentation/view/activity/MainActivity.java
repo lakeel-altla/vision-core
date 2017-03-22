@@ -13,7 +13,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
+import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
@@ -347,7 +347,7 @@ public final class MainActivity extends AppCompatActivity
             if (user != null) {
                 // Subscribe the connection.
                 if (observeConnectionDisposable == null) {
-                    observeConnectionDisposable = RxHelper
+                    observeConnectionDisposable = ObservableHelper
                             .usingData(() -> visionService.getFirebaseConnectionApi().observeConnection())
                             .doOnNext(connected -> LOG
                                     .i("The user device connection state changed: connected = %b", connected))
@@ -367,7 +367,7 @@ public final class MainActivity extends AppCompatActivity
 
                 // Subscribe the user profile.
                 if (observeUserProfileDisposable == null) {
-                    observeUserProfileDisposable = RxHelper
+                    observeUserProfileDisposable = ObservableHelper
                             .usingData(() -> visionService.getUserProfileApi().observeUserProfileById(user.getUid()))
                             .subscribe(profile -> {
                                 // Update UI each time the user profile is updated.

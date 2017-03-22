@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
+import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
 import com.lakeel.altla.vision.helper.ObservableListEvent;
@@ -50,7 +50,7 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
         items.clear();
 
-        Disposable disposable = RxHelper
+        Disposable disposable = ObservableHelper
                 .usingList(() -> visionService.getUserAssetApi().observeAllUserImageAssets())
                 .map(Event::new)
                 .subscribe(event -> {

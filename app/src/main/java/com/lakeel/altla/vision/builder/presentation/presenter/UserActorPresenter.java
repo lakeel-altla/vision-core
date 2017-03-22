@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.helper.RxHelper;
+import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -70,7 +70,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
 
         getView().onUpdateTitle(null);
 
-        Disposable disposable = RxHelper
+        Disposable disposable = ObservableHelper
                 .usingData(() -> visionService.getUserActorApi().observeUserActorById(actorId))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(actor -> {
