@@ -1,7 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
-import com.lakeel.altla.vision.model.AreaScope;
-import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,23 +8,21 @@ import android.support.annotation.StringRes;
 
 public interface AreaSettingsView {
 
-    void onUpdateRadioGroupChecked(int checkedId);
+    void onUpdateAreaMode(@StringRes int resId);
 
     void onUpdateAreaName(@Nullable String areaName);
 
     void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName);
 
-    void onUpdateAreaDescriptionPickerEnabled(boolean enabled);
+    void onUpdateButtonSelectAreaDescriptionEnabled(boolean enabled);
 
-    void onUpdateEditButtonEnabled(boolean enabled);
+    void onShowAreaModeView(@NonNull AreaSettingsModel model);
 
-    void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope);
+    void onShowAreaFindView(@NonNull AreaSettingsModel model);
 
-    void onShowAreaFindByNameView(@NonNull AreaScope areaScope);
+    void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model);
 
-    void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId);
+    void onAreaSettingsSelected(@NonNull AreaSettingsModel model);
 
-    void onShowArView(@NonNull AreaSettings settings);
-
-    void onSnackbar(@StringRes int resId);
+    void onCloseView();
 }

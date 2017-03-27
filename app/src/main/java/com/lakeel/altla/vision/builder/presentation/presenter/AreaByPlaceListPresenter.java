@@ -32,6 +32,8 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
 
+    private static final String ARG_PLACE_ID = "placeId";
+
     @Inject
     VisionService visionService;
 
@@ -41,14 +43,19 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     private AreaScope areaScope;
 
+    private String placeId;
+
+    private Area selectedArea;
+
     @Inject
     public AreaByPlaceListPresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope) {
+    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull Place place) {
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putString(ARG_PLACE_ID, place.getId());
         return bundle;
     }
 
@@ -62,8 +69,14 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         if (areaScopeValue < 0) {
             throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
         }
-
         areaScope = AreaScope.toAreaScope(areaScopeValue);
+
+        String placeId = arguments.getString(ARG_PLACE_ID);
+        if (placeId == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_PLACE_ID));
+        }
+
+        this.placeId = placeId;
     }
 
     @Override
@@ -72,6 +85,32 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
         items.clear();
         getView().onDataSetChanged();
+
+        Disposable disposable = Single.<List<Area>>create(e -> {
+            switch (areaScope) {
+                case PUBLIC: {
+                    visionService.getPublicAreaApi().findAreasByPlaceId(placeId, areas -> {
+                        Collections.sort(areas, AreaNameComparater.INSTANCE);
+                        e.onSuccess(areas);
+                    }, e::onError);
+                    break;
+                }
+                case USER: {
+                    visionService.getUserAreaApi().findAreasByPlaceId(placeId, areas -> {
+                        Collections.sort(areas, AreaNameComparater.INSTANCE);
+                        e.onSuccess(areas);
+                    }, e::onError);
+                    break;
+                }
+            }
+        }).subscribe(areas -> {
+            items.addAll(areas);
+            getView().onDataSetChanged();
+        }, e -> {
+            getLog().e("Failed.", e);
+            getView().onSnackbar(R.string.snackbar_failed);
+        });
+        compositeDisposable.add(disposable);
     }
 
     @Override
@@ -115,45 +154,23 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         return new ItemPresenter();
     }
 
-    public void onClickItem(int position) {
-        Area area = items.get(position);
-        getView().onItemSelected(area.getId());
+    public void onItemSelected(int position) {
+        if (0 <= position) {
+            selectedArea = items.get(position);
+            getView().onUpdateButtonSelectEnabled(true);
+        } else {
+            selectedArea = null;
+            getView().onUpdateButtonSelectEnabled(false);
+        }
     }
 
-    public void onActionPickPlace() {
-        getView().onShowPlacePicker();
+    public void onClickButtonPrevious() {
+        getView().onBackToAreaFindView();
     }
 
-    public void onPlacePicked(@NonNull Place place) {
-        // onPlacePicked will be invoked after Fragment#onStart() because of the result of startActivityForResult.
-        items.clear();
-        getView().onDataSetChanged();
-
-        Disposable disposable = Single.<List<Area>>create(e -> {
-            switch (areaScope) {
-                case PUBLIC: {
-                    visionService.getPublicAreaApi().findAreasByPlaceId(place.getId(), areas -> {
-                        Collections.sort(areas, AreaNameComparater.INSTANCE);
-                        e.onSuccess(areas);
-                    }, e::onError);
-                    break;
-                }
-                case USER: {
-                    visionService.getUserAreaApi().findAreasByPlaceId(place.getId(), areas -> {
-                        Collections.sort(areas, AreaNameComparater.INSTANCE);
-                        e.onSuccess(areas);
-                    }, e::onError);
-                    break;
-                }
-            }
-        }).subscribe(areas -> {
-            items.addAll(areas);
-            getView().onDataSetChanged();
-        }, e -> {
-            getLog().e("Failed.", e);
-            getView().onSnackbar(R.string.snackbar_failed);
-        });
-        compositeDisposable.add(disposable);
+    public void onClickButtonSelect() {
+        getView().onAreaSelected(selectedArea);
+        getView().onCloseAreaByPlaceListView();
     }
 
     public final class ItemPresenter {

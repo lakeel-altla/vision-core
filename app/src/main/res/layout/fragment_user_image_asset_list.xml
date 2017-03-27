@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/view_top"
-              android:background="@color/background_overlay_pane"
+              android:background="@color/background_overlay"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
@@ -8,7 +8,7 @@
     <ImageButton android:id="@+id/image_button_expand"
                  android:src="@drawable/ic_expand_less_black_24dp"
                  android:background="?android:attr/actionBarItemBackground"
-                 android:tint="@color/foreground_overlay_pane"
+                 android:tint="@color/foreground_overlay"
                  android:layout_gravity="right"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
@@ -16,7 +16,7 @@
     <ImageButton android:id="@+id/image_button_collapse"
                  android:src="@drawable/ic_expand_more_black_24dp"
                  android:background="?android:attr/actionBarItemBackground"
-                 android:tint="@color/foreground_overlay_pane"
+                 android:tint="@color/foreground_overlay"
                  android:layout_gravity="right"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>

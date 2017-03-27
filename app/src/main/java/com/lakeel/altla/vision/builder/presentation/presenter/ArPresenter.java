@@ -10,20 +10,20 @@ import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
 import com.lakeel.altla.rajawali.pool.Vector3Pool;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
-import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
@@ -60,10 +60,12 @@ import io.reactivex.disposables.Disposable;
  * Defines the presenter for {@link ArView}.
  */
 public final class ArPresenter extends BasePresenter<ArView>
-        implements OnFrameAvailableListener, MainRenderer.OnCurrentCameraTransformUpdatedListener,
+        implements TangoWrapper.OnTangoReadyListener,
+                   OnFrameAvailableListener,
+                   MainRenderer.OnCurrentCameraTransformUpdatedListener,
                    MainRenderer.OnActorPickedListener {
 
-    private static final String ARG_AREA_SETTINGS = "areaSettings";
+    private static final String STATE_AREA_SETTINGS = "areaSettings";
 
     private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
 
@@ -103,7 +105,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
     private final Vector3 cameraForward = new Vector3();
 
-    private AreaSettings areaSettings;
+    private AreaSettingsModel areaSettingsModel;
 
     private ActorManager actorManager;
 
@@ -125,29 +127,25 @@ public final class ArPresenter extends BasePresenter<ArView>
     public ArPresenter() {
     }
 
-    @NonNull
-    public static Bundle createArguments(@NonNull AreaSettings settings) {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_AREA_SETTINGS, Parcels.wrap(settings));
-        return bundle;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
         super.onCreate(arguments, savedInstanceState);
 
-        if (arguments == null) throw new ArgumentNullException("arguments");
-
-        AreaSettings areaSettings = Parcels.unwrap(arguments.getParcelable(ARG_AREA_SETTINGS));
-        if (areaSettings == null) {
-            throw new IllegalStateException(String.format("Argument '%s' must be not null.", ARG_AREA_SETTINGS));
+        if (savedInstanceState != null) {
+            areaSettingsModel = Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA_SETTINGS));
+            getLog().w("Saved instance state '%s' is null.", STATE_AREA_SETTINGS);
         }
-
-        this.areaSettings = areaSettings;
 
         visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(STATE_AREA_SETTINGS, Parcels.wrap(areaSettingsModel));
     }
 
     @Override
@@ -176,28 +174,6 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
-
-        Disposable disposable = Single.<List<Actor>>create(e -> {
-            switch (areaSettings.getAreaScopeAsEnum()) {
-                case PUBLIC: {
-                    visionService.getPublicActorApi().findUserActorsByAreaId(areaSettings.getAreaId(), actors -> {
-                        e.onSuccess(actors);
-                    }, e::onError);
-                    break;
-                }
-                case USER: {
-                    visionService.getUserActorApi().findUserActorsByAreaId(areaSettings.getAreaId(), actors -> {
-                        e.onSuccess(actors);
-                    }, e::onError);
-                    break;
-                }
-            }
-        }).subscribe(actors -> {
-            actorManager.addActors(actors);
-        }, e -> {
-            getLog().e("Failed.", e);
-        });
-        compositeDisposable.add(disposable);
     }
 
     @Override
@@ -211,7 +187,7 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onResumeOverride() {
         super.onResumeOverride();
 
-        visionService.getTangoWrapper().addOnTangoReadyListener(renderer::connectToTangoCamera);
+        visionService.getTangoWrapper().addOnTangoReadyListener(this);
         visionService.getTangoWrapper().addOnFrameAvailableListener(this);
         visionService.getTangoWrapper().connect();
         active = true;
@@ -223,9 +199,46 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         active = false;
         renderer.disconnectFromTangoCamera();
-        visionService.getTangoWrapper().removeOnTangoReadyListener(renderer::connectToTangoCamera);
+        visionService.getTangoWrapper().removeOnTangoReadyListener(this);
         visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
         visionService.getTangoWrapper().disconnect();
+
+        // Pause the thread for OpenGL in the texture view.
+        getView().onPauseTextureView();
+    }
+
+    @Override
+    public void onTangoReady(Tango tango) {
+        renderer.connectToTangoCamera(tango);
+
+        // Resume the texture view after the tango becomes ready.
+        getView().onResumeTextureView();
+
+        if (areaSettingsModel != null) {
+            Disposable disposable = Single.<List<Actor>>create(e -> {
+                switch (areaSettingsModel.getAreaScope()) {
+                    case PUBLIC: {
+                        visionService.getPublicActorApi()
+                                     .findUserActorsByAreaId(areaSettingsModel.getArea().getId(), actors -> {
+                                         e.onSuccess(actors);
+                                     }, e::onError);
+                        break;
+                    }
+                    case USER: {
+                        visionService.getUserActorApi()
+                                     .findUserActorsByAreaId(areaSettingsModel.getArea().getId(), actors -> {
+                                         e.onSuccess(actors);
+                                     }, e::onError);
+                        break;
+                    }
+                }
+            }).subscribe(actors -> {
+                actorManager.addActors(actors);
+            }, e -> {
+                getLog().e("Failed.", e);
+            });
+            compositeDisposable.add(disposable);
+        }
     }
 
     @Override
@@ -249,6 +262,37 @@ public final class ArPresenter extends BasePresenter<ArView>
     public void onActorPicked(@Nullable ActorModel actorModel) {
         pickedActorModel = actorModel;
         getView().onUpdateObjectMenuVisible(pickedActorModel != null);
+    }
+
+    public void onActionCloseSelected() {
+        // TODO: confirmation.
+        getView().onCloseView();
+    }
+
+    public void onActionDebugSelected() {
+        debugConsoleVisible = !debugConsoleVisible;
+        getView().onUpdateDebugConsoleVisible(debugConsoleVisible);
+    }
+
+    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
+        areaSettingsModel = model;
+
+        renderer.disconnectFromTangoCamera();
+        visionService.getTangoWrapper().removeOnTangoReadyListener(this);
+        visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().disconnect();
+
+        // Pause the thread for OpenGL in the texture view.
+        getView().onPauseTextureView();
+
+        visionService.getTangoWrapper().addOnTangoReadyListener(this);
+        visionService.getTangoWrapper().addOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().connect();
+    }
+
+    public void onClickButtonAreaSettings() {
+        getView().onUpdateAreaSettingsVisible(true);
+        getView().onUpdateMainMenuVisible(false);
     }
 
     public void onTouchButtonTranslate() {
@@ -326,7 +370,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         Actor actor = new Actor();
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setAreaId(areaSettings.getAreaId());
+        actor.setAreaId(areaSettingsModel.getArea().getId());
         // TODO: handle other asset types.
         actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
         actor.setAssetId(asset.getId());
@@ -550,19 +594,11 @@ public final class ArPresenter extends BasePresenter<ArView>
         // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
-        config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
+        if (areaSettingsModel != null && areaSettingsModel.getAreaDescription().getId() != null) {
+            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettingsModel.getAreaDescription().getId());
+        }
 
         return config;
-    }
-
-    public void onActionCloseSelected() {
-        // TODO: confirmation.
-        getView().onCloseView();
-    }
-
-    public void onActionDebugSelected() {
-        debugConsoleVisible = !debugConsoleVisible;
-        getView().onUpdateDebugConsoleVisible(debugConsoleVisible);
     }
 
     private final class ActorManager {

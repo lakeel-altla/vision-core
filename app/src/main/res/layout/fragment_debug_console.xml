@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:id="@+id/view_top"
-                android:background="@color/background_overlay_pane"
+                android:background="@color/background_overlay"
                 android:paddingStart="@dimen/content_horizontal_margin"
                 android:paddingEnd="@dimen/content_horizontal_margin"
                 android:paddingTop="@dimen/content_vertical_margin"

@@ -6,10 +6,13 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
+import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
+
+import org.parceler.Parcels;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,7 +33,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     private static final String ARG_AREA_SCOPE_VALUE = "areaScropeValue";
 
-    private static final String ARG_AREA_ID = "areaId";
+    private static final String ARG_AREA = "area";
 
     @Inject
     VisionService visionService;
@@ -41,17 +44,19 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     private AreaScope areaScope;
 
-    private String areaId;
+    private Area area;
+
+    private AreaDescription selectedAreaDescription;
 
     @Inject
     public AreaDescriptionByAreaListPresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull String areaId) {
+    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull Area area) {
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
-        bundle.putString(ARG_AREA_ID, areaId);
+        bundle.putParcelable(ARG_AREA, Parcels.wrap(area));
         return bundle;
     }
 
@@ -63,20 +68,20 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
         int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
         if (areaScopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_ID));
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA));
         }
 
         AreaScope areaScope = AreaScope.toAreaScope(areaScopeValue);
         if (areaScope == AreaScope.UNKNOWN) throw new IllegalArgumentException("Unknown area scope.");
 
 
-        String areaId = arguments.getString(ARG_AREA_ID, null);
-        if (areaId == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
+        Area area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
+        if (area == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
         }
 
         this.areaScope = areaScope;
-        this.areaId = areaId;
+        this.area = area;
     }
 
     @Override
@@ -90,7 +95,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
             switch (areaScope) {
                 case PUBLIC: {
                     visionService.getPublicAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
+                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
                                      Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
                                      e.onSuccess(areaDescriptions);
                                  }, e::onError);
@@ -98,7 +103,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
                 }
                 case USER: {
                     visionService.getUserAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
+                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
                                      Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
                                      e.onSuccess(areaDescriptions);
                                  }, e::onError);
@@ -156,9 +161,23 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
         return new ItemPresenter();
     }
 
-    public void onClickItem(int position) {
-        AreaDescription areaDescription = items.get(position);
-        getView().onItemSelected(areaDescription.getId());
+    public void onItemSelected(int position) {
+        if (0 <= position) {
+            selectedAreaDescription = items.get(position);
+            getView().onUpdateButtonSelectEnabled(true);
+        } else {
+            selectedAreaDescription = null;
+            getView().onUpdateButtonSelectEnabled(false);
+        }
+    }
+
+    public void onClickButtonClose() {
+        getView().onCloseAreaDescriptionByAreaListView();
+    }
+
+    public void onClickButtonSelect() {
+        getView().onAreaDescriptionSelected(selectedAreaDescription);
+        getView().onCloseAreaDescriptionByAreaListView();
     }
 
     public final class ItemPresenter {

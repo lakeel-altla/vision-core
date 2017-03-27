@@ -15,15 +15,11 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsContainerFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
-import com.lakeel.altla.vision.model.AreaScope;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.squareup.picasso.Picasso;
 
 import android.net.Uri;
@@ -56,9 +52,6 @@ public final class MainActivity extends AppCompatActivity
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
-                   AreaSettingsFragment.InteractionListener,
-                   AreaByPlaceListFragment.InteractionListener,
-                   AreaDescriptionByAreaListFragment.InteractionListener,
                    ArFragment.InteractionListener,
                    UserActorFragment.InteractionListener,
                    UserActorEditFragment.InteractionListener,
@@ -225,27 +218,7 @@ public final class MainActivity extends AppCompatActivity
     public void onCloseTangoPermissionView() {
         toolbar.setVisibility(View.VISIBLE);
 
-        replaceFragment(AreaSettingsFragment.newInstance());
-    }
-
-    @Override
-    public void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope) {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(areaScope));
-    }
-
-    @Override
-    public void onShowAreaFindByNameView(@NonNull AreaScope areaScope) {
-        // TODO
-    }
-
-    @Override
-    public void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId) {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(areaScope, areaId));
-    }
-
-    @Override
-    public void onShowArView(@NonNull AreaSettings settings) {
-        replaceFragment(ArFragment.newInstance(settings));
+        replaceFragment(ArFragment.newInstance());
     }
 
     @Override
@@ -255,33 +228,13 @@ public final class MainActivity extends AppCompatActivity
 
     @Override
     public void onCloseUserSceneBuildView() {
-        replaceFragment(AreaSettingsFragment.newInstance());
+        replaceFragment(AreaSettingsContainerFragment.newInstance());
     }
 
     @Override
     public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
         replaceFragmentAndAddToBackStack(UserActorEditFragment.newInstance(sceneId, actorId));
         // TODO
-    }
-
-    @Override
-    public void onUserAreaSelected(@NonNull String areaId) {
-        getSupportFragmentManager().popBackStack();
-
-        AreaSettingsFragment fragment = (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
-        if (fragment != null) {
-            fragment.onUserAreaSelected(areaId);
-        }
-    }
-
-    @Override
-    public void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId) {
-        getSupportFragmentManager().popBackStack();
-
-        AreaSettingsFragment fragment = (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
-        if (fragment != null) {
-            fragment.onUserAreaDescriptionSelected(areaDescriptionId);
-        }
     }
 
     private void updateActionBarHome() {

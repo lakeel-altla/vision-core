@@ -2,10 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
-import com.lakeel.altla.vision.model.AreaScope;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -14,21 +13,16 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
@@ -37,11 +31,8 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     @Inject
     AreaSettingsPresenter presenter;
 
-    @BindView(R.id.view_top)
-    View viewTop;
-
-    @BindView(R.id.radio_group_area_scope)
-    RadioGroup radioGroupType;
+    @BindView(R.id.text_view_area_mode)
+    TextView textViewAreaMode;
 
     @BindView(R.id.text_view_area_name)
     TextView textViewAreaName;
@@ -49,17 +40,17 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     @BindView(R.id.text_view_area_description_name)
     TextView textViewAreaDescriptionName;
 
-    @BindView(R.id.image_button_select_area_description)
+    @BindView(R.id.button_select_area_description)
     ImageButton imageButtonSelectAreaDescription;
-
-    @BindView(R.id.button_start)
-    Button buttonStart;
 
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaSettingsFragment newInstance() {
-        return new AreaSettingsFragment();
+    public static AreaSettingsFragment newInstance(@NonNull AreaSettingsModel model) {
+        AreaSettingsFragment fragment = new AreaSettingsFragment();
+        Bundle bundle = AreaSettingsPresenter.createArguments(model);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -76,8 +67,8 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     protected void onAttachOverride(@NonNull Context context) {
         super.onAttachOverride(context);
 
-        interactionListener = InteractionListener.class.cast(context);
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
+        interactionListener = InteractionListener.class.cast(getParentFragment());
     }
 
     @Override
@@ -99,13 +90,11 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
-
-        getActivity().setTitle(R.string.title_project);
     }
 
     @Override
-    public void onUpdateRadioGroupChecked(int checkedId) {
-        radioGroupType.check(checkedId);
+    public void onUpdateAreaMode(@StringRes int resId) {
+        textViewAreaMode.setText(resId);
     }
 
     @Override
@@ -119,64 +108,54 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onUpdateAreaDescriptionPickerEnabled(boolean enabled) {
+    public void onUpdateButtonSelectAreaDescriptionEnabled(boolean enabled) {
         imageButtonSelectAreaDescription.setEnabled(enabled);
         imageButtonSelectAreaDescription.setColorFilter(resolveImageButtonTint(enabled));
     }
 
     @Override
-    public void onUpdateEditButtonEnabled(boolean enabled) {
-        buttonStart.setEnabled(enabled);
+    public void onShowAreaModeView(@NonNull AreaSettingsModel model) {
+        interactionListener.onShowAreaModeView(model);
     }
 
     @Override
-    public void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope) {
-        interactionListener.onShowAreaFindByPlaceView(areaScope);
+    public void onShowAreaFindView(@NonNull AreaSettingsModel model) {
+        interactionListener.onShowAreaFindView(model);
     }
 
     @Override
-    public void onShowAreaFindByNameView(@NonNull AreaScope areaScope) {
-        interactionListener.onShowAreaFindByNameView(areaScope);
+    public void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model) {
+        interactionListener.onShowAreaDescriptionByAreaListView(model);
     }
 
     @Override
-    public void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId) {
-        interactionListener.onShowAreaDescriptionInAreaListView(areaScope, areaId);
+    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
+        interactionListener.onAreaSettingsSelected(model);
     }
 
     @Override
-    public void onShowArView(@NonNull AreaSettings settings) {
-        interactionListener.onShowArView(settings);
+    public void onCloseView() {
+        interactionListener.onCloseAreaSettingsView();
     }
 
-    @Override
-    public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    @OnClick(R.id.button_close)
+    void onClickButtonClose() {
+        presenter.onClickButtonClose();
     }
 
-    @OnCheckedChanged(R.id.radio_button_public)
-    void onCheckedChangedRadioButtonPublic(CompoundButton buttonView, boolean isChecked) {
-        presenter.onCheckedChangedRadioButtonPublic(isChecked);
+    @OnClick(R.id.button_select_area_mode)
+    void onClickButtonSelectAreaMode() {
+        presenter.onClickButtonSelectAreaMode();
     }
 
-    @OnCheckedChanged(R.id.radio_button_user)
-    void onCheckedChangedRadioButtonUser(CompoundButton buttonView, boolean isChecked) {
-        presenter.onCheckedChangedRadioButtonUser(isChecked);
+    @OnClick(R.id.button_select_area)
+    void onClickButtonSelectArea() {
+        presenter.onClickButtonSelectArea();
     }
 
-    @OnClick(R.id.button_find_by_place)
-    void onClickButtonFindByPlace() {
-        presenter.onClickButtonFindByPlace();
-    }
-
-    @OnClick(R.id.button_find_by_name)
-    void onClickButtonFindByName() {
-        presenter.onClickButtonFindByName();
-    }
-
-    @OnClick(R.id.image_button_select_area_description)
-    void onClickImageButtonSelectAreaDescription() {
-        presenter.onClickImageButtonSelectAreaDescription();
+    @OnClick(R.id.button_select_area_description)
+    void onClickButtonSelectAreaDescription() {
+        presenter.onClickButtonSelectAreaDescription();
     }
 
     @OnClick(R.id.button_start)
@@ -184,28 +163,22 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         presenter.onClickButtonStart();
     }
 
-    public void onUserAreaSelected(@NonNull String areaId) {
-        presenter.onUserAreaSelected(areaId);
-    }
-
-    public void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId) {
-        presenter.onUserAreaDescriptionSelected(areaDescriptionId);
-    }
-
     @ColorInt
     private int resolveImageButtonTint(boolean enabled) {
-        int resId = enabled ? R.color.tint_image_button_enabled : R.color.tint_image_button_disabled;
+        int resId = enabled ? R.color.foreground_overlay : R.color.foreground_overlay_disabled;
         return getResources().getColor(resId);
     }
 
     public interface InteractionListener {
 
-        void onShowAreaFindByPlaceView(@NonNull AreaScope areaScope);
+        void onShowAreaModeView(@NonNull AreaSettingsModel model);
 
-        void onShowAreaFindByNameView(@NonNull AreaScope areaScope);
+        void onShowAreaFindView(@NonNull AreaSettingsModel model);
 
-        void onShowAreaDescriptionInAreaListView(@NonNull AreaScope areaScope, @NonNull String areaId);
+        void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model);
 
-        void onShowArView(@NonNull AreaSettings settings);
+        void onAreaSettingsSelected(@NonNull AreaSettingsModel model);
+
+        void onCloseAreaSettingsView();
     }
 }

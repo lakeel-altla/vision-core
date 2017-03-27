@@ -5,6 +5,8 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionByAreaListAdapter;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -19,11 +21,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public final class AreaDescriptionByAreaListFragment
         extends AbstractFragment<AreaDescriptionByAreaListView, AreaDescriptionByAreaListPresenter>
@@ -35,12 +39,15 @@ public final class AreaDescriptionByAreaListFragment
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
+    @BindView(R.id.button_select)
+    Button buttonSelect;
+
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaDescriptionByAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull String areaId) {
+    public static AreaDescriptionByAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull Area area) {
         AreaDescriptionByAreaListFragment fragment = new AreaDescriptionByAreaListFragment();
-        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(areaScope, areaId);
+        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(areaScope, area);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -60,7 +67,7 @@ public final class AreaDescriptionByAreaListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
+        interactionListener = InteractionListener.class.cast(getParentFragment());
     }
 
     @Override
@@ -90,6 +97,11 @@ public final class AreaDescriptionByAreaListFragment
     }
 
     @Override
+    public void onUpdateButtonSelectEnabled(boolean enabled) {
+        buttonSelect.setEnabled(enabled);
+    }
+
+    @Override
     public void onItemInserted(int position) {
         recyclerView.getAdapter().notifyItemInserted(position);
     }
@@ -115,9 +127,13 @@ public final class AreaDescriptionByAreaListFragment
     }
 
     @Override
-    public void onItemSelected(@NonNull String areaDescriptionId) {
-        // TODO: import AD
-        interactionListener.onUserAreaDescriptionSelected(areaDescriptionId);
+    public void onCloseAreaDescriptionByAreaListView() {
+        interactionListener.onCloseAreaDescriptionByAreaListView();
+    }
+
+    @Override
+    public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
+        interactionListener.onAreaDescriptionSelected(areaDescription);
     }
 
     @Override
@@ -125,8 +141,20 @@ public final class AreaDescriptionByAreaListFragment
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
     }
 
+    @OnClick(R.id.button_close)
+    void onClickButtonClose() {
+        presenter.onClickButtonClose();
+    }
+
+    @OnClick(R.id.button_select)
+    void onClickButtonSelect() {
+        presenter.onClickButtonSelect();
+    }
+
     public interface InteractionListener {
 
-        void onUserAreaDescriptionSelected(@NonNull String areaDescriptionId);
+        void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
+
+        void onCloseAreaDescriptionByAreaListView();
     }
 }

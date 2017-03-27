@@ -23,6 +23,8 @@ public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPla
 
     private LayoutInflater inflater;
 
+    private View selectedItem;
+
     public AreaByPlaceListAdapter(@NonNull AreaByPlaceListPresenter presenter) {
         this.presenter = presenter;
     }
@@ -48,7 +50,22 @@ public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPla
         itemView.setOnClickListener(v -> {
             if (recyclerView != null) {
                 int position = recyclerView.getChildAdapterPosition(v);
-                presenter.onClickItem(position);
+
+                if (selectedItem == null) {
+                    selectedItem = itemView;
+                    selectedItem.setSelected(true);
+                    presenter.onItemSelected(position);
+                } else {
+                    if (selectedItem == itemView) {
+                        itemView.setSelected(false);
+                        presenter.onItemSelected(-1);
+                    } else {
+                        selectedItem.setSelected(false);
+                        selectedItem = itemView;
+                        selectedItem.setSelected(true);
+                        presenter.onItemSelected(position);
+                    }
+                }
             }
         });
         return new ViewHolder(itemView);

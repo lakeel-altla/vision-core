@@ -18,6 +18,14 @@ public interface ArView {
 
     void setSurfaceRenderer(ISurfaceRenderer renderer);
 
+    void onResumeTextureView();
+
+    void onPauseTextureView();
+
+    void onUpdateAreaSettingsVisible(boolean visible);
+
+    void onUpdateMainMenuVisible(boolean visible);
+
     void onUpdateObjectMenuVisible(boolean visible);
 
     void onUpdateTranslateSelected(boolean selected);

@@ -58,7 +58,7 @@
     <string name="label_y">Y</string>
     <string name="label_z">Z</string>
     <string name="label_w">W</string>
-    <string name="label_area_scope">Area Scope</string>
+    <string name="label_area_mode">Area Mode</string>
 
     <string name="title_project">Project</string>
     <string name="title_select_area">Select Area</string>
@@ -73,5 +73,8 @@
 
     <string name="input_error_required">Required.</string>
     <string name="button_start">Start</string>
+    <string name="button_select">Select</string>
+    <string name="label_area_mode_public">Public mode</string>
+    <string name="label_area_mode_user">User mode</string>
 
 </resources>

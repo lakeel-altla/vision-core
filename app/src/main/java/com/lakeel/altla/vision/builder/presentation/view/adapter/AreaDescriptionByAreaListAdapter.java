@@ -24,6 +24,8 @@ public final class AreaDescriptionByAreaListAdapter
 
     private LayoutInflater inflater;
 
+    private View selectedItem;
+
     public AreaDescriptionByAreaListAdapter(@NonNull AreaDescriptionByAreaListPresenter presenter) {
         this.presenter = presenter;
     }
@@ -49,7 +51,22 @@ public final class AreaDescriptionByAreaListAdapter
         itemView.setOnClickListener(v -> {
             if (recyclerView != null) {
                 int position = recyclerView.getChildAdapterPosition(itemView);
-                presenter.onClickItem(position);
+
+                if (selectedItem == null) {
+                    selectedItem = itemView;
+                    selectedItem.setSelected(true);
+                    presenter.onItemSelected(position);
+                } else {
+                    if (selectedItem == itemView) {
+                        itemView.setSelected(false);
+                        presenter.onItemSelected(-1);
+                    } else {
+                        selectedItem.setSelected(false);
+                        selectedItem = itemView;
+                        selectedItem.setSelected(true);
+                        presenter.onItemSelected(position);
+                    }
+                }
             }
         });
         return new ViewHolder(itemView);

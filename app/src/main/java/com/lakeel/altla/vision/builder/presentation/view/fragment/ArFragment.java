@@ -4,12 +4,13 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tango.ux.TangoUxLayout;
 
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -44,10 +45,15 @@ import butterknife.OnClick;
 import butterknife.OnTouch;
 
 public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
-        implements ArView {
+        implements ArView,
+                   AreaSettingsContainerFragment.InteractionListener {
 
     @Inject
     ArPresenter presenter;
+
+    // TODO
+    @Inject
+    VisionService visionService;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -57,6 +63,9 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @BindView(R.id.texture_view)
     TextureView textureView;
+
+    @BindView(R.id.view_group_main_menu)
+    ViewGroup viewGroupMainMenu;
 
     @BindView(R.id.view_group_edit_user_actor_menu)
     ViewGroup viewGroupEditUserActorMenu;
@@ -94,11 +103,8 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     private InteractionListener interactionListener;
 
     @NonNull
-    public static Fragment newInstance(@NonNull AreaSettings settings) {
-        ArFragment fragment = new ArFragment();
-        Bundle bundle = ArPresenter.createArguments(settings);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static Fragment newInstance() {
+        return new ArFragment();
     }
 
     @Override
@@ -199,17 +205,17 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
             return false;
         });
 
-        UserImageAssetListFragment userImageAssetListFragment =
-                (UserImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
-                        UserImageAssetListFragment.class.getName());
-        if (userImageAssetListFragment == null) {
-            userImageAssetListFragment = UserImageAssetListFragment.newInstance();
-            getChildFragmentManager().beginTransaction()
-                                     .add(R.id.user_image_asset_list_container,
-                                          userImageAssetListFragment,
-                                          UserImageAssetListFragment.class.getName())
-                                     .commit();
-        }
+//        UserImageAssetListFragment userImageAssetListFragment =
+//                (UserImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
+//                        UserImageAssetListFragment.class.getName());
+//        if (userImageAssetListFragment == null) {
+//            userImageAssetListFragment = UserImageAssetListFragment.newInstance();
+//            getChildFragmentManager().beginTransaction()
+//                                     .add(R.id.user_image_asset_list_container,
+//                                          userImageAssetListFragment,
+//                                          UserImageAssetListFragment.class.getName())
+//                                     .commit();
+//        }
 
         setHasOptionsMenu(true);
     }
@@ -234,20 +240,6 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    protected void onResumeOverride() {
-        super.onResumeOverride();
-
-        textureView.onResume();
-    }
-
-    @Override
-    protected void onPauseOverride() {
-        super.onPauseOverride();
-
-        textureView.onPause();
-    }
-
-    @Override
     public void setTangoUxLayout(TangoUx tangoUx) {
         tangoUx.setLayout(tangoUxLayout);
     }
@@ -255,6 +247,48 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     @Override
     public void setSurfaceRenderer(ISurfaceRenderer renderer) {
         textureView.setSurfaceRenderer(renderer);
+    }
+
+    @Override
+    public void onResumeTextureView() {
+        textureView.onResume();
+    }
+
+    @Override
+    public void onPauseTextureView() {
+        textureView.onPause();
+    }
+
+    @Override
+    public void onUpdateAreaSettingsVisible(boolean visible) {
+        final String tag = AreaSettingsContainerFragment.class.getName();
+        AreaSettingsContainerFragment
+                fragment = (AreaSettingsContainerFragment) getChildFragmentManager().findFragmentByTag(tag);
+
+        if (visible) {
+            if (fragment == null) {
+                fragment = AreaSettingsContainerFragment.newInstance();
+                getChildFragmentManager().beginTransaction()
+                                         .replace(R.id.window_container, fragment, tag)
+                                         .commit();
+            }
+        } else {
+            if (fragment != null) {
+                getChildFragmentManager().beginTransaction()
+                                         .remove(fragment)
+                                         .commit();
+            }
+        }
+    }
+
+    @Override
+    public void onUpdateMainMenuVisible(boolean visible) {
+        viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
+        presenter.onAreaSettingsSelected(model);
     }
 
     @Override
@@ -311,13 +345,15 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
             if (fragment == null) {
                 fragment = DebugConsoleFragment.newInstance();
                 getChildFragmentManager().beginTransaction()
-                                         .add(R.id.debug_console_container, fragment, tag)
+                                         .replace(R.id.debug_console_container, fragment, tag)
                                          .commit();
             }
         } else {
-            getChildFragmentManager().beginTransaction()
-                                     .remove(fragment)
-                                     .commit();
+            if (fragment != null) {
+                getChildFragmentManager().beginTransaction()
+                                         .remove(fragment)
+                                         .commit();
+            }
         }
     }
 
@@ -334,6 +370,11 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.button_area_settings)
+    void onClickButtonAreaSettings() {
+        presenter.onClickButtonAreaSettings();
     }
 
     //

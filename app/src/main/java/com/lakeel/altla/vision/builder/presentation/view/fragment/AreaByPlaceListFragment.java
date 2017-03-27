@@ -1,65 +1,53 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlacePicker;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaByPlaceListAdapter;
+import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceListView, AreaByPlaceListPresenter>
         implements AreaByPlaceListView {
 
-    private static final int REQUEST_CODE_PLACE_PICKER = 1;
-
     @Inject
     AreaByPlaceListPresenter presenter;
-
-    @Inject
-    AppCompatActivity activity;
-
-    @Inject
-    GoogleApiClient googleApiClient;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
+    @BindView(R.id.button_select)
+    Button buttonSelect;
+
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaByPlaceListFragment newInstance(@NonNull AreaScope areaScope) {
+    public static AreaByPlaceListFragment newInstance(@NonNull AreaScope areaScope, @NonNull Place place) {
         AreaByPlaceListFragment fragment = new AreaByPlaceListFragment();
-        Bundle bundle = AreaByPlaceListPresenter.createArguments(areaScope);
+        Bundle bundle = AreaByPlaceListPresenter.createArguments(areaScope, place);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -79,7 +67,7 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
+        interactionListener = InteractionListener.class.cast(getParentFragment());
     }
 
     @Override
@@ -104,40 +92,6 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
 
         recyclerView.setAdapter(new AreaByPlaceListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        getActivity().setTitle(R.string.title_select_area);
-
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_area_by_place_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_pick_place:
-                presenter.onActionPickPlace();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PLACE_PICKER) {
-            // TODO: renable the action to pick a place.
-
-            if (resultCode == Activity.RESULT_OK) {
-                Place place = PlacePicker.getPlace(getContext(), data);
-                presenter.onPlacePicked(place);
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
     @Override
@@ -166,23 +120,23 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
     }
 
     @Override
-    public void onItemSelected(String areaId) {
-        interactionListener.onUserAreaSelected(areaId);
+    public void onUpdateButtonSelectEnabled(boolean enabled) {
+        buttonSelect.setEnabled(enabled);
     }
 
     @Override
-    public void onShowPlacePicker() {
-        if (googleApiClient.isConnected()) {
-            // TODO: disable the action to pick a place.
-            try {
-                Intent intent = new PlacePicker.IntentBuilder().build(activity);
-                startActivityForResult(intent, REQUEST_CODE_PLACE_PICKER);
-            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-                onSnackbar(R.string.snackbar_failed);
-                // TODO: renable the action to pick a place.
-            }
-        }
+    public void onAreaSelected(@NonNull Area area) {
+        interactionListener.onAreaSelected(area);
+    }
 
+    @Override
+    public void onBackToAreaFindView() {
+        interactionListener.onBackToAreaFindView();
+    }
+
+    @Override
+    public void onCloseAreaByPlaceListView() {
+        interactionListener.onCloseAreaByPlaceListView();
     }
 
     @Override
@@ -190,8 +144,22 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
     }
 
+    @OnClick(R.id.button_previous)
+    void onClickButtonPrevious() {
+        presenter.onClickButtonPrevious();
+    }
+
+    @OnClick(R.id.button_select)
+    void onClickButtonSelect() {
+        presenter.onClickButtonSelect();
+    }
+
     public interface InteractionListener {
 
-        void onUserAreaSelected(@NonNull String areaId);
+        void onAreaSelected(@NonNull Area area);
+
+        void onBackToAreaFindView();
+
+        void onCloseAreaByPlaceListView();
     }
 }
