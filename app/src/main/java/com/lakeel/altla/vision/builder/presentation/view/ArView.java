@@ -24,7 +24,11 @@ public interface ArView {
 
     void onUpdateAreaSettingsVisible(boolean visible);
 
+    void onUpdateAssetListVisible(boolean visible);
+
     void onUpdateMainMenuVisible(boolean visible);
+
+    void onUpdateImageButtonAssetListVisible(boolean visible);
 
     void onUpdateObjectMenuVisible(boolean visible);
 

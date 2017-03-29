@@ -138,14 +138,22 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content">
 
-        <ImageButton android:id="@+id/button_area_settings"
+        <ImageButton android:id="@+id/image_button_area_settings"
                      android:background="@drawable/button_background_circle"
                      android:src="@drawable/ic_map_black_24dp"
                      android:tint="@color/foreground_overlay"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
-        <ImageButton android:id="@+id/button_close"
+        <ImageButton android:id="@+id/image_button_asset_list"
+                     android:background="@drawable/button_background_circle"
+                     android:src="@drawable/ic_image_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:layout_marginStart="@dimen/content_vertical_margin"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+        <ImageButton android:id="@+id/image_button_close"
                      android:background="@drawable/button_background_circle"
                      android:src="@drawable/ic_close_black_24dp"
                      android:tint="@color/foreground_overlay"
@@ -155,7 +163,7 @@
 
     </LinearLayout>
 
-    <FrameLayout android:id="@+id/user_image_asset_list_container"
+    <FrameLayout android:id="@+id/asset_list_container"
                  android:layout_gravity="bottom"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content"/>

@@ -36,15 +36,6 @@ public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListV
     }
 
     @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        getView().onUpdateImageButtonExpandVisible(true);
-        getView().onUpdateImageButtonCollapseVisible(false);
-        getView().onUpdateContentVisible(false);
-    }
-
-    @Override
     protected void onStartOverride() {
         super.onStartOverride();
 
@@ -110,16 +101,8 @@ public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListV
         return new ItemPresenter();
     }
 
-    public void onClickImageButtonExpand() {
-        getView().onUpdateImageButtonExpandVisible(false);
-        getView().onUpdateImageButtonCollapseVisible(true);
-        getView().onUpdateContentVisible(true);
-    }
-
-    public void onClickImageButtonCollapse() {
-        getView().onUpdateImageButtonExpandVisible(true);
-        getView().onUpdateImageButtonCollapseVisible(false);
-        getView().onUpdateContentVisible(false);
+    public void onClickButtonClose() {
+        getView().onCloseView();
     }
 
     public final class ItemPresenter {

@@ -156,7 +156,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
         presenter.onClickButtonFindByPlace();
     }
 
-    @OnClick(R.id.button_close)
+    @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
     }

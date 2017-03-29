@@ -103,7 +103,7 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
         presenter.onClickButtonSelect();
     }
 
-    @OnClick(R.id.button_close)
+    @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
     }

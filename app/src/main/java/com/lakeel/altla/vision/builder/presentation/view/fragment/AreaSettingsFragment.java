@@ -44,7 +44,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     @BindView(R.id.text_view_area_description_name)
     TextView textViewAreaDescriptionName;
 
-    @BindView(R.id.button_select_area_description)
+    @BindView(R.id.image_button_select_area_description)
     ImageButton imageButtonSelectAreaDescription;
 
     @BindView(R.id.button_start)
@@ -173,27 +173,27 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
     }
 
-    @OnClick(R.id.button_close)
+    @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
     }
 
-    @OnClick(R.id.button_history)
+    @OnClick(R.id.image_button_history)
     void onClickButtonHistory() {
         presenter.onClickButtonHistory();
     }
 
-    @OnClick(R.id.button_select_area_mode)
+    @OnClick(R.id.image_button_select_area_mode)
     void onClickButtonSelectAreaMode() {
         presenter.onClickButtonSelectAreaMode();
     }
 
-    @OnClick(R.id.button_select_area)
+    @OnClick(R.id.image_button_select_area)
     void onClickButtonSelectArea() {
         presenter.onClickButtonSelectArea();
     }
 
-    @OnClick(R.id.button_select_area_description)
+    @OnClick(R.id.image_button_select_area_description)
     void onClickButtonSelectAreaDescription() {
         presenter.onClickButtonSelectAreaDescription();
     }

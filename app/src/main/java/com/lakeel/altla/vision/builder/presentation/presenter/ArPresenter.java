@@ -192,6 +192,8 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onResumeOverride() {
         super.onResumeOverride();
 
+        getView().onUpdateImageButtonAssetListVisible(false);
+
         if (areaSettingsId == null) {
             visionService.getTangoWrapper().addOnTangoReadyListener(this);
             visionService.getTangoWrapper().addOnFrameAvailableListener(this);
@@ -288,6 +290,7 @@ public final class ArPresenter extends BasePresenter<ArView>
                     })
                     .subscribe(actors -> {
                         actorManager.addActors(actors);
+                        getView().onUpdateImageButtonAssetListVisible(true);
                     }, e -> {
                         getLog().e("Failed.", e);
                         getView().onSnackbar(R.string.snackbar_failed);
@@ -363,6 +366,11 @@ public final class ArPresenter extends BasePresenter<ArView>
 
     public void onClickButtonAreaSettings() {
         getView().onUpdateAreaSettingsVisible(true);
+        getView().onUpdateMainMenuVisible(false);
+    }
+
+    public void onClickButtonAssetList() {
+        getView().onUpdateAssetListVisible(true);
         getView().onUpdateMainMenuVisible(false);
     }
 

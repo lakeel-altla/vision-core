@@ -18,7 +18,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 
 import javax.inject.Inject;
 
@@ -33,17 +32,10 @@ public final class ImageAssetListFragment
     @Inject
     ImageAssetListPresenter presenter;
 
-    @BindView(R.id.image_button_expand)
-    ImageButton imageButtonExpand;
-
-    @BindView(R.id.image_button_collapse)
-    ImageButton imageButtonCollapse;
-
-    @BindView(R.id.view_group_content)
-    ViewGroup viewGroupContent;
-
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+
+    private InteractionListener interactionListener;
 
     @NonNull
     public static ImageAssetListFragment newInstance() {
@@ -65,6 +57,14 @@ public final class ImageAssetListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
+        interactionListener = InteractionListener.class.cast(getParentFragment());
+    }
+
+    @Override
+    protected void onDetachOverride() {
+        super.onDetachOverride();
+
+        interactionListener = null;
     }
 
     @Nullable
@@ -82,21 +82,6 @@ public final class ImageAssetListFragment
 
         recyclerView.setAdapter(new ImageAssetListAdapter(presenter, getContext()));
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 5));
-    }
-
-    @Override
-    public void onUpdateImageButtonExpandVisible(boolean visible) {
-        imageButtonExpand.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onUpdateImageButtonCollapseVisible(boolean visible) {
-        imageButtonCollapse.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onUpdateContentVisible(boolean visible) {
-        viewGroupContent.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -125,17 +110,25 @@ public final class ImageAssetListFragment
     }
 
     @Override
+    public void onCloseView() {
+        interactionListener.onUpdateAssetListVisible(false);
+        interactionListener.onUpdateMainMenuVisible(true);
+    }
+
+    @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.image_button_expand)
-    void onClickImageButtonExpand() {
-        presenter.onClickImageButtonExpand();
+    @OnClick(R.id.image_button_close)
+    void onClickButtonClose() {
+        presenter.onClickButtonClose();
     }
 
-    @OnClick(R.id.image_button_collapse)
-    void onClickImageButtonCollapse() {
-        presenter.onClickImageButtonCollapse();
+    public interface InteractionListener {
+
+        void onUpdateAssetListVisible(boolean visible);
+
+        void onUpdateMainMenuVisible(boolean visible);
     }
 }

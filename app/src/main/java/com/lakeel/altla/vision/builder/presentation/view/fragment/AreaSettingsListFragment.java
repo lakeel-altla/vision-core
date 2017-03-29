@@ -122,7 +122,7 @@ public final class AreaSettingsListFragment extends AbstractFragment<AreaSetting
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.button_close)
+    @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
     }

@@ -31,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import javax.inject.Inject;
 
@@ -42,7 +43,8 @@ import butterknife.OnTouch;
 
 public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         implements ArView,
-                   AreaSettingsContainerFragment.InteractionListener {
+                   AreaSettingsContainerFragment.InteractionListener,
+                   ImageAssetListFragment.InteractionListener {
 
     @Inject
     ArPresenter presenter;
@@ -59,6 +61,9 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @BindView(R.id.texture_view)
     TextureView textureView;
+
+    @BindView(R.id.image_button_asset_list)
+    ImageButton imageButtonAssetList;
 
     @BindView(R.id.view_group_main_menu)
     ViewGroup viewGroupMainMenu;
@@ -201,18 +206,6 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
             return false;
         });
 
-//        ImageAssetListFragment userImageAssetListFragment =
-//                (ImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
-//                        ImageAssetListFragment.class.getName());
-//        if (userImageAssetListFragment == null) {
-//            userImageAssetListFragment = ImageAssetListFragment.newInstance();
-//            getChildFragmentManager().beginTransaction()
-//                                     .add(R.id.user_image_asset_list_container,
-//                                          userImageAssetListFragment,
-//                                          ImageAssetListFragment.class.getName())
-//                                     .commit();
-//        }
-
         interactionListener.onUpdateActionBarVisible(false);
     }
 
@@ -253,8 +246,31 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
+    public void onUpdateAssetListVisible(boolean visible) {
+        ImageAssetListFragment fragment = (ImageAssetListFragment) findFragment(ImageAssetListFragment.class);
+
+        if (visible) {
+            if (fragment == null) {
+                fragment = ImageAssetListFragment.newInstance();
+                getChildFragmentManager().beginTransaction()
+                                         .replace(R.id.asset_list_container, fragment, fragment.getClass().getName())
+                                         .commit();
+            }
+        } else {
+            if (fragment != null) {
+                removeFragment(fragment);
+            }
+        }
+    }
+
+    @Override
     public void onUpdateMainMenuVisible(boolean visible) {
         viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onUpdateImageButtonAssetListVisible(boolean visible) {
+        imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -321,12 +337,17 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.button_area_settings)
+    @OnClick(R.id.image_button_area_settings)
     void onClickButtonAreaSettings() {
         presenter.onClickButtonAreaSettings();
     }
 
-    @OnClick(R.id.button_close)
+    @OnClick(R.id.image_button_asset_list)
+    void onClickButtonAssetList() {
+        presenter.onClickButtonAssetList();
+    }
+
+    @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
     }

@@ -4,12 +4,6 @@ import android.support.annotation.StringRes;
 
 public interface ImageAssetListView {
 
-    void onUpdateImageButtonExpandVisible(boolean visible);
-
-    void onUpdateImageButtonCollapseVisible(boolean visible);
-
-    void onUpdateContentVisible(boolean visible);
-
     void onItemInserted(int position);
 
     void onItemChanged(int position);
@@ -19,6 +13,8 @@ public interface ImageAssetListView {
     void onItemMoved(int fromPosition, int toPosition);
 
     void onDataSetChanged();
+
+    void onCloseView();
 
     void onSnackbar(@StringRes int resId);
 }
