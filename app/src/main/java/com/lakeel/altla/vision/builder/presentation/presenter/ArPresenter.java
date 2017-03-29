@@ -5,6 +5,7 @@ import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.google.firebase.auth.FirebaseAuth;
 
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
@@ -363,6 +364,18 @@ public final class ArPresenter extends BasePresenter<ArView>
     public void onClickButtonAreaSettings() {
         getView().onUpdateAreaSettingsVisible(true);
         getView().onUpdateMainMenuVisible(false);
+    }
+
+    public void onClickButtonClose() {
+        visionService.getUserDeviceConnectionApi()
+                     .markUserDeviceConnectionAsOffline(aVoid -> {
+                         FirebaseAuth.getInstance().signOut();
+                         getView().onShowSignInView();
+                     }, e -> {
+                         getLog().e("Failed.", e);
+                         FirebaseAuth.getInstance().signOut();
+                         getView().onShowSignInView();
+                     });
     }
 
     public void onTouchButtonTranslate() {

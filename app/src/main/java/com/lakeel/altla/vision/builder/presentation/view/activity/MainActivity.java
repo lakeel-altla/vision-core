@@ -19,24 +19,14 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.squareup.picasso.Picasso;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import javax.inject.Inject;
 
@@ -47,15 +37,14 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class MainActivity extends AppCompatActivity
-        implements FragmentManager.OnBackStackChangedListener,
-                   ActivityScopeContext,
+        implements ActivityScopeContext,
+                   FirebaseAuth.AuthStateListener,
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    ArFragment.InteractionListener,
                    ActorFragment.InteractionListener,
-                   ActorEditFragment.InteractionListener,
-                   NavigationView.OnNavigationItemSelectedListener {
+                   ActorEditFragment.InteractionListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
@@ -65,21 +54,9 @@ public final class MainActivity extends AppCompatActivity
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-
-    @BindView(R.id.navigation_view)
-    NavigationView navigationView;
-
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private ActivityComponent activityComponent;
-
-    private ActionBarDrawerToggle drawerToggle;
-
-    private NavigationViewHeader navigationViewHeader;
-
-    private Disposable observeUserProfileDisposable;
 
     private Disposable observeConnectionDisposable;
 
@@ -98,21 +75,6 @@ public final class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
-        // setDisplayHomeAsUpEnabled(true) will cause the arrow icon to appear instead of the hamburger icon
-        // by calling drawerToggle.setDrawerIndicatorEnabled(false).
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        // Use the following constructor to set the Toolbar as the ActionBar of an Activity.
-        drawerToggle = new ActionBarDrawerToggle(
-                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
-
-        updateActionBarHome();
-
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationViewHeader = new NavigationViewHeader(navigationView);
 
         if (savedInstanceState == null) {
             showSignInView();
@@ -122,12 +84,15 @@ public final class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseAuth.getInstance().addAuthStateListener(navigationViewHeader);
+
+        FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
 
         // Unsubscribe the connection.
         if (observeConnectionDisposable != null) {
@@ -135,61 +100,45 @@ public final class MainActivity extends AppCompatActivity
             observeConnectionDisposable = null;
         }
 
-        // Unsubscribe the user profile.
-        if (observeUserProfileDisposable != null) {
-            observeUserProfileDisposable.dispose();
-            observeUserProfileDisposable = null;
-        }
-
         compositeDisposable.clear();
-
-        FirebaseAuth.getInstance().removeAuthStateListener(navigationViewHeader);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
-                    getSupportFragmentManager().popBackStack();
-                } else {
-                    drawerLayout.openDrawer(GravityCompat.START);
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_sign_out:
-                onSignOut();
-                break;
-        }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    @Override
-    public void onBackStackChanged() {
-        updateActionBarHome();
     }
 
     @Override
     public ActivityComponent getActivityComponent() {
         return activityComponent;
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+
+        if (user != null) {
+            // Subscribe the connection.
+            if (observeConnectionDisposable == null) {
+                observeConnectionDisposable = ObservableHelper
+                        .usingData(() -> visionService.getFirebaseConnectionApi().observeConnection())
+                        .doOnNext(connected -> LOG
+                                .i("The user device connection state changed: connected = %b", connected))
+                        .flatMapCompletable(connected -> {
+                            return Completable.create(e -> {
+                                if (connected) {
+                                    visionService.getUserDeviceConnectionApi()
+                                                 .markUserDeviceConnectionAsOnline(aVoid -> {
+                                                     e.onComplete();
+                                                 }, e::onError);
+                                } else {
+                                    e.onComplete();
+                                }
+                            });
+                        }).subscribe();
+            }
+        } else {
+            // Unsubscribe the connection.
+            if (observeConnectionDisposable != null) {
+                observeConnectionDisposable.dispose();
+                observeConnectionDisposable = null;
+            }
+        }
     }
 
     @Override
@@ -239,37 +188,20 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onShowSignInView() {
+        showSignInView();
+    }
+
+    @Override
     public void onShowActorEditView(@NonNull String sceneId, @NonNull String actorId) {
         replaceFragmentAndAddToBackStack(ActorEditFragment.newInstance(sceneId, actorId));
         // TODO
-    }
-
-    private void updateActionBarHome() {
-        if (getSupportActionBar() != null) {
-            boolean isHome = (getSupportFragmentManager().getBackStackEntryCount() == 0);
-            drawerToggle.setDrawerIndicatorEnabled(isHome);
-        }
-    }
-
-    private void onSignOut() {
-        visionService.getUserDeviceConnectionApi().markUserDeviceConnectionAsOffline(aVoid -> {
-            FirebaseAuth.getInstance().signOut();
-            showSignInView();
-        }, e -> {
-            LOG.e("Failed.", e);
-            FirebaseAuth.getInstance().signOut();
-            showSignInView();
-        });
     }
 
     private void showSignInView() {
         toolbar.setVisibility(View.INVISIBLE);
 
         replaceFragment(SignInFragment.newInstance());
-    }
-
-    private Fragment findFragment(Class<?> clazz) {
-        return getSupportFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {
@@ -283,82 +215,5 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
-    }
-
-    class NavigationViewHeader implements FirebaseAuth.AuthStateListener {
-
-        @BindView(R.id.image_view_user_photo)
-        ImageView imageViewUserPhoto;
-
-        @BindView(R.id.text_view_user_name)
-        TextView textViewUserName;
-
-        @BindView(R.id.text_view_user_email)
-        TextView textViewUserEmail;
-
-        private NavigationViewHeader(@NonNull NavigationView navigationView) {
-            ButterKnife.bind(this, navigationView.getHeaderView(0));
-        }
-
-        @Override
-        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
-
-            if (user != null) {
-                // Subscribe the connection.
-                if (observeConnectionDisposable == null) {
-                    observeConnectionDisposable = ObservableHelper
-                            .usingData(() -> visionService.getFirebaseConnectionApi().observeConnection())
-                            .doOnNext(connected -> LOG
-                                    .i("The user device connection state changed: connected = %b", connected))
-                            .flatMapCompletable(connected -> {
-                                return Completable.create(e -> {
-                                    if (connected) {
-                                        visionService.getUserDeviceConnectionApi()
-                                                     .markUserDeviceConnectionAsOnline(aVoid -> {
-                                                         e.onComplete();
-                                                     }, e::onError);
-                                    } else {
-                                        e.onComplete();
-                                    }
-                                });
-                            }).subscribe();
-                }
-
-                // Subscribe the user profile.
-                if (observeUserProfileDisposable == null) {
-                    observeUserProfileDisposable = ObservableHelper
-                            .usingData(() -> visionService.getUserProfileApi().observeUserProfileById(user.getUid()))
-                            .subscribe(profile -> {
-                                // Update UI each time the user profile is updated.
-                                if (profile.getPhotoUri() != null) {
-                                    Uri photoUri = Uri.parse(profile.getPhotoUri());
-                                    Picasso.with(MainActivity.this).load(photoUri).into(imageViewUserPhoto);
-                                }
-                                textViewUserName.setText(profile.getDisplayName());
-                                textViewUserEmail.setText(profile.getEmail());
-                            }, e -> {
-                                LOG.e("Failed.", e);
-                            });
-                }
-            } else {
-                // Unsubscribe the connection.
-                if (observeConnectionDisposable != null) {
-                    observeConnectionDisposable.dispose();
-                    observeConnectionDisposable = null;
-                }
-
-                // Unsubscribe the user profile.
-                if (observeUserProfileDisposable != null) {
-                    observeUserProfileDisposable.dispose();
-                    observeUserProfileDisposable = null;
-                }
-
-                // Clear UI.
-                imageViewUserPhoto.setImageBitmap(null);
-                textViewUserName.setText(null);
-                textViewUserEmail.setText(null);
-            }
-        }
     }
 }

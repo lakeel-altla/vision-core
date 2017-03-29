@@ -312,6 +312,11 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
+    public void onShowSignInView() {
+        interactionListener.onShowSignInView();
+    }
+
+    @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
@@ -319,6 +324,11 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     @OnClick(R.id.button_area_settings)
     void onClickButtonAreaSettings() {
         presenter.onClickButtonAreaSettings();
+    }
+
+    @OnClick(R.id.button_close)
+    void onClickButtonClose() {
+        presenter.onClickButtonClose();
     }
 
     //
@@ -445,5 +455,7 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         void onShowActorView(@NonNull String sceneId, @NonNull String actorId);
 
         void onUpdateActionBarVisible(boolean visible);
+
+        void onShowSignInView();
     }
 }

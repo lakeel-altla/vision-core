@@ -44,5 +44,7 @@ public interface ArView {
 
     void onShowUserActorView(@NonNull String areaId, @NonNull String actorId);
 
+    void onShowSignInView();
+
     void onSnackbar(@StringRes int resId);
 }
