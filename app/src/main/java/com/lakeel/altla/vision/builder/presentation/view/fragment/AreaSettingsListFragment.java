@@ -2,12 +2,12 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionByAreaListAdapter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsListView;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaSettingsListAdapter;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -29,12 +29,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public final class AreaDescriptionByAreaListFragment
-        extends AbstractFragment<AreaDescriptionByAreaListView, AreaDescriptionByAreaListPresenter>
-        implements AreaDescriptionByAreaListView {
+public final class AreaSettingsListFragment extends AbstractFragment<AreaSettingsListView, AreaSettingsListPresenter>
+        implements AreaSettingsListView {
 
     @Inject
-    AreaDescriptionByAreaListPresenter presenter;
+    AreaSettingsListPresenter presenter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -45,20 +44,17 @@ public final class AreaDescriptionByAreaListFragment
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaDescriptionByAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull Area area) {
-        AreaDescriptionByAreaListFragment fragment = new AreaDescriptionByAreaListFragment();
-        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(areaScope, area);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static AreaSettingsListFragment newInstance() {
+        return new AreaSettingsListFragment();
     }
 
     @Override
-    protected AreaDescriptionByAreaListPresenter getPresenter() {
+    protected AreaSettingsListPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected AreaDescriptionByAreaListView getViewInterface() {
+    protected AreaSettingsListView getViewInterface() {
         return this;
     }
 
@@ -81,7 +77,7 @@ public final class AreaDescriptionByAreaListFragment
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_area_description_by_area_list, container, false);
+        return inflater.inflate(R.layout.fragment_area_settings_list, container, false);
     }
 
     @Override
@@ -90,10 +86,8 @@ public final class AreaDescriptionByAreaListFragment
 
         ButterKnife.bind(this, view);
 
-        recyclerView.setAdapter(new AreaDescriptionByAreaListAdapter(presenter));
+        recyclerView.setAdapter(new AreaSettingsListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        getActivity().setTitle(R.string.title_user_area_description_list_in_area);
     }
 
     @Override
@@ -107,33 +101,20 @@ public final class AreaDescriptionByAreaListFragment
     }
 
     @Override
-    public void onItemChanged(int position) {
-        recyclerView.getAdapter().notifyItemChanged(position);
-    }
-
-    @Override
-    public void onItemRemoved(int position) {
-        recyclerView.getAdapter().notifyItemRemoved(position);
-    }
-
-    @Override
-    public void onItemMoved(int fromPosition, int toPosition) {
-        recyclerView.getAdapter().notifyItemMoved(fromPosition, toPosition);
-    }
-
-    @Override
     public void onDataSetChanged() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
     @Override
-    public void onCloseView() {
-        interactionListener.onCloseAreaDescriptionByAreaListView();
+    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                       @NonNull Area area,
+                                       @NonNull AreaDescription areaDescription) {
+        interactionListener.onAreaSettingsSelected(areaSettings, area, areaDescription);
     }
 
     @Override
-    public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
-        interactionListener.onAreaDescriptionSelected(areaDescription);
+    public void onCloseView() {
+        interactionListener.onCloseAreaSettingsListView();
     }
 
     @Override
@@ -153,8 +134,10 @@ public final class AreaDescriptionByAreaListFragment
 
     public interface InteractionListener {
 
-        void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
+        void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                    @NonNull Area area,
+                                    @NonNull AreaDescription areaDescription);
 
-        void onCloseAreaDescriptionByAreaListView();
+        void onCloseAreaSettingsListView();
     }
 }

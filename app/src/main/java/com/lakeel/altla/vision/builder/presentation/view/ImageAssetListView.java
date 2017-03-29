@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view;
 
 import android.support.annotation.StringRes;
 
-public interface UserImageAssetListView {
+public interface ImageAssetListView {
 
     void onUpdateImageButtonExpandVisible(boolean visible);
 

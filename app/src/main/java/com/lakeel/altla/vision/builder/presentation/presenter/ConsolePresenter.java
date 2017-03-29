@@ -4,7 +4,7 @@ import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.presentation.view.DebugConsoleView;
+import com.lakeel.altla.vision.builder.presentation.view.ConsoleView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Handler;
@@ -12,7 +12,7 @@ import android.os.Looper;
 
 import javax.inject.Inject;
 
-public final class DebugConsolePresenter extends BasePresenter<DebugConsoleView>
+public final class ConsolePresenter extends BasePresenter<ConsoleView>
         implements OnPoseAvailableListener {
 
     private static final int SECS_TO_MILLISECS = 1000;
@@ -49,7 +49,7 @@ public final class DebugConsolePresenter extends BasePresenter<DebugConsoleView>
     });
 
     @Inject
-    public DebugConsolePresenter() {
+    public ConsolePresenter() {
     }
 
     @Override

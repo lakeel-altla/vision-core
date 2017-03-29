@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
-public interface DebugConsoleView {
+public interface ConsoleView {
 
     void onUpdateLocalized(boolean localized);
 

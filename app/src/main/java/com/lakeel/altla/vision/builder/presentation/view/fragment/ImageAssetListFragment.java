@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserImageAssetListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
-import com.lakeel.altla.vision.builder.presentation.view.adapter.UserImageAssetListAdapter;
+import com.lakeel.altla.vision.builder.presentation.presenter.ImageAssetListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ImageAssetListView;
+import com.lakeel.altla.vision.builder.presentation.view.adapter.ImageAssetListAdapter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -26,12 +26,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public final class UserImageAssetListFragment
-        extends AbstractFragment<UserImageAssetListView, UserImageAssetListPresenter>
-        implements UserImageAssetListView {
+public final class ImageAssetListFragment
+        extends AbstractFragment<ImageAssetListView, ImageAssetListPresenter>
+        implements ImageAssetListView {
 
     @Inject
-    UserImageAssetListPresenter presenter;
+    ImageAssetListPresenter presenter;
 
     @BindView(R.id.image_button_expand)
     ImageButton imageButtonExpand;
@@ -46,17 +46,17 @@ public final class UserImageAssetListFragment
     RecyclerView recyclerView;
 
     @NonNull
-    public static UserImageAssetListFragment newInstance() {
-        return new UserImageAssetListFragment();
+    public static ImageAssetListFragment newInstance() {
+        return new ImageAssetListFragment();
     }
 
     @Override
-    protected UserImageAssetListPresenter getPresenter() {
+    protected ImageAssetListPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserImageAssetListView getViewInterface() {
+    protected ImageAssetListView getViewInterface() {
         return this;
     }
 
@@ -71,7 +71,7 @@ public final class UserImageAssetListFragment
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_image_asset_list, container, false);
+        return inflater.inflate(R.layout.fragment_image_asset_list, container, false);
     }
 
     @Override
@@ -80,7 +80,7 @@ public final class UserImageAssetListFragment
 
         ButterKnife.bind(this, view);
 
-        recyclerView.setAdapter(new UserImageAssetListAdapter(presenter, getContext()));
+        recyclerView.setAdapter(new ImageAssetListAdapter(presenter, getContext()));
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 5));
     }
 

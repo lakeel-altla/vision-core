@@ -23,7 +23,7 @@ public interface AreaByPlaceListView {
 
     void onBackToAreaFindView();
 
-    void onCloseAreaByPlaceListView();
+    void onCloseView();
 
     void onSnackbar(@StringRes int resId);
 }

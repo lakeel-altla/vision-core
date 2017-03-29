@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserActorPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
+import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -28,15 +28,15 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class UserActorFragment extends AbstractFragment<UserActorView, UserActorPresenter>
-        implements UserActorView {
+public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter>
+        implements ActorView {
 
     private static final String FORMAT_VECTOR3 = "{ %f, %f, %f }";
 
     private static final String FORMAT_VECTOR4 = "{ %f, %f, %f, %f }";
 
     @Inject
-    UserActorPresenter presenter;
+    ActorPresenter presenter;
 
     @BindView(R.id.view_top)
     View viewTop;
@@ -65,20 +65,20 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
     private InteractionListener interactionListener;
 
     @NonNull
-    public static UserActorFragment newInstance(@NonNull String sceneId, @NonNull String actorId) {
-        UserActorFragment fragment = new UserActorFragment();
-        Bundle bundle = UserActorPresenter.createArguments(sceneId, actorId);
+    public static ActorFragment newInstance(@NonNull String sceneId, @NonNull String actorId) {
+        ActorFragment fragment = new ActorFragment();
+        Bundle bundle = ActorPresenter.createArguments(sceneId, actorId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserActorPresenter getPresenter() {
+    protected ActorPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserActorView getViewInterface() {
+    protected ActorView getViewInterface() {
         return this;
     }
 
@@ -101,7 +101,7 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_actor, container, false);
+        return inflater.inflate(R.layout.fragment_actor, container, false);
     }
 
     @Override
@@ -115,7 +115,7 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_actor, menu);
+        inflater.inflate(R.menu.fragment_actor, menu);
     }
 
     @Override
@@ -171,7 +171,7 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
 
     @Override
     public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
-        interactionListener.onShowUserActorEditView(sceneId, actorId);
+        interactionListener.onShowActorEditView(sceneId, actorId);
     }
 
     @Override
@@ -181,6 +181,6 @@ public final class UserActorFragment extends AbstractFragment<UserActorView, Use
 
     public interface InteractionListener {
 
-        void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId);
+        void onShowActorEditView(@NonNull String sceneId, @NonNull String actorId);
     }
 }

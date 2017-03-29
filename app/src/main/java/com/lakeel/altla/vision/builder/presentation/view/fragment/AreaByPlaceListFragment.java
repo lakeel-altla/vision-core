@@ -135,7 +135,7 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
     }
 
     @Override
-    public void onCloseAreaByPlaceListView() {
+    public void onCloseView() {
         interactionListener.onCloseAreaByPlaceListView();
     }
 

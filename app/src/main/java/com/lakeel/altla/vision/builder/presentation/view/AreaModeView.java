@@ -11,5 +11,5 @@ public interface AreaModeView {
 
     void onAreaModeSelected(@NonNull AreaScope areaScope);
 
-    void onCloseAreaModeView();
+    void onCloseView();
 }

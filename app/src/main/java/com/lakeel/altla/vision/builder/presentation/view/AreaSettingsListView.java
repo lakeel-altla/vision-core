@@ -1,25 +1,23 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
+import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
+import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
-public interface AreaDescriptionByAreaListView {
+public interface AreaSettingsListView {
 
     void onUpdateButtonSelectEnabled(boolean enabled);
 
     void onItemInserted(int position);
 
-    void onItemChanged(int position);
-
-    void onItemRemoved(int position);
-
-    void onItemMoved(int fromPosition, int toPosition);
-
     void onDataSetChanged();
 
-    void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
+    void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                @NonNull Area area,
+                                @NonNull AreaDescription areaDescription);
 
     void onCloseView();
 

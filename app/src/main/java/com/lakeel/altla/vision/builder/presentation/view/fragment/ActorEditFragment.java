@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserActorEditPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorEditView;
+import com.lakeel.altla.vision.builder.presentation.presenter.ActorEditPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ActorEditView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -33,11 +33,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnTextChanged;
 
-public final class UserActorEditFragment extends AbstractFragment<UserActorEditView, UserActorEditPresenter>
-        implements UserActorEditView {
+public final class ActorEditFragment extends AbstractFragment<ActorEditView, ActorEditPresenter>
+        implements ActorEditView {
 
     @Inject
-    UserActorEditPresenter presenter;
+    ActorEditPresenter presenter;
 
     @BindView(R.id.view_top)
     View viewTop;
@@ -83,20 +83,20 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
     private boolean actionSaveEnabled;
 
     @NonNull
-    public static UserActorEditFragment newInstance(@NonNull String sceneId, @NonNull String actorId) {
-        UserActorEditFragment fragment = new UserActorEditFragment();
-        Bundle bundle = UserActorEditPresenter.createArguments(sceneId, actorId);
+    public static ActorEditFragment newInstance(@NonNull String sceneId, @NonNull String actorId) {
+        ActorEditFragment fragment = new ActorEditFragment();
+        Bundle bundle = ActorEditPresenter.createArguments(sceneId, actorId);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    protected UserActorEditPresenter getPresenter() {
+    protected ActorEditPresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected UserActorEditView getViewInterface() {
+    protected ActorEditView getViewInterface() {
         return this;
     }
 
@@ -119,7 +119,7 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_actor_edit, container, false);
+        return inflater.inflate(R.layout.fragment_actor_edit, container, false);
     }
 
     @Override
@@ -133,7 +133,7 @@ public final class UserActorEditFragment extends AbstractFragment<UserActorEditV
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_actor_edit, menu);
+        inflater.inflate(R.menu.fragment_actor_edit, menu);
     }
 
     @Override

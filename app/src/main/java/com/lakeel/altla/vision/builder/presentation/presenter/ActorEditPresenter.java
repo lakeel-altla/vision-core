@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorEditView;
+import com.lakeel.altla.vision.builder.presentation.view.ActorEditView;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -19,7 +19,7 @@ import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class UserActorEditPresenter extends BasePresenter<UserActorEditView> {
+public final class ActorEditPresenter extends BasePresenter<ActorEditView> {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -39,7 +39,7 @@ public final class UserActorEditPresenter extends BasePresenter<UserActorEditVie
     private Actor actor;
 
     @Inject
-    public UserActorEditPresenter() {
+    public ActorEditPresenter() {
     }
 
     @NonNull

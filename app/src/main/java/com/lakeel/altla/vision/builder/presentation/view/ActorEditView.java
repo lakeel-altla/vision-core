@@ -5,7 +5,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
-public interface UserActorEditView {
+public interface ActorEditView {
 
     void onUpdateViewsEnabled(boolean enabled);
 

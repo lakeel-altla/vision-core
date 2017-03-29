@@ -24,9 +24,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 public final class MainRenderer extends TangoCameraRenderer implements OnObjectPickedListener {
 
@@ -48,6 +50,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final Map<String, Object3D> object3DMap = new HashMap<>();
 
+    private final Object clearAllActorsLock = new Object();
+
     private ObjectColorPicker objectColorPicker;
 
     private Line3D axes;
@@ -59,6 +63,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     private OnActorPickedListener onActorPickedListener;
 
     private OnCurrentCameraTransformUpdatedListener onCurrentCameraTransformUpdatedListener;
+
+    private boolean clearAllActors;
 
     public MainRenderer(Context context) {
         super(context);
@@ -143,7 +149,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
             }
         }
 
-        // Delete user actors.
+        // Delete actors.
         synchronized (deleteActorIdQueue) {
             while (true) {
                 String actorId = deleteActorIdQueue.poll();
@@ -162,6 +168,29 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
                 if (pickedObject == object3D) {
                     onNoObjectPicked();
+                }
+            }
+        }
+
+        // Clear all actors.
+        synchronized (clearAllActorsLock) {
+            if (clearAllActors) {
+                clearAllActors = false;
+
+                Set<String> actorIds = new HashSet<>(object3DMap.keySet());
+                for (String actorId : actorIds) {
+                    Object3D object3D = object3DMap.remove(actorId);
+                    if (object3D == null) {
+                        continue;
+                    }
+
+                    actorModelMap.remove(object3D);
+
+                    getCurrentScene().removeChild(object3D);
+
+                    if (pickedObject == object3D) {
+                        onNoObjectPicked();
+                    }
                 }
             }
         }
@@ -234,6 +263,12 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     public void removeActor(@NonNull String actorId) {
         synchronized (deleteActorIdQueue) {
             deleteActorIdQueue.add(actorId);
+        }
+    }
+
+    public void clearAllActors() {
+        synchronized (clearAllActorsLock) {
+            clearAllActors = true;
         }
     }
 

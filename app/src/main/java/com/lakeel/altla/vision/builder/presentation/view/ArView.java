@@ -42,11 +42,7 @@ public interface ArView {
 
     void onUpdateScaleSelected(boolean selected);
 
-    void onUpdateDebugConsoleVisible(boolean visible);
-
     void onShowUserActorView(@NonNull String areaId, @NonNull String actorId);
-
-    void onCloseView();
 
     void onSnackbar(@StringRes int resId);
 }

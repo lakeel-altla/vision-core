@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.UserActorView;
+import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -17,7 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class UserActorPresenter extends BasePresenter<UserActorView> {
+public final class ActorPresenter extends BasePresenter<ActorView> {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -33,7 +33,7 @@ public final class UserActorPresenter extends BasePresenter<UserActorView> {
     private String actorId;
 
     @Inject
-    public UserActorPresenter() {
+    public ActorPresenter() {
     }
 
     @NonNull

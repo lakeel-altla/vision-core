@@ -3,8 +3,8 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
-import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetListView;
+import com.lakeel.altla.vision.builder.presentation.view.ImageAssetItemView;
+import com.lakeel.altla.vision.builder.presentation.view.ImageAssetListView;
 import com.lakeel.altla.vision.helper.ObservableListEvent;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -19,7 +19,7 @@ import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class UserImageAssetListPresenter extends BasePresenter<UserImageAssetListView>
+public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListView>
         implements DataList.OnItemListener {
 
     private final DataList<Item> items = new DataList<>(this);
@@ -32,7 +32,7 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
     private Disposable getUserImageAssetFileUriUseCaseDisposable;
 
     @Inject
-    public UserImageAssetListPresenter() {
+    public ImageAssetListPresenter() {
     }
 
     @Override
@@ -124,9 +124,9 @@ public final class UserImageAssetListPresenter extends BasePresenter<UserImageAs
 
     public final class ItemPresenter {
 
-        private UserImageAssetItemView itemView;
+        private ImageAssetItemView itemView;
 
-        public void onCreateItemView(@NonNull UserImageAssetItemView itemView) {
+        public void onCreateItemView(@NonNull ImageAssetItemView itemView) {
             this.itemView = itemView;
         }
 

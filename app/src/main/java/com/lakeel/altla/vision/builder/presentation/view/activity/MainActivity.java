@@ -14,12 +14,11 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsContainerFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorEditFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.UserActorFragment;
 import com.squareup.picasso.Picasso;
 
 import android.net.Uri;
@@ -30,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -53,8 +53,8 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    ArFragment.InteractionListener,
-                   UserActorFragment.InteractionListener,
-                   UserActorEditFragment.InteractionListener,
+                   ActorFragment.InteractionListener,
+                   ActorEditFragment.InteractionListener,
                    NavigationView.OnNavigationItemSelectedListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -222,18 +222,25 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId) {
-        replaceFragmentAndAddToBackStack(UserActorFragment.newInstance(sceneId, actorId));
+    public void onShowActorView(@NonNull String sceneId, @NonNull String actorId) {
+        replaceFragmentAndAddToBackStack(ActorFragment.newInstance(sceneId, actorId));
     }
 
     @Override
-    public void onCloseUserSceneBuildView() {
-        replaceFragment(AreaSettingsContainerFragment.newInstance());
+    public void onUpdateActionBarVisible(boolean visible) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (visible) {
+                actionBar.show();
+            } else {
+                actionBar.hide();
+            }
+        }
     }
 
     @Override
-    public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
-        replaceFragmentAndAddToBackStack(UserActorEditFragment.newInstance(sceneId, actorId));
+    public void onShowActorEditView(@NonNull String sceneId, @NonNull String actorId) {
+        replaceFragmentAndAddToBackStack(ActorEditFragment.newInstance(sceneId, actorId));
         // TODO
     }
 

@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public interface UserImageAssetItemView {
+public interface ImageAssetItemView {
 
     void onUpdateName(@Nullable String name);
 

@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
-import com.lakeel.altla.vision.builder.presentation.view.UserAreaDescriptionItemView;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -82,6 +82,13 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
         this.areaScope = areaScope;
         this.area = area;
+    }
+
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     @Override
@@ -164,27 +171,31 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
     public void onItemSelected(int position) {
         if (0 <= position) {
             selectedAreaDescription = items.get(position);
-            getView().onUpdateButtonSelectEnabled(true);
         } else {
             selectedAreaDescription = null;
-            getView().onUpdateButtonSelectEnabled(false);
         }
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     public void onClickButtonClose() {
-        getView().onCloseAreaDescriptionByAreaListView();
+        getView().onCloseView();
     }
 
     public void onClickButtonSelect() {
         getView().onAreaDescriptionSelected(selectedAreaDescription);
-        getView().onCloseAreaDescriptionByAreaListView();
+        getView().onCloseView();
+    }
+
+    private boolean canSelect() {
+        return selectedAreaDescription != null;
     }
 
     public final class ItemPresenter {
 
-        private UserAreaDescriptionItemView itemView;
+        private AreaDescriptionItemView itemView;
 
-        public void onCreateItemView(@NonNull UserAreaDescriptionItemView itemView) {
+        public void onCreateItemView(@NonNull AreaDescriptionItemView itemView) {
             this.itemView = itemView;
         }
 

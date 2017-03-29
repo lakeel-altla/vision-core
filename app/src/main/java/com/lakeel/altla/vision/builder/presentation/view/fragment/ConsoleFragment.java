@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.DebugConsolePresenter;
-import com.lakeel.altla.vision.builder.presentation.view.DebugConsoleView;
+import com.lakeel.altla.vision.builder.presentation.presenter.ConsolePresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ConsoleView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -22,13 +22,13 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class DebugConsoleFragment extends AbstractFragment<DebugConsoleView, DebugConsolePresenter>
-        implements DebugConsoleView {
+public final class ConsoleFragment extends AbstractFragment<ConsoleView, ConsolePresenter>
+        implements ConsoleView {
 
     private static final String FORMAT_TRANSLATION = "{ %7.2f, %7.2f, %7.2f }";
 
     @Inject
-    DebugConsolePresenter presenter;
+    ConsolePresenter presenter;
 
     @BindView(R.id.text_view_localized_value)
     TextView textViewLocalizedValue;
@@ -43,17 +43,17 @@ public final class DebugConsoleFragment extends AbstractFragment<DebugConsoleVie
     TextView textViewSs2DTranslation;
 
     @NonNull
-    public static DebugConsoleFragment newInstance() {
-        return new DebugConsoleFragment();
+    public static ConsoleFragment newInstance() {
+        return new ConsoleFragment();
     }
 
     @Override
-    protected DebugConsolePresenter getPresenter() {
+    protected ConsolePresenter getPresenter() {
         return presenter;
     }
 
     @Override
-    protected DebugConsoleView getViewInterface() {
+    protected ConsoleView getViewInterface() {
         return this;
     }
 
@@ -68,7 +68,7 @@ public final class DebugConsoleFragment extends AbstractFragment<DebugConsoleVie
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_debug_console, container, false);
+        return inflater.inflate(R.layout.fragment_console, container, false);
     }
 
     @Override

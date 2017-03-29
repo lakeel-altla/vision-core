@@ -10,6 +10,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
+import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.app.Activity;
@@ -53,8 +54,11 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     private Place pickedPlace;
 
     @NonNull
-    public static AreaFindFragment newInstance() {
-        return new AreaFindFragment();
+    public static AreaFindFragment newInstance(@NonNull AreaScope areaScope) {
+        AreaFindFragment fragment = new AreaFindFragment();
+        Bundle bundle = AreaFindPresenter.createArguments(areaScope);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -133,12 +137,12 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     }
 
     @Override
-    public void onPlaceSelected(@NonNull Place place) {
-        interactionListener.onPlaceSelected(place);
+    public void onShowAreaByPlaceListView(@NonNull AreaScope areaScope, @NonNull Place place) {
+        interactionListener.onShowAreaByPlaceListView(areaScope, place);
     }
 
     @Override
-    public void onCloseAreaFindView() {
+    public void onCloseView() {
         interactionListener.onCloseAreaFindView();
     }
 
@@ -159,7 +163,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
 
     public interface InteractionListener {
 
-        void onPlaceSelected(@NonNull Place place);
+        void onShowAreaByPlaceListView(@NonNull AreaScope areaScope, @NonNull Place place);
 
         void onCloseAreaFindView();
     }

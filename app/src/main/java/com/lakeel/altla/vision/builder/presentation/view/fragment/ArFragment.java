@@ -7,7 +7,6 @@ import com.google.atap.tango.ux.TangoUxLayout;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
@@ -28,9 +27,6 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -205,38 +201,19 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
             return false;
         });
 
-//        UserImageAssetListFragment userImageAssetListFragment =
-//                (UserImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
-//                        UserImageAssetListFragment.class.getName());
+//        ImageAssetListFragment userImageAssetListFragment =
+//                (ImageAssetListFragment) getChildFragmentManager().findFragmentByTag(
+//                        ImageAssetListFragment.class.getName());
 //        if (userImageAssetListFragment == null) {
-//            userImageAssetListFragment = UserImageAssetListFragment.newInstance();
+//            userImageAssetListFragment = ImageAssetListFragment.newInstance();
 //            getChildFragmentManager().beginTransaction()
 //                                     .add(R.id.user_image_asset_list_container,
 //                                          userImageAssetListFragment,
-//                                          UserImageAssetListFragment.class.getName())
+//                                          ImageAssetListFragment.class.getName())
 //                                     .commit();
 //        }
 
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_user_scene_build, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_close:
-                presenter.onActionCloseSelected();
-                return true;
-            case R.id.action_debug:
-                presenter.onActionDebugSelected();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        interactionListener.onUpdateActionBarVisible(false);
     }
 
     @Override
@@ -261,22 +238,16 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Override
     public void onUpdateAreaSettingsVisible(boolean visible) {
-        final String tag = AreaSettingsContainerFragment.class.getName();
-        AreaSettingsContainerFragment
-                fragment = (AreaSettingsContainerFragment) getChildFragmentManager().findFragmentByTag(tag);
+        AreaSettingsContainerFragment fragment =
+                (AreaSettingsContainerFragment) findFragment(AreaSettingsContainerFragment.class);
 
         if (visible) {
             if (fragment == null) {
-                fragment = AreaSettingsContainerFragment.newInstance();
-                getChildFragmentManager().beginTransaction()
-                                         .replace(R.id.window_container, fragment, tag)
-                                         .commit();
+                replaceWindowFragment(AreaSettingsContainerFragment.newInstance());
             }
         } else {
             if (fragment != null) {
-                getChildFragmentManager().beginTransaction()
-                                         .remove(fragment)
-                                         .commit();
+                removeFragment(fragment);
             }
         }
     }
@@ -287,8 +258,8 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
-        presenter.onAreaSettingsSelected(model);
+    public void onUpdateArView(@NonNull String areaSettingsId) {
+        presenter.onAreaSettingsSelected(areaSettingsId);
     }
 
     @Override
@@ -336,35 +307,8 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onUpdateDebugConsoleVisible(boolean visible) {
-        final String tag = DebugConsoleFragment.class.getName();
-
-        DebugConsoleFragment fragment = (DebugConsoleFragment) getChildFragmentManager().findFragmentByTag(tag);
-
-        if (visible) {
-            if (fragment == null) {
-                fragment = DebugConsoleFragment.newInstance();
-                getChildFragmentManager().beginTransaction()
-                                         .replace(R.id.debug_console_container, fragment, tag)
-                                         .commit();
-            }
-        } else {
-            if (fragment != null) {
-                getChildFragmentManager().beginTransaction()
-                                         .remove(fragment)
-                                         .commit();
-            }
-        }
-    }
-
-    @Override
     public void onShowUserActorView(@NonNull String areaId, @NonNull String actorId) {
-        interactionListener.onShowUserActorView(areaId, actorId);
-    }
-
-    @Override
-    public void onCloseView() {
-        interactionListener.onCloseUserSceneBuildView();
+        interactionListener.onShowActorView(areaId, actorId);
     }
 
     @Override
@@ -479,10 +423,27 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         presenter.onClickButtonDelete();
     }
 
+    @Nullable
+    private Fragment findFragment(@NonNull Class<? extends Fragment> clazz) {
+        return getChildFragmentManager().findFragmentByTag(clazz.getName());
+    }
+
+    private void replaceWindowFragment(@NonNull Fragment fragment) {
+        getChildFragmentManager().beginTransaction()
+                                 .replace(R.id.window_container, fragment, fragment.getClass().getName())
+                                 .commit();
+    }
+
+    private void removeFragment(@NonNull Fragment fragment) {
+        getChildFragmentManager().beginTransaction()
+                                 .remove(fragment)
+                                 .commit();
+    }
+
     public interface InteractionListener {
 
-        void onShowUserActorView(@NonNull String sceneId, @NonNull String actorId);
+        void onShowActorView(@NonNull String sceneId, @NonNull String actorId);
 
-        void onCloseUserSceneBuildView();
+        void onUpdateActionBarVisible(boolean visible);
     }
 }

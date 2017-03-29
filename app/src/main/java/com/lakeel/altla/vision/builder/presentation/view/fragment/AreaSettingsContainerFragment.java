@@ -5,12 +5,12 @@ import com.google.android.gms.location.places.Place;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContainerPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -32,6 +32,7 @@ public final class AreaSettingsContainerFragment
         extends AbstractFragment<AreaSettingsContainerView, AreaSettingsContainerPresenter>
         implements AreaSettingsContainerView,
                    AreaSettingsFragment.InteractionListener,
+                   AreaSettingsListFragment.InteractionListener,
                    AreaModeFragment.InteractionListener,
                    AreaFindFragment.InteractionListener,
                    AreaByPlaceListFragment.InteractionListener,
@@ -93,19 +94,34 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaSettingsView(@NonNull AreaSettingsModel model) {
-        replaceFragment(AreaSettingsFragment.newInstance(model));
-    }
-
-    @Override
     public void onCloseAreaSettingsView() {
         interactionListener.onUpdateAreaSettingsVisible(false);
         interactionListener.onUpdateMainMenuVisible(true);
     }
 
     @Override
-    public void onShowAreaModeView(@NonNull AreaSettingsModel model) {
-        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(model.getAreaScope()));
+    public void onShowAreaSettingsHistoryView() {
+        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
+    }
+
+    @Override
+    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                       @NonNull Area area,
+                                       @NonNull AreaDescription areaDescription) {
+        AreaSettingsFragment fragment = findAreaSettingsFragment();
+        if (fragment != null) {
+            fragment.onAreaSettingsSelected(areaSettings, area, areaDescription);
+        }
+    }
+
+    @Override
+    public void onCloseAreaSettingsListView() {
+        backFragment();
+    }
+
+    @Override
+    public void onShowAreaModeView(@NonNull AreaScope areaScope) {
+        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(areaScope));
     }
 
     @Override
@@ -114,8 +130,18 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaFindView(@NonNull AreaSettingsModel model) {
-        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance());
+    public void onShowAreaFindView(@NonNull AreaScope areaScope) {
+        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(areaScope));
+    }
+
+    @Override
+    public void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area) {
+        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(areaScope, area));
+    }
+
+    @Override
+    public void onShowAreaSettingsView(@NonNull AreaScope areaScope) {
+        replaceFragment(AreaSettingsFragment.newInstance(areaScope));
     }
 
     @Override
@@ -125,12 +151,10 @@ public final class AreaSettingsContainerFragment
 
     @Override
     public void onAreaModeSelected(@NonNull AreaScope areaScope) {
-        presenter.onAreaModeSelected(areaScope);
-    }
-
-    @Override
-    public void onPlaceSelected(@NonNull Place place) {
-        presenter.onPlaceSelected(place);
+        AreaSettingsFragment fragment = findAreaSettingsFragment();
+        if (fragment != null) {
+            fragment.onAreaModeSelected(areaScope);
+        }
     }
 
     @Override
@@ -140,7 +164,10 @@ public final class AreaSettingsContainerFragment
 
     @Override
     public void onAreaSelected(@NonNull Area area) {
-        presenter.onAreaSelected(area);
+        AreaSettingsFragment fragment = findAreaSettingsFragment();
+        if (fragment != null) {
+            fragment.onAreaSelected(area);
+        }
     }
 
     @Override
@@ -155,28 +182,31 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model) {
-        if (model.getArea() == null) {
-            throw new IllegalArgumentException("Invalid argument 'model': 'area' is null.");
-        }
-
-        replaceFragmentAndAddToBackStack(
-                AreaDescriptionByAreaListFragment.newInstance(model.getAreaScope(), model.getArea()));
-    }
-
-    @Override
-    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
-        interactionListener.onAreaSettingsSelected(model);
-    }
-
-    @Override
     public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
-        presenter.onAreaDescriptionSelected(areaDescription);
+        AreaSettingsFragment fragment = findAreaSettingsFragment();
+        if (fragment != null) {
+            fragment.onAreaDescriptionSelected(areaDescription);
+        }
+    }
+
+    @Override
+    public void onUpdateArView(@NonNull String areaSettingsId) {
+        interactionListener.onUpdateArView(areaSettingsId);
     }
 
     @Override
     public void onCloseAreaDescriptionByAreaListView() {
         backFragment();
+    }
+
+    @Nullable
+    private AreaSettingsFragment findAreaSettingsFragment() {
+        return (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
+    }
+
+    @Nullable
+    private Fragment findFragment(Class<? extends Fragment> clazz) {
+        return getChildFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceFragmentAndAddToBackStack(@NonNull Fragment fragment) {
@@ -204,6 +234,6 @@ public final class AreaSettingsContainerFragment
 
         void onUpdateMainMenuVisible(boolean visible);
 
-        void onAreaSettingsSelected(@NonNull AreaSettingsModel model);
+        void onUpdateArView(@NonNull String areaSettingsId);
     }
 }

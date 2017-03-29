@@ -94,7 +94,7 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     }
 
     @Override
-    public void onCloseAreaModeView() {
+    public void onCloseView() {
         interactionListener.onCloseAreaModeView();
     }
 

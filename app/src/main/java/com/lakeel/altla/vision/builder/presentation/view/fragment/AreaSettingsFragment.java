@@ -2,9 +2,12 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.AreaDescription;
+import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -16,6 +19,7 @@ import android.support.annotation.StringRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -43,12 +47,15 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     @BindView(R.id.button_select_area_description)
     ImageButton imageButtonSelectAreaDescription;
 
+    @BindView(R.id.button_start)
+    Button buttonStart;
+
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaSettingsFragment newInstance(@NonNull AreaSettingsModel model) {
+    public static AreaSettingsFragment newInstance(@NonNull AreaScope areaScope) {
         AreaSettingsFragment fragment = new AreaSettingsFragment();
-        Bundle bundle = AreaSettingsPresenter.createArguments(model);
+        Bundle bundle = AreaSettingsPresenter.createArguments(areaScope);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -114,23 +121,33 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onShowAreaModeView(@NonNull AreaSettingsModel model) {
-        interactionListener.onShowAreaModeView(model);
+    public void onUpdateButtonStartEnabled(boolean enabled) {
+        buttonStart.setEnabled(enabled);
     }
 
     @Override
-    public void onShowAreaFindView(@NonNull AreaSettingsModel model) {
-        interactionListener.onShowAreaFindView(model);
+    public void onShowAreaSettingsHistoryView() {
+        interactionListener.onShowAreaSettingsHistoryView();
     }
 
     @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model) {
-        interactionListener.onShowAreaDescriptionByAreaListView(model);
+    public void onShowAreaModeView(@NonNull AreaScope areaScope) {
+        interactionListener.onShowAreaModeView(areaScope);
     }
 
     @Override
-    public void onAreaSettingsSelected(@NonNull AreaSettingsModel model) {
-        interactionListener.onAreaSettingsSelected(model);
+    public void onShowAreaFindView(@NonNull AreaScope areaScope) {
+        interactionListener.onShowAreaFindView(areaScope);
+    }
+
+    @Override
+    public void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area) {
+        interactionListener.onShowAreaDescriptionByAreaListView(areaScope, area);
+    }
+
+    @Override
+    public void onUpdateArView(@NonNull String areaSettingsId) {
+        interactionListener.onUpdateArView(areaSettingsId);
     }
 
     @Override
@@ -138,9 +155,32 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         interactionListener.onCloseAreaSettingsView();
     }
 
+    public void onAreaModeSelected(@NonNull AreaScope areaScope) {
+        presenter.onAreaModeSelected(areaScope);
+    }
+
+    public void onAreaSelected(@NonNull Area area) {
+        presenter.onAreaSelected(area);
+    }
+
+    public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
+        presenter.onAreaDescriptionSelected(areaDescription);
+    }
+
+    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                       @NonNull Area area,
+                                       @NonNull AreaDescription areaDescription) {
+        presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
+    }
+
     @OnClick(R.id.button_close)
     void onClickButtonClose() {
         presenter.onClickButtonClose();
+    }
+
+    @OnClick(R.id.button_history)
+    void onClickButtonHistory() {
+        presenter.onClickButtonHistory();
     }
 
     @OnClick(R.id.button_select_area_mode)
@@ -171,13 +211,15 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
     public interface InteractionListener {
 
-        void onShowAreaModeView(@NonNull AreaSettingsModel model);
+        void onShowAreaSettingsHistoryView();
 
-        void onShowAreaFindView(@NonNull AreaSettingsModel model);
+        void onShowAreaModeView(@NonNull AreaScope areaScope);
 
-        void onShowAreaDescriptionByAreaListView(@NonNull AreaSettingsModel model);
+        void onShowAreaFindView(@NonNull AreaScope areaScope);
 
-        void onAreaSettingsSelected(@NonNull AreaSettingsModel model);
+        void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area);
+
+        void onUpdateArView(@NonNull String areaSettingsId);
 
         void onCloseAreaSettingsView();
     }

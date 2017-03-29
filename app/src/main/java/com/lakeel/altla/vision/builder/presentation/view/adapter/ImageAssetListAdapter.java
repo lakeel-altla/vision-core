@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
-import com.lakeel.altla.vision.builder.presentation.presenter.UserImageAssetListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.UserImageAssetItemView;
+import com.lakeel.altla.vision.builder.presentation.presenter.ImageAssetListPresenter;
+import com.lakeel.altla.vision.builder.presentation.view.ImageAssetItemView;
 import com.lakeel.altla.vision.builder.presentation.helper.ThumbnailLoader;
 import com.lakeel.altla.vision.model.ImageAsset;
 
@@ -27,9 +27,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnLongClick;
 
-public final class UserImageAssetListAdapter extends RecyclerView.Adapter<UserImageAssetListAdapter.ViewHolderAsset> {
+public final class ImageAssetListAdapter extends RecyclerView.Adapter<ImageAssetListAdapter.ViewHolderAsset> {
 
-    private final UserImageAssetListPresenter presenter;
+    private final ImageAssetListPresenter presenter;
 
     private final Context context;
 
@@ -37,7 +37,7 @@ public final class UserImageAssetListAdapter extends RecyclerView.Adapter<UserIm
 
     private LayoutInflater inflater;
 
-    public UserImageAssetListAdapter(@NonNull UserImageAssetListPresenter presenter, @NonNull Context context) {
+    public ImageAssetListAdapter(@NonNull ImageAssetListPresenter presenter, @NonNull Context context) {
         this.presenter = presenter;
         this.context = context;
         thumbnailLoader = new ThumbnailLoader(context);
@@ -48,7 +48,7 @@ public final class UserImageAssetListAdapter extends RecyclerView.Adapter<UserIm
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
-        View itemView = inflater.inflate(R.layout.item_user_image_asset, parent, false);
+        View itemView = inflater.inflate(R.layout.item_image_asset, parent, false);
         return new ViewHolderAsset(itemView);
     }
 
@@ -62,7 +62,7 @@ public final class UserImageAssetListAdapter extends RecyclerView.Adapter<UserIm
         return presenter.getItemCount();
     }
 
-    class ViewHolderAsset extends RecyclerView.ViewHolder implements UserImageAssetItemView {
+    class ViewHolderAsset extends RecyclerView.ViewHolder implements ImageAssetItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;
@@ -70,7 +70,7 @@ public final class UserImageAssetListAdapter extends RecyclerView.Adapter<UserIm
         @BindView(R.id.image_view_thumbnail)
         ImageView imageViewThumbnail;
 
-        private UserImageAssetListPresenter.ItemPresenter itemPresenter;
+        private ImageAssetListPresenter.ItemPresenter itemPresenter;
 
         private final View.DragShadowBuilder dragShadowBuilder;
 

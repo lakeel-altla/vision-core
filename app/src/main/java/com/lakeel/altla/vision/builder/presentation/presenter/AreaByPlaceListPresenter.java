@@ -80,6 +80,13 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     }
 
     @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
+    }
+
+    @Override
     protected void onStartOverride() {
         super.onStartOverride();
 
@@ -157,11 +164,11 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     public void onItemSelected(int position) {
         if (0 <= position) {
             selectedArea = items.get(position);
-            getView().onUpdateButtonSelectEnabled(true);
         } else {
             selectedArea = null;
-            getView().onUpdateButtonSelectEnabled(false);
         }
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     public void onClickButtonPrevious() {
@@ -170,7 +177,11 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     public void onClickButtonSelect() {
         getView().onAreaSelected(selectedArea);
-        getView().onCloseAreaByPlaceListView();
+        getView().onCloseView();
+    }
+
+    private boolean canSelect() {
+        return selectedArea != null;
     }
 
     public final class ItemPresenter {

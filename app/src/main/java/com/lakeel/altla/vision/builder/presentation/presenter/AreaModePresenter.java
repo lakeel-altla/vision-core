@@ -43,18 +43,24 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
         if (initialAreaScopeValue < 0) {
             throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
         }
+
         initialAreaScope = AreaScope.toAreaScope(initialAreaScopeValue);
+
+        if (initialAreaScope == AreaScope.UNKNOWN) {
+            throw new IllegalArgumentException(
+                    String.format("Argument '%s' is invalid: value = %s", ARG_AREA_SCOPE_VALUE, initialAreaScope));
+        }
 
         if (savedInstanceState == null) {
             areaScope = initialAreaScope;
         } else {
             int areaScopeValue = savedInstanceState.getInt(STATE_AREA_SCOPE_VALUE, AreaScope.UNKNOWN.getValue());
-            AreaScope areaScope = AreaScope.toAreaScope(areaScopeValue);
-            if (areaScope == AreaScope.UNKNOWN) {
-                areaScope = initialAreaScope;
-            }
+            areaScope = AreaScope.toAreaScope(areaScopeValue);
 
-            this.areaScope = areaScope;
+            if (areaScope == AreaScope.UNKNOWN) {
+                throw new IllegalArgumentException(
+                        String.format("Argument '%s' is invalid: value = %s", ARG_AREA_SCOPE_VALUE, areaScope));
+            }
         }
     }
 
@@ -68,11 +74,11 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
     public void onClickButtonSelect() {
         getView().onAreaModeSelected(areaScope);
-        getView().onCloseAreaModeView();
+        getView().onCloseView();
     }
 
     public void onClickButtonClose() {
-        getView().onCloseAreaModeView();
+        getView().onCloseView();
     }
 
     public void onCheckedChangedRadioButtonPublic(boolean checked) {
