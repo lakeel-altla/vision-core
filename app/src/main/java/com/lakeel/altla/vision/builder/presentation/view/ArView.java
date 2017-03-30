@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view;
 import com.google.atap.tango.ux.TangoUx;
 
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 
@@ -32,7 +32,7 @@ public interface ArView {
 
     void onUpdateAssetListVisible(boolean visible);
 
-    void onUpdateActorViewContent(@NonNull AreaScope areaScope, @Nullable String actorId);
+    void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId);
 
     void onUpdateObjectMenuVisible(boolean visible);
 

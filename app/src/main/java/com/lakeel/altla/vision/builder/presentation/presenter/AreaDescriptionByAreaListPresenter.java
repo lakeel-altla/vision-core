@@ -8,7 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
@@ -31,7 +31,7 @@ import io.reactivex.disposables.Disposable;
 public final class AreaDescriptionByAreaListPresenter extends BasePresenter<AreaDescriptionByAreaListView>
         implements DataList.OnItemListener {
 
-    private static final String ARG_AREA_SCOPE_VALUE = "areaScropeValue";
+    private static final String ARG_SCOPE_VALUE = "scropeValue";
 
     private static final String ARG_AREA = "area";
 
@@ -42,7 +42,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     private final List<AreaDescription> items = new ArrayList<>();
 
-    private AreaScope areaScope;
+    private Scope scope;
 
     private Area area;
 
@@ -53,9 +53,9 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull Area area) {
+    public static Bundle createArguments(@NonNull Scope scope, @NonNull Area area) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
         bundle.putParcelable(ARG_AREA, Parcels.wrap(area));
         return bundle;
     }
@@ -66,13 +66,13 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
-        if (areaScopeValue < 0) {
+        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
+        if (scopeValue < 0) {
             throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA));
         }
 
-        AreaScope areaScope = AreaScope.toAreaScope(areaScopeValue);
-        if (areaScope == AreaScope.UNKNOWN) throw new IllegalArgumentException("Unknown area scope.");
+        Scope scope = Scope.toAreaScope(scopeValue);
+        if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
 
         Area area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
@@ -80,7 +80,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
             throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
         }
 
-        this.areaScope = areaScope;
+        this.scope = scope;
         this.area = area;
     }
 
@@ -99,7 +99,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
         getView().onDataSetChanged();
 
         Disposable disposable = Single.<List<AreaDescription>>create(e -> {
-            switch (areaScope) {
+            switch (scope) {
                 case PUBLIC: {
                     visionService.getPublicAreaDescriptionApi()
                                  .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {

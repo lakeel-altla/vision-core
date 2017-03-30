@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -46,9 +46,9 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     private InteractionListener interactionListener;
 
     @NonNull
-    public static ActorFragment newInstance(@NonNull AreaScope areaScope, @NonNull String actorId) {
+    public static ActorFragment newInstance(@NonNull Scope scope, @NonNull String actorId) {
         ActorFragment fragment = new ActorFragment();
-        Bundle bundle = ActorPresenter.createArguments(areaScope, actorId);
+        Bundle bundle = ActorPresenter.createArguments(scope, actorId);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -122,8 +122,8 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
-    public void onUpdateActor(@NonNull AreaScope areaScope, @Nullable String actorId) {
-        presenter.onUpdateActor(areaScope, actorId);
+    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
+        presenter.onUpdateActor(scope, actorId);
     }
 
     @OnClick(R.id.image_button_close)

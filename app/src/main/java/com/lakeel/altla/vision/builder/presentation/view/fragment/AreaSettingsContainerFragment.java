@@ -9,7 +9,7 @@ import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContai
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -120,8 +120,8 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaModeView(@NonNull AreaScope areaScope) {
-        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(areaScope));
+    public void onShowAreaModeView(@NonNull Scope scope) {
+        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(scope));
     }
 
     @Override
@@ -130,30 +130,30 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaFindView(@NonNull AreaScope areaScope) {
-        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(areaScope));
+    public void onShowAreaFindView(@NonNull Scope scope) {
+        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(scope));
     }
 
     @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area) {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(areaScope, area));
+    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
+        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(scope, area));
     }
 
     @Override
-    public void onShowAreaSettingsView(@NonNull AreaScope areaScope) {
-        replaceFragment(AreaSettingsFragment.newInstance(areaScope));
+    public void onShowAreaSettingsView(@NonNull Scope scope) {
+        replaceFragment(AreaSettingsFragment.newInstance(scope));
     }
 
     @Override
-    public void onShowAreaByPlaceListView(@NonNull AreaScope areaScope, @NonNull Place place) {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(areaScope, place));
+    public void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place) {
+        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(scope, place));
     }
 
     @Override
-    public void onAreaModeSelected(@NonNull AreaScope areaScope) {
+    public void onAreaModeSelected(@NonNull Scope scope) {
         AreaSettingsFragment fragment = findAreaSettingsFragment();
         if (fragment != null) {
-            fragment.onAreaModeSelected(areaScope);
+            fragment.onAreaModeSelected(scope);
         }
     }
 

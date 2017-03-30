@@ -5,7 +5,7 @@ import com.google.android.gms.location.places.Place;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -16,18 +16,18 @@ import javax.inject.Inject;
 
 public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
 
-    private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
+    private static final String ARG_SCOPE_VALUE = "scopeValue";
 
-    private AreaScope areaScope;
+    private Scope scope;
 
     @Inject
     public AreaFindPresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope) {
+    public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
         return bundle;
     }
 
@@ -37,16 +37,13 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
-        if (areaScopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
+        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
+        if (scopeValue < 0) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
         }
 
-        areaScope = AreaScope.toAreaScope(areaScopeValue);
-
-        if (areaScope == AreaScope.UNKNOWN) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is invalid.", ARG_AREA_SCOPE_VALUE));
-        }
+        scope = Scope.toAreaScope(scopeValue);
+        if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
     }
 
     public void onClickButtonFindByPlace() {
@@ -54,7 +51,7 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
     }
 
     public void onPlacePicked(@NonNull Place place) {
-        getView().onShowAreaByPlaceListView(areaScope, place);
+        getView().onShowAreaByPlaceListView(scope, place);
     }
 
     public void onShowPlacePickerFailed(@NonNull Exception e) {

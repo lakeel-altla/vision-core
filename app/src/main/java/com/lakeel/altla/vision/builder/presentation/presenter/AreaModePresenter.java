@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaModeView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -14,22 +14,22 @@ import javax.inject.Inject;
 
 public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
-    private static final String ARG_AREA_SCOPE_VALUE = "areaScropeValue";
+    private static final String ARG_SCOPE_VALUE = "scropeValue";
 
-    private static final String STATE_AREA_SCOPE_VALUE = "areaScopeValue";
+    private static final String STATE_SCOPE_VALUE = "scopeValue";
 
-    private AreaScope initialAreaScope;
+    private Scope initialScope;
 
-    private AreaScope areaScope;
+    private Scope scope;
 
     @Inject
     public AreaModePresenter() {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope) {
+    public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
         return bundle;
     }
 
@@ -39,28 +39,24 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int initialAreaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
-        if (initialAreaScopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
+        int initialScopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
+        if (initialScopeValue < 0) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
         }
 
-        initialAreaScope = AreaScope.toAreaScope(initialAreaScopeValue);
-
-        if (initialAreaScope == AreaScope.UNKNOWN) {
-            throw new IllegalArgumentException(
-                    String.format("Argument '%s' is invalid: value = %s", ARG_AREA_SCOPE_VALUE, initialAreaScope));
-        }
+        initialScope = Scope.toAreaScope(initialScopeValue);
+        if (initialScope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
         if (savedInstanceState == null) {
-            areaScope = initialAreaScope;
+            scope = initialScope;
         } else {
-            int areaScopeValue = savedInstanceState.getInt(STATE_AREA_SCOPE_VALUE, AreaScope.UNKNOWN.getValue());
-            areaScope = AreaScope.toAreaScope(areaScopeValue);
-
-            if (areaScope == AreaScope.UNKNOWN) {
-                throw new IllegalArgumentException(
-                        String.format("Argument '%s' is invalid: value = %s", ARG_AREA_SCOPE_VALUE, areaScope));
+            int scopeValue = savedInstanceState.getInt(STATE_SCOPE_VALUE, -1);
+            if (scopeValue < 0) {
+                throw new IllegalStateException(String.format("State '%s' is required.", STATE_SCOPE_VALUE));
             }
+
+            scope = Scope.toAreaScope(scopeValue);
+            if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
         }
     }
 
@@ -68,12 +64,12 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        int checkedId = (areaScope == AreaScope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
+        int checkedId = (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
         getView().onUpdateRadioGroupScopeChecked(checkedId);
     }
 
     public void onClickButtonSelect() {
-        getView().onAreaModeSelected(areaScope);
+        getView().onAreaModeSelected(scope);
         getView().onCloseView();
     }
 
@@ -83,13 +79,13 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
     public void onCheckedChangedRadioButtonPublic(boolean checked) {
         if (checked) {
-            areaScope = AreaScope.PUBLIC;
+            scope = Scope.PUBLIC;
         }
     }
 
     public void onCheckedChangedRadioButtonUser(boolean checked) {
         if (checked) {
-            areaScope = AreaScope.USER;
+            scope = Scope.USER;
         }
     }
 }

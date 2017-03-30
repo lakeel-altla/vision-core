@@ -7,7 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaLi
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionByAreaListAdapter;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -45,9 +45,9 @@ public final class AreaDescriptionByAreaListFragment
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaDescriptionByAreaListFragment newInstance(@NonNull AreaScope areaScope, @NonNull Area area) {
+    public static AreaDescriptionByAreaListFragment newInstance(@NonNull Scope scope, @NonNull Area area) {
         AreaDescriptionByAreaListFragment fragment = new AreaDescriptionByAreaListFragment();
-        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(areaScope, area);
+        Bundle bundle = AreaDescriptionByAreaListPresenter.createArguments(scope, area);
         fragment.setArguments(bundle);
         return fragment;
     }

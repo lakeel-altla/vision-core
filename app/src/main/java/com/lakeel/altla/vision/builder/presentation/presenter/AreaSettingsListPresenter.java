@@ -6,7 +6,7 @@ import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsListView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -184,7 +184,7 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         public void onBind(int position) {
             Item item = items.get(position);
 
-            int resId = (item.areaSettings.getAreaScopeAsEnum() == AreaScope.PUBLIC ? R.string.label_area_mode_public :
+            int resId = (item.areaSettings.getAreaScopeAsEnum() == Scope.PUBLIC ? R.string.label_area_mode_public :
                     R.string.label_area_mode_user);
             itemView.onUpdateAreaMode(resId);
             itemView.onUpdateUpdatedAt(item.areaSettings.getUpdatedAtAsLong());

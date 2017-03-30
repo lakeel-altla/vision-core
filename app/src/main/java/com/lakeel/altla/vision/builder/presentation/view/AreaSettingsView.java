@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view;
 
 import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,11 +21,11 @@ public interface AreaSettingsView {
 
     void onShowAreaSettingsHistoryView();
 
-    void onShowAreaModeView(@NonNull AreaScope areaScope);
+    void onShowAreaModeView(@NonNull Scope scope);
 
-    void onShowAreaFindView(@NonNull AreaScope areaScope);
+    void onShowAreaFindView(@NonNull Scope scope);
 
-    void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area);
+    void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area);
 
     void onUpdateArView(@NonNull String areaSettingsId);
 

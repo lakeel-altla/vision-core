@@ -5,7 +5,7 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -20,11 +20,11 @@ import io.reactivex.disposables.Disposable;
 
 public final class ActorPresenter extends BasePresenter<ActorView> {
 
-    private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
+    private static final String ARG_SCOPE_VALUE = "scopeValue";
 
     private static final String ARG_ACTOR_ID = "actorId";
 
-    private static final String STATE_AREA_SCOPE_VALUE = "areaScopeValue";
+    private static final String STATE_SCOPE_VALUE = "scopeValue";
 
     private static final String STATE_ACTOR_ID = "actorId";
 
@@ -33,7 +33,7 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private AreaScope areaScope;
+    private Scope scope;
 
     private String actorId;
 
@@ -42,9 +42,9 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull String actorId) {
+    public static Bundle createArguments(@NonNull Scope scope, @NonNull String actorId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
         bundle.putString(ARG_ACTOR_ID, actorId);
         return bundle;
     }
@@ -56,30 +56,26 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         if (arguments == null) throw new ArgumentNullException("arguments");
 
         if (savedInstanceState == null) {
-            int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
-            if (areaScopeValue < 0) {
-                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
+            int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
+            if (scopeValue < 0) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
             }
 
-            areaScope = AreaScope.toAreaScope(areaScopeValue);
-            if (areaScope == AreaScope.UNKNOWN) {
-                throw new IllegalArgumentException(String.format("Argument '%s' is invalid.", ARG_AREA_SCOPE_VALUE));
-            }
+            scope = Scope.toAreaScope(scopeValue);
+            if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
             actorId = arguments.getString(ARG_ACTOR_ID);
             if (actorId == null) {
                 throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_ACTOR_ID));
             }
         } else {
-            int areaScopeValue = savedInstanceState.getInt(STATE_AREA_SCOPE_VALUE, -1);
-            if (areaScopeValue < 0) {
-                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_AREA_SCOPE_VALUE));
+            int scopeValue = savedInstanceState.getInt(STATE_SCOPE_VALUE, -1);
+            if (scopeValue < 0) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_SCOPE_VALUE));
             }
 
-            areaScope = AreaScope.toAreaScope(areaScopeValue);
-            if (areaScope == AreaScope.UNKNOWN) {
-                throw new IllegalArgumentException(String.format("State '%s' is invalid.", STATE_AREA_SCOPE_VALUE));
-            }
+            scope = Scope.toAreaScope(scopeValue);
+            if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
             actorId = savedInstanceState.getString(STATE_ACTOR_ID);
             if (actorId == null) {
@@ -100,8 +96,8 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         getView().onUpdateMainMenuVisible(true);
     }
 
-    public void onUpdateActor(@NonNull AreaScope areaScope, @Nullable String actorId) {
-        this.areaScope = areaScope;
+    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
+        this.scope = scope;
         this.actorId = actorId;
 
         loadActor();
@@ -115,7 +111,7 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         } else {
             Disposable disposable = Maybe
                     .<Actor>create(e -> {
-                        switch (areaScope) {
+                        switch (scope) {
                             case PUBLIC:
                                 visionService.getPublicActorApi().findActorById(actorId, actor -> {
                                     if (actor == null) {
@@ -135,7 +131,7 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
                                 }, e::onError);
                                 break;
                             default:
-                                throw new IllegalStateException("Invalid scope: " + areaScope);
+                                throw new IllegalStateException("Invalid scope: " + scope);
                         }
                     })
                     .subscribe(actor -> {

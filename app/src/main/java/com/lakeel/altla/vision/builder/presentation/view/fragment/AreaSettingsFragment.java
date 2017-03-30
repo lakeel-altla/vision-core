@@ -6,7 +6,7 @@ import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresen
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -53,9 +53,9 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaSettingsFragment newInstance(@NonNull AreaScope areaScope) {
+    public static AreaSettingsFragment newInstance(@NonNull Scope scope) {
         AreaSettingsFragment fragment = new AreaSettingsFragment();
-        Bundle bundle = AreaSettingsPresenter.createArguments(areaScope);
+        Bundle bundle = AreaSettingsPresenter.createArguments(scope);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -131,18 +131,18 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    public void onShowAreaModeView(@NonNull AreaScope areaScope) {
-        interactionListener.onShowAreaModeView(areaScope);
+    public void onShowAreaModeView(@NonNull Scope scope) {
+        interactionListener.onShowAreaModeView(scope);
     }
 
     @Override
-    public void onShowAreaFindView(@NonNull AreaScope areaScope) {
-        interactionListener.onShowAreaFindView(areaScope);
+    public void onShowAreaFindView(@NonNull Scope scope) {
+        interactionListener.onShowAreaFindView(scope);
     }
 
     @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area) {
-        interactionListener.onShowAreaDescriptionByAreaListView(areaScope, area);
+    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
+        interactionListener.onShowAreaDescriptionByAreaListView(scope, area);
     }
 
     @Override
@@ -155,8 +155,8 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         interactionListener.onCloseAreaSettingsView();
     }
 
-    public void onAreaModeSelected(@NonNull AreaScope areaScope) {
-        presenter.onAreaModeSelected(areaScope);
+    public void onAreaModeSelected(@NonNull Scope scope) {
+        presenter.onAreaModeSelected(scope);
     }
 
     public void onAreaSelected(@NonNull Area area) {
@@ -213,11 +213,11 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
         void onShowAreaSettingsHistoryView();
 
-        void onShowAreaModeView(@NonNull AreaScope areaScope);
+        void onShowAreaModeView(@NonNull Scope scope);
 
-        void onShowAreaFindView(@NonNull AreaScope areaScope);
+        void onShowAreaFindView(@NonNull Scope scope);
 
-        void onShowAreaDescriptionByAreaListView(@NonNull AreaScope areaScope, @NonNull Area area);
+        void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area);
 
         void onUpdateArView(@NonNull String areaSettingsId);
 

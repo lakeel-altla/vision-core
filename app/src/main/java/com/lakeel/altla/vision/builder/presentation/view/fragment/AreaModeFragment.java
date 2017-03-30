@@ -4,7 +4,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaModeView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -37,9 +37,9 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaModeFragment newInstance(@NonNull AreaScope areaScope) {
+    public static AreaModeFragment newInstance(@NonNull Scope scope) {
         AreaModeFragment fragment =new AreaModeFragment();
-        Bundle bundle = AreaModePresenter.createArguments(areaScope);
+        Bundle bundle = AreaModePresenter.createArguments(scope);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -89,8 +89,8 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     }
 
     @Override
-    public void onAreaModeSelected(@NonNull AreaScope areaScope) {
-        interactionListener.onAreaModeSelected(areaScope);
+    public void onAreaModeSelected(@NonNull Scope scope) {
+        interactionListener.onAreaModeSelected(scope);
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
 
     public interface InteractionListener {
 
-        void onAreaModeSelected(@NonNull AreaScope areaScope);
+        void onAreaModeSelected(@NonNull Scope scope);
 
         void onCloseAreaModeView();
     }

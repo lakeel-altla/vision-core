@@ -7,8 +7,8 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -19,16 +19,16 @@ import javax.inject.Inject;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
 
-    private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
+    private static final String ARG_SCOPE_VALUE = "scopeValue";
 
     @Inject
     VisionService visionService;
 
-    private AreaScope initialAreaScope;
+    private Scope initialScope;
 
     private AreaSettings areaSettings;
 
-    private AreaScope areaScope;
+    private Scope scope;
 
     private Area area;
 
@@ -39,9 +39,9 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull AreaScope areaScope) {
+    public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
+        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
         return bundle;
     }
 
@@ -51,19 +51,15 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
-        if (areaScopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
+        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
+        if (scopeValue < 0) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
         }
 
-        initialAreaScope = AreaScope.toAreaScope(areaScopeValue);
+        initialScope = Scope.toAreaScope(scopeValue);
+        if (initialScope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
-        if (initialAreaScope == AreaScope.UNKNOWN) {
-            throw new IllegalArgumentException(
-                    String.format("Argument '%s' is invalid: value = %s", ARG_AREA_SCOPE_VALUE, areaScope));
-        }
-
-        areaScope = initialAreaScope;
+        scope = initialScope;
 
         // TODO: restore saved fields.
     }
@@ -72,7 +68,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        int resId = (areaScope == AreaScope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
+        int resId = (scope == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
         getView().onUpdateAreaMode(resId);
         getView().onUpdateAreaName(area == null ? null : area.getName());
         getView().onUpdateAreaDescriptionName(areaDescription == null ? null : areaDescription.getName());
@@ -81,14 +77,14 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         getView().onUpdateButtonStartEnabled(canStart());
     }
 
-    public void onAreaModeSelected(@NonNull AreaScope areaScope) {
-        if (this.areaScope != areaScope) {
-            this.areaScope = areaScope;
+    public void onAreaModeSelected(@NonNull Scope scope) {
+        if (this.scope != scope) {
+            this.scope = scope;
             area = null;
             areaDescription = null;
 
             int resId =
-                    (areaScope == AreaScope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
+                    (scope == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
             getView().onUpdateAreaMode(resId);
             getView().onUpdateAreaName(null);
             getView().onUpdateAreaDescriptionName(null);
@@ -139,15 +135,15 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     public void onClickButtonSelectAreaMode() {
-        getView().onShowAreaModeView(areaScope);
+        getView().onShowAreaModeView(scope);
     }
 
     public void onClickButtonSelectArea() {
-        getView().onShowAreaFindView(areaScope);
+        getView().onShowAreaFindView(scope);
     }
 
     public void onClickButtonSelectAreaDescription() {
-        getView().onShowAreaDescriptionByAreaListView(areaScope, area);
+        getView().onShowAreaDescriptionByAreaListView(scope, area);
     }
 
     public void onClickButtonStart() {
@@ -156,7 +152,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             areaSettings.setUserId(CurrentUser.getInstance().getUserId());
         }
 
-        areaSettings.setAreaScopeAsEnum(areaScope);
+        areaSettings.setAreaScopeAsEnum(scope);
         areaSettings.setAreaId(area.getId());
         areaSettings.setAreaDescriptionId(areaDescription.getId());
 

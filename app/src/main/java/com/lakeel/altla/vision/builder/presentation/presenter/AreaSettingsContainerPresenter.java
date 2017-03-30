@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -31,7 +31,7 @@ public final class AreaSettingsContainerPresenter extends BasePresenter<AreaSett
         super.onCreateViewOverride();
 
         if (initialDisplay) {
-            getView().onShowAreaSettingsView(AreaScope.USER);
+            getView().onShowAreaSettingsView(Scope.USER);
         }
     }
 }

@@ -8,7 +8,7 @@ import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPre
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaByPlaceListAdapter;
 import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -45,9 +45,9 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
     private InteractionListener interactionListener;
 
     @NonNull
-    public static AreaByPlaceListFragment newInstance(@NonNull AreaScope areaScope, @NonNull Place place) {
+    public static AreaByPlaceListFragment newInstance(@NonNull Scope scope, @NonNull Place place) {
         AreaByPlaceListFragment fragment = new AreaByPlaceListFragment();
-        Bundle bundle = AreaByPlaceListPresenter.createArguments(areaScope, place);
+        Bundle bundle = AreaByPlaceListPresenter.createArguments(scope, place);
         fragment.setArguments(bundle);
         return fragment;
     }

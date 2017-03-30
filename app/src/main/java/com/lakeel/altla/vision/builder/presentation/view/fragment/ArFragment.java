@@ -10,7 +10,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
-import com.lakeel.altla.vision.model.AreaScope;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -276,15 +276,15 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onUpdateActorViewContent(@NonNull AreaScope areaScope, @Nullable String actorId) {
+    public void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId) {
         ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
 
         if (fragment == null) {
             if (actorId != null) {
-                replaceWindowFragment(ActorFragment.newInstance(areaScope, actorId));
+                replaceWindowFragment(ActorFragment.newInstance(scope, actorId));
             }
         } else {
-            fragment.onUpdateActor(areaScope, actorId);
+            fragment.onUpdateActor(scope, actorId);
         }
     }
 
