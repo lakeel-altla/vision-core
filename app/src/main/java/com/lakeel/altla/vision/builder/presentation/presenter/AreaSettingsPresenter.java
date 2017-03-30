@@ -11,6 +11,8 @@ import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.parceler.Parcels;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,7 +21,7 @@ import javax.inject.Inject;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
 
-    private static final String ARG_SCOPE_VALUE = "scopeValue";
+    private static final String ARG_SCOPE = "scope";
 
     @Inject
     VisionService visionService;
@@ -41,7 +43,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
         return bundle;
     }
 
@@ -51,13 +53,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
-        if (scopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
+        initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        if (initialScope == null) {
+            throw new ArgumentNullException(String.format("Argument '%s' is required.", ARG_SCOPE));
         }
-
-        initialScope = Scope.toAreaScope(scopeValue);
-        if (initialScope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
         scope = initialScope;
 

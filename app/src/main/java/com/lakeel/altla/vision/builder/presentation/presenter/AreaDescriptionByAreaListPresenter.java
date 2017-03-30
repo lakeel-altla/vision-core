@@ -31,7 +31,7 @@ import io.reactivex.disposables.Disposable;
 public final class AreaDescriptionByAreaListPresenter extends BasePresenter<AreaDescriptionByAreaListView>
         implements DataList.OnItemListener {
 
-    private static final String ARG_SCOPE_VALUE = "scropeValue";
+    private static final String ARG_SCOPE = "scrope";
 
     private static final String ARG_AREA = "area";
 
@@ -55,7 +55,7 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
     @NonNull
     public static Bundle createArguments(@NonNull Scope scope, @NonNull Area area) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
         bundle.putParcelable(ARG_AREA, Parcels.wrap(area));
         return bundle;
     }
@@ -66,22 +66,16 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
-        if (scopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA));
+        scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        if (scope == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
         }
 
-        Scope scope = Scope.toAreaScope(scopeValue);
-        if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
-
-        Area area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
+        area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
         if (area == null) {
             throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
         }
-
-        this.scope = scope;
-        this.area = area;
     }
 
     @Override

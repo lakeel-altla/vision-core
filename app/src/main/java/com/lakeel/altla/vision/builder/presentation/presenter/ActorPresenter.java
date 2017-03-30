@@ -8,6 +8,8 @@ import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.parceler.Parcels;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,11 +22,11 @@ import io.reactivex.disposables.Disposable;
 
 public final class ActorPresenter extends BasePresenter<ActorView> {
 
-    private static final String ARG_SCOPE_VALUE = "scopeValue";
+    private static final String ARG_SCOPE = "scope";
 
     private static final String ARG_ACTOR_ID = "actorId";
 
-    private static final String STATE_SCOPE_VALUE = "scopeValue";
+    private static final String STATE_SCOPE = "scopeValue";
 
     private static final String STATE_ACTOR_ID = "actorId";
 
@@ -44,7 +46,7 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
     @NonNull
     public static Bundle createArguments(@NonNull Scope scope, @NonNull String actorId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
         bundle.putString(ARG_ACTOR_ID, actorId);
         return bundle;
     }
@@ -56,26 +58,20 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         if (arguments == null) throw new ArgumentNullException("arguments");
 
         if (savedInstanceState == null) {
-            int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
-            if (scopeValue < 0) {
-                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
+            scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+            if (scope == null) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
             }
-
-            scope = Scope.toAreaScope(scopeValue);
-            if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
             actorId = arguments.getString(ARG_ACTOR_ID);
             if (actorId == null) {
                 throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_ACTOR_ID));
             }
         } else {
-            int scopeValue = savedInstanceState.getInt(STATE_SCOPE_VALUE, -1);
-            if (scopeValue < 0) {
-                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_SCOPE_VALUE));
+            scope = Parcels.unwrap(savedInstanceState.getParcelable(STATE_SCOPE));
+            if (scope == null) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_SCOPE));
             }
-
-            scope = Scope.toAreaScope(scopeValue);
-            if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
 
             actorId = savedInstanceState.getString(STATE_ACTOR_ID);
             if (actorId == null) {

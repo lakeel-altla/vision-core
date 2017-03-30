@@ -8,6 +8,8 @@ import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.parceler.Parcels;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +18,7 @@ import javax.inject.Inject;
 
 public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
 
-    private static final String ARG_SCOPE_VALUE = "scopeValue";
+    private static final String ARG_SCOPE = "scope";
 
     private Scope scope;
 
@@ -27,7 +29,7 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
     @NonNull
     public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SCOPE_VALUE, scope.getValue());
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
         return bundle;
     }
 
@@ -37,13 +39,10 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int scopeValue = arguments.getInt(ARG_SCOPE_VALUE, -1);
-        if (scopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE_VALUE));
+        scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        if (scope == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
         }
-
-        scope = Scope.toAreaScope(scopeValue);
-        if (scope == Scope.UNKNOWN) throw new IllegalArgumentException("Unknown scope.");
     }
 
     public void onClickButtonFindByPlace() {
