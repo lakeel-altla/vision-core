@@ -10,6 +10,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
+import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -44,6 +45,7 @@ import butterknife.OnTouch;
 public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         implements ArView,
                    AreaSettingsContainerFragment.InteractionListener,
+                   ActorFragment.InteractionListener,
                    ImageAssetListFragment.InteractionListener {
 
     @Inject
@@ -230,6 +232,16 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
+    public void onUpdateMainMenuVisible(boolean visible) {
+        viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onUpdateImageButtonAssetListVisible(boolean visible) {
+        imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
     public void onUpdateAreaSettingsVisible(boolean visible) {
         AreaSettingsContainerFragment fragment =
                 (AreaSettingsContainerFragment) findFragment(AreaSettingsContainerFragment.class);
@@ -264,13 +276,16 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onUpdateMainMenuVisible(boolean visible) {
-        viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
+    public void onUpdateActorViewContent(@NonNull AreaScope areaScope, @Nullable String actorId) {
+        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
 
-    @Override
-    public void onUpdateImageButtonAssetListVisible(boolean visible) {
-        imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (fragment == null) {
+            if (actorId != null) {
+                replaceWindowFragment(ActorFragment.newInstance(areaScope, actorId));
+            }
+        } else {
+            fragment.onUpdateActor(areaScope, actorId);
+        }
     }
 
     @Override
@@ -323,13 +338,14 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    public void onShowUserActorView(@NonNull String areaId, @NonNull String actorId) {
-        interactionListener.onShowActorView(areaId, actorId);
+    public void onShowSignInView() {
+        interactionListener.onShowSignInView();
     }
 
     @Override
-    public void onShowSignInView() {
-        interactionListener.onShowSignInView();
+    public void onCloseActorView() {
+        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
+        removeFragment(fragment);
     }
 
     @Override
@@ -472,8 +488,6 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     public interface InteractionListener {
-
-        void onShowActorView(@NonNull String sceneId, @NonNull String actorId);
 
         void onUpdateActionBarVisible(boolean visible);
 

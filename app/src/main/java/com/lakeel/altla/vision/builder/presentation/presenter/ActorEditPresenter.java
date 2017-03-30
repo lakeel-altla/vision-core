@@ -100,7 +100,7 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditView> {
 
         if (actor == null) {
             Disposable disposable = Maybe.<Actor>create(e -> {
-                visionService.getUserActorApi().findUserActorById(actorId, actor -> {
+                visionService.getUserActorApi().findActorById(actorId, actor -> {
                     if (actor == null) {
                         e.onComplete();
                     } else {
@@ -197,7 +197,7 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditView> {
         getView().onUpdateViewsEnabled(false);
         getView().onUpdateActionSave(false);
 
-        visionService.getUserActorApi().saveUserActor(actor);
+        visionService.getUserActorApi().saveActor(actor);
         getView().onSnackbar(R.string.snackbar_done);
         getView().onBackView();
     }

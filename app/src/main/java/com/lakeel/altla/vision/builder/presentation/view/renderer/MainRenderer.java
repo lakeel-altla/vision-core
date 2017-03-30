@@ -56,7 +56,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private Line3D axes;
 
-    private Object3D pickedObject;
+//    private Object3D pickedObject;
 
     private EditAxesModel editAxesModel;
 
@@ -166,9 +166,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
                 getCurrentScene().removeChild(object3D);
 
-                if (pickedObject == object3D) {
-                    onNoObjectPicked();
-                }
+//                if (pickedObject == object3D) {
+//                    onNoObjectPicked();
+//                }
             }
         }
 
@@ -188,9 +188,9 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
                     getCurrentScene().removeChild(object3D);
 
-                    if (pickedObject == object3D) {
-                        onNoObjectPicked();
-                    }
+//                    if (pickedObject == object3D) {
+//                        onNoObjectPicked();
+//                    }
                 }
             }
         }
@@ -200,13 +200,14 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     public void onObjectPicked(@NonNull Object3D object) {
-        if (pickedObject == object) {
-            // Unpick.
-            changePickedObject(null);
-        } else {
-            // Pick.
-            changePickedObject(object);
-        }
+//        if (pickedObject == object) {
+//            // Unpick.
+//            changePickedObject(null);
+//        } else {
+//            // Pick.
+//            changePickedObject(object);
+//        }
+        changePickedObject(object);
     }
 
     @Override
@@ -278,17 +279,30 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     }
 
     private void changePickedObject(@Nullable Object3D object) {
-        pickedObject = object;
+//        pickedObject = object;
+//
+//        ActorModel pickedActor = null;
+//
+//        if (pickedObject != null) {
+//            // The axes model uses the same pose with the picked object.
+//            axes.setPosition(pickedObject.getPosition().clone());
+//            axes.setOrientation(pickedObject.getOrientation().clone());
+//            axes.setVisible(true);
+//
+//            pickedActor = actorModelMap.get(pickedObject);
+//        } else {
+//            axes.setVisible(false);
+//        }
 
         ActorModel pickedActor = null;
 
-        if (pickedObject != null) {
+        if (object != null) {
             // The axes model uses the same pose with the picked object.
-            axes.setPosition(pickedObject.getPosition().clone());
-            axes.setOrientation(pickedObject.getOrientation().clone());
+            axes.setPosition(object.getPosition().clone());
+            axes.setOrientation(object.getOrientation().clone());
             axes.setVisible(true);
 
-            pickedActor = actorModelMap.get(pickedObject);
+            pickedActor = actorModelMap.get(object);
         } else {
             axes.setVisible(false);
         }

@@ -137,7 +137,7 @@ public final class ArPresenter extends BasePresenter<ArView>
         if (savedInstanceState != null) {
             areaSettingsId = savedInstanceState.getString(STATE_AREA_SETTINGS_ID);
             if (areaSettingsId == null) {
-                throw new IllegalStateException(String.format("State '%s' is null.", STATE_AREA_SETTINGS_ID));
+                throw new IllegalStateException(String.format("Model '%s' is null.", STATE_AREA_SETTINGS_ID));
             }
         }
 
@@ -271,17 +271,17 @@ public final class ArPresenter extends BasePresenter<ArView>
                             case PUBLIC: {
                                 return Maybe.<List<Actor>>create(e -> {
                                     visionService.getPublicActorApi()
-                                                 .findUserActorsByAreaId(areaSettings.getAreaId(),
-                                                                         e::onSuccess,
-                                                                         e::onError);
+                                                 .findActorsByAreaId(areaSettings.getAreaId(),
+                                                                     e::onSuccess,
+                                                                     e::onError);
                                 });
                             }
                             case USER: {
                                 return Maybe.create(e -> {
                                     visionService.getUserActorApi()
-                                                 .findUserActorsByAreaId(areaSettings.getAreaId(),
-                                                                         e::onSuccess,
-                                                                         e::onError);
+                                                 .findActorsByAreaId(areaSettings.getAreaId(),
+                                                                     e::onSuccess,
+                                                                     e::onError);
                                 });
                             }
                             default:
@@ -322,7 +322,10 @@ public final class ArPresenter extends BasePresenter<ArView>
     @Override
     public void onActorPicked(@Nullable ActorModel actorModel) {
         pickedActorModel = actorModel;
-        getView().onUpdateObjectMenuVisible(pickedActorModel != null);
+
+        final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
+        getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
+        getView().onUpdateMainMenuVisible(false);
     }
 
     public void onAreaSettingsSelected(@NonNull String areaSettingsId) {
@@ -433,9 +436,9 @@ public final class ArPresenter extends BasePresenter<ArView>
     }
 
     public void onTouchButtonDetail() {
-        if (pickedActorModel == null) return;
-
-        getView().onShowUserActorView(pickedActorModel.actor.getAreaId(), pickedActorModel.actor.getId());
+//        if (pickedActorModel == null) return;
+//
+//        getView().onShowUserActorView(pickedActorModel.actor.getAreaId(), pickedActorModel.actor.getId());
     }
 
     public void onClickButtonDelete() {
@@ -445,7 +448,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         actorManager.removeActor(pickedActorModel.actor.getId());
 
-        visionService.getUserActorApi().deleteUserActorById(pickedActorModel.actor.getId());
+        visionService.getUserActorApi().deleteActorById(pickedActorModel.actor.getId());
     }
 
     public void onDropModel(@NonNull ClipData clipData) {
@@ -505,7 +508,7 @@ public final class ArPresenter extends BasePresenter<ArView>
         actorManager.addActor(actor);
 
         // Add it into the server.
-        visionService.getUserActorApi().saveUserActor(actor);
+        visionService.getUserActorApi().saveActor(actor);
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
@@ -544,7 +547,7 @@ public final class ArPresenter extends BasePresenter<ArView>
         if (pickedActorModel == null) return;
 
         // Save.
-        visionService.getUserActorApi().saveUserActor(pickedActorModel.actor);
+        visionService.getUserActorApi().saveActor(pickedActorModel.actor);
     }
 
     private void translateUserActor(float distance) {

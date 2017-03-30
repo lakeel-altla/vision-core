@@ -2,9 +2,10 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
-import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
+import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -14,26 +15,18 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.util.Locale;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter>
         implements ActorView {
-
-    private static final String FORMAT_VECTOR3 = "{ %f, %f, %f }";
-
-    private static final String FORMAT_VECTOR4 = "{ %f, %f, %f, %f }";
 
     @Inject
     ActorPresenter presenter;
@@ -41,20 +34,8 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     @BindView(R.id.view_top)
     View viewTop;
 
-    @BindView(R.id.text_view_id)
-    TextView textViewId;
-
     @BindView(R.id.text_view_name)
     TextView textViewName;
-
-    @BindView(R.id.text_view_position)
-    TextView textViewPosition;
-
-    @BindView(R.id.text_view_orientation)
-    TextView textViewOrientation;
-
-    @BindView(R.id.text_view_scale)
-    TextView textViewScale;
 
     @BindView(R.id.text_view_created_at)
     TextView textViewCreatedAt;
@@ -65,9 +46,9 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     private InteractionListener interactionListener;
 
     @NonNull
-    public static ActorFragment newInstance(@NonNull String sceneId, @NonNull String actorId) {
+    public static ActorFragment newInstance(@NonNull AreaScope areaScope, @NonNull String actorId) {
         ActorFragment fragment = new ActorFragment();
-        Bundle bundle = ActorPresenter.createArguments(sceneId, actorId);
+        Bundle bundle = ActorPresenter.createArguments(areaScope, actorId);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -86,8 +67,8 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     protected void onAttachOverride(@NonNull Context context) {
         super.onAttachOverride(context);
 
-        interactionListener = InteractionListener.class.cast(context);
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
+        interactionListener = InteractionListener.class.cast(getParentFragment());
     }
 
     @Override
@@ -109,54 +90,11 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
-
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_actor, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_edit:
-                presenter.onEdit();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onUpdateTitle(@Nullable String title) {
-        getActivity().setTitle(title);
-    }
-
-    @Override
-    public void onUpdateActorId(@NonNull String actorId) {
-        textViewId.setText(actorId);
     }
 
     @Override
     public void onUpdateName(@NonNull String name) {
         textViewName.setText(name);
-    }
-
-    @Override
-    public void onUpdatePosition(double x, double y, double z) {
-        textViewPosition.setText(String.format(Locale.getDefault(), FORMAT_VECTOR3, x, y, z));
-    }
-
-    @Override
-    public void onUpdateOrientation(double x, double y, double z, double w) {
-        textViewOrientation.setText(String.format(Locale.getDefault(), FORMAT_VECTOR4, x, y, z, w));
-    }
-
-    @Override
-    public void onUpdateScale(double x, double y, double z) {
-        textViewScale.setText(String.format(Locale.getDefault(), FORMAT_VECTOR3, x, y, z));
     }
 
     @Override
@@ -170,8 +108,13 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     }
 
     @Override
-    public void onShowUserActorEditView(@NonNull String sceneId, @NonNull String actorId) {
-        interactionListener.onShowActorEditView(sceneId, actorId);
+    public void onUpdateMainMenuVisible(boolean visible) {
+        interactionListener.onUpdateMainMenuVisible(visible);
+    }
+
+    @Override
+    public void onCloseView() {
+        interactionListener.onCloseActorView();
     }
 
     @Override
@@ -179,8 +122,19 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
+    public void onUpdateActor(@NonNull AreaScope areaScope, @Nullable String actorId) {
+        presenter.onUpdateActor(areaScope, actorId);
+    }
+
+    @OnClick(R.id.image_button_close)
+    void onClickImageButtonClose() {
+        presenter.onClickImageButtonClose();
+    }
+
     public interface InteractionListener {
 
-        void onShowActorEditView(@NonNull String sceneId, @NonNull String actorId);
+        void onUpdateMainMenuVisible(boolean visible);
+
+        void onCloseActorView();
     }
 }

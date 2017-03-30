@@ -3,8 +3,9 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
+import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.AreaScope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
@@ -13,22 +14,26 @@ import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class ActorPresenter extends BasePresenter<ActorView> {
 
-    private static final String ARG_AREA_ID = "areaId";
+    private static final String ARG_AREA_SCOPE_VALUE = "areaScopeValue";
 
     private static final String ARG_ACTOR_ID = "actorId";
+
+    private static final String STATE_AREA_SCOPE_VALUE = "areaScopeValue";
+
+    private static final String STATE_ACTOR_ID = "actorId";
 
     @Inject
     VisionService visionService;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private String areaId;
+    private AreaScope areaScope;
 
     private String actorId;
 
@@ -37,9 +42,9 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
     }
 
     @NonNull
-    public static Bundle createArguments(@NonNull String areaId, @NonNull String actorId) {
+    public static Bundle createArguments(@NonNull AreaScope areaScope, @NonNull String actorId) {
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_AREA_ID, areaId);
+        bundle.putInt(ARG_AREA_SCOPE_VALUE, areaScope.getValue());
         bundle.putString(ARG_ACTOR_ID, actorId);
         return bundle;
     }
@@ -50,56 +55,101 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        String areaId = arguments.getString(ARG_AREA_ID);
-        if (areaId == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA_ID));
-        }
+        if (savedInstanceState == null) {
+            int areaScopeValue = arguments.getInt(ARG_AREA_SCOPE_VALUE, -1);
+            if (areaScopeValue < 0) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE_VALUE));
+            }
 
-        String actorId = arguments.getString(ARG_ACTOR_ID);
-        if (actorId == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_ACTOR_ID));
-        }
+            areaScope = AreaScope.toAreaScope(areaScopeValue);
+            if (areaScope == AreaScope.UNKNOWN) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is invalid.", ARG_AREA_SCOPE_VALUE));
+            }
 
-        this.areaId = areaId;
+            actorId = arguments.getString(ARG_ACTOR_ID);
+            if (actorId == null) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_ACTOR_ID));
+            }
+        } else {
+            int areaScopeValue = savedInstanceState.getInt(STATE_AREA_SCOPE_VALUE, -1);
+            if (areaScopeValue < 0) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_AREA_SCOPE_VALUE));
+            }
+
+            areaScope = AreaScope.toAreaScope(areaScopeValue);
+            if (areaScope == AreaScope.UNKNOWN) {
+                throw new IllegalArgumentException(String.format("State '%s' is invalid.", STATE_AREA_SCOPE_VALUE));
+            }
+
+            actorId = savedInstanceState.getString(STATE_ACTOR_ID);
+            if (actorId == null) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_ACTOR_ID));
+            }
+        }
+    }
+
+    @Override
+    protected void onResumeOverride() {
+        super.onResumeOverride();
+
+        loadActor();
+    }
+
+    public void onClickImageButtonClose() {
+        getView().onCloseView();
+        getView().onUpdateMainMenuVisible(true);
+    }
+
+    public void onUpdateActor(@NonNull AreaScope areaScope, @Nullable String actorId) {
+        this.areaScope = areaScope;
         this.actorId = actorId;
+
+        loadActor();
     }
 
-    @Override
-    protected void onStartOverride() {
-        super.onStartOverride();
-
-        getView().onUpdateTitle(null);
-
-        Disposable disposable = ObservableHelper
-                .usingData(() -> visionService.getUserActorApi().observeUserActorById(actorId))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(actor -> {
-                    getView().onUpdateTitle(actor.getName());
-                    getView().onUpdateActorId(actor.getId());
-                    getView().onUpdateName(actor.getName());
-                    getView().onUpdatePosition(actor.getPositionX(), actor.getPositionY(), actor.getPositionZ());
-                    getView().onUpdateOrientation(actor.getOrientationX(),
-                                                  actor.getOrientationY(),
-                                                  actor.getOrientationZ(),
-                                                  actor.getOrientationW());
-                    getView().onUpdateScale(actor.getScaleX(), actor.getScaleY(), actor.getScaleZ());
-                    getView().onUpdateCreatedAt(actor.getCreatedAtAsLong());
-                    getView().onUpdateUpdatedAt(actor.getUpdatedAtAsLong());
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        compositeDisposable.clear();
-    }
-
-    @Override
-    protected void onStopOverride() {
-        super.onStopOverride();
-
-        compositeDisposable.clear();
-    }
-
-    public void onEdit() {
-        getView().onShowUserActorEditView(areaId, actorId);
+    private void loadActor() {
+        if (actorId == null) {
+            getView().onUpdateName(null);
+            getView().onUpdateCreatedAt(-1);
+            getView().onUpdateUpdatedAt(-1);
+        } else {
+            Disposable disposable = Maybe
+                    .<Actor>create(e -> {
+                        switch (areaScope) {
+                            case PUBLIC:
+                                visionService.getPublicActorApi().findActorById(actorId, actor -> {
+                                    if (actor == null) {
+                                        e.onComplete();
+                                    } else {
+                                        e.onSuccess(actor);
+                                    }
+                                }, e::onError);
+                                break;
+                            case USER:
+                                visionService.getUserActorApi().findActorById(actorId, actor -> {
+                                    if (actor == null) {
+                                        e.onComplete();
+                                    } else {
+                                        e.onSuccess(actor);
+                                    }
+                                }, e::onError);
+                                break;
+                            default:
+                                throw new IllegalStateException("Invalid scope: " + areaScope);
+                        }
+                    })
+                    .subscribe(actor -> {
+                        getView().onUpdateName(actor.getName());
+                        getView().onUpdateCreatedAt(actor.getCreatedAtAsLong());
+                        getView().onUpdateUpdatedAt(actor.getUpdatedAtAsLong());
+                    }, e -> {
+                        getLog().e("Failed.", e);
+                        getView().onSnackbar(R.string.snackbar_failed);
+                    }, () -> {
+                        getLog().e("Entity not found.");
+                        getView().onSnackbar(R.string.snackbar_failed);
+                    });
+            compositeDisposable.add(disposable);
+        }
     }
 }

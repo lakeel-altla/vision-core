@@ -15,7 +15,6 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
@@ -43,7 +42,6 @@ public final class MainActivity extends AppCompatActivity
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
                    ArFragment.InteractionListener,
-                   ActorFragment.InteractionListener,
                    ActorEditFragment.InteractionListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
@@ -171,11 +169,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowActorView(@NonNull String sceneId, @NonNull String actorId) {
-        replaceFragmentAndAddToBackStack(ActorFragment.newInstance(sceneId, actorId));
-    }
-
-    @Override
     public void onUpdateActionBarVisible(boolean visible) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -190,12 +183,6 @@ public final class MainActivity extends AppCompatActivity
     @Override
     public void onShowSignInView() {
         showSignInView();
-    }
-
-    @Override
-    public void onShowActorEditView(@NonNull String sceneId, @NonNull String actorId) {
-        replaceFragmentAndAddToBackStack(ActorEditFragment.newInstance(sceneId, actorId));
-        // TODO
     }
 
     private void showSignInView() {
