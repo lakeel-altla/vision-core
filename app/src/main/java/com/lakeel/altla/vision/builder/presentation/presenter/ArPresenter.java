@@ -27,6 +27,7 @@ import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -55,6 +56,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -241,6 +243,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
         // Pause the thread for OpenGL in the texture view.
         getView().onPauseTextureView();
+        getView().onUpdateImageButtonAssetListVisible(true);
     }
 
     @Override
@@ -250,55 +253,66 @@ public final class ArPresenter extends BasePresenter<ArView>
         // Resume the texture view after the tango becomes ready.
         getView().onResumeTextureView();
 
-        if (areaSettingsId != null) {
-            Disposable disposable = Maybe
-                    .<AreaSettings>create(e -> {
-                        visionService.getUserAreaSettingsApi()
-                                     .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
-                                         if (areaSettings == null) {
-                                             e.onComplete();
-                                         } else {
-                                             e.onSuccess(areaSettings);
-                                         }
-                                     }, e::onError);
-                    })
-                    .flatMap(areaSettings -> {
-                        if (areaSettings.getAreaId() == null) {
-                            throw new IllegalStateException("Field 'areaId' is required.");
-                        }
+        if (areaSettings != null) {
+            if (areaSettings.getAreaId() == null) {
+                throw new IllegalStateException("Unknown areaId: null");
+            }
 
-                        switch (areaSettings.getAreaScopeAsEnum()) {
-                            case PUBLIC: {
-                                return Maybe.<List<Actor>>create(e -> {
-                                    visionService.getPublicActorApi()
-                                                 .findActorsByAreaId(areaSettings.getAreaId(),
-                                                                     e::onSuccess,
-                                                                     e::onError);
-                                });
-                            }
-                            case USER: {
-                                return Maybe.create(e -> {
-                                    visionService.getUserActorApi()
-                                                 .findActorsByAreaId(areaSettings.getAreaId(),
-                                                                     e::onSuccess,
-                                                                     e::onError);
-                                });
-                            }
-                            default:
-                                throw new IllegalStateException("Field 'areaScope' is invalid.");
-                        }
-                    })
-                    .subscribe(actors -> {
-                        actorManager.addActors(actors);
-                        getView().onUpdateImageButtonAssetListVisible(true);
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                        getView().onSnackbar(R.string.snackbar_failed);
-                    }, () -> {
-                        getLog().e("Entity not found.");
-                        getView().onSnackbar(R.string.snackbar_failed);
-                    });
-            compositeDisposable.add(disposable);
+            runOnUiThread(() -> {
+                getView().onUpdateImageButtonAssetListVisible(true);
+            });
+
+            if (areaSettings.getAreaScopeAsEnum() == Scope.PUBLIC) {
+                Disposable disposable = Observable
+                        .<Actor>concat(e -> {
+                            visionService.getPublicActorApi()
+                                         .findActorsByAreaId(areaSettings.getAreaId(),
+                                                             actors -> {
+                                                                 for (Actor actor : actors) {
+                                                                     e.onNext(actor);
+                                                                 }
+                                                                 e.onComplete();
+                                                             },
+                                                             e::onError);
+                        }, e -> {
+                            visionService.getUserActorApi()
+                                         .findActorsByAreaId(areaSettings.getAreaId(),
+                                                             actors -> {
+                                                                 for (Actor actor : actors) {
+                                                                     e.onNext(actor);
+                                                                 }
+                                                                 e.onComplete();
+                                                             },
+                                                             e::onError);
+                        })
+                        .subscribe(actor -> {
+                            actorManager.addActor(actor);
+                        }, e -> {
+                            getLog().e("Failed.", e);
+                            getView().onSnackbar(R.string.snackbar_failed);
+                        });
+                compositeDisposable.add(disposable);
+            } else if (areaSettings.getAreaScopeAsEnum() == Scope.USER) {
+                Disposable disposable = Observable
+                        .<Actor>create(e -> {
+                            visionService.getUserActorApi()
+                                         .findActorsByAreaId(areaSettings.getAreaId(),
+                                                             actors -> {
+                                                                 for (Actor actor : actors) {
+                                                                     e.onNext(actor);
+                                                                 }
+                                                                 e.onComplete();
+                                                             },
+                                                             e::onError);
+                        })
+                        .subscribe(actor -> {
+                            actorManager.addActor(actor);
+                        }, e -> {
+                            getLog().e("Failed.", e);
+                            getView().onSnackbar(R.string.snackbar_failed);
+                        });
+                compositeDisposable.add(disposable);
+            }
         }
     }
 
@@ -321,11 +335,14 @@ public final class ArPresenter extends BasePresenter<ArView>
 
     @Override
     public void onActorPicked(@Nullable ActorModel actorModel) {
-        pickedActorModel = actorModel;
+        if (areaSettings != null) {
+            pickedActorModel = actorModel;
 
-        final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
-        getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
-        getView().onUpdateMainMenuVisible(false);
+            // TODO: use the scope of the targeted actor, not the current area.
+            final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
+            getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
+            getView().onUpdateMainMenuVisible(false);
+        }
     }
 
     public void onAreaSettingsSelected(@NonNull String areaSettingsId) {
@@ -353,6 +370,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
                     // Pause the thread for OpenGL in the texture view.
                     getView().onPauseTextureView();
+                    getView().onUpdateImageButtonAssetListVisible(true);
 
                     visionService.getTangoWrapper().addOnTangoReadyListener(this);
                     visionService.getTangoWrapper().addOnFrameAvailableListener(this);
@@ -705,14 +723,6 @@ public final class ArPresenter extends BasePresenter<ArView>
             picasso = new Picasso.Builder(context).build();
         }
 
-        void addActors(@NonNull List<Actor> actors) {
-            getLog().v("Adding actors: count = %s", actors.size());
-
-            for (Actor actor : actors) {
-                addActor(actor);
-            }
-        }
-
         void addActor(@NonNull Actor actor) {
             getLog().v("Adding the actor: id = %s", actor.getId());
 
@@ -759,6 +769,7 @@ public final class ArPresenter extends BasePresenter<ArView>
                              .getUserImageAssetFileUriById(actor.getAssetId(), e::onSuccess, e::onError);
             }).subscribe(uri -> {
                 final ImageActorModel model = new ImageActorModel(actor);
+                renderer.addActorModel(model);
 
                 Target target = new Target() {
                     @Override
@@ -767,7 +778,7 @@ public final class ArPresenter extends BasePresenter<ArView>
 
                         model.bitmap = bitmap;
 
-                        renderer.addActorModel(model);
+                        renderer.updateActorModel(model);
 
                         // Dereference.
                         targetMap.remove(this);

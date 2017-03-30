@@ -3,11 +3,10 @@ package com.lakeel.altla.vision.builder.presentation.view.renderer;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.tango.rajawali.TangoCameraRenderer;
-import com.lakeel.altla.vision.builder.presentation.graphics.BitmapPlaneFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.XyzAxesBuilder;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
-import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
+import com.lakeel.altla.vision.model.Scope;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.Camera;
@@ -42,21 +41,19 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private final Queue<String> deleteActorIdQueue = new LinkedList<>();
 
-    private final BitmapPlaneFactory bitmapPlaneFactory = new BitmapPlaneFactory();
-
     private final Object editAxesModelLock = new Object();
 
     private final Map<Object3D, ActorModel> actorModelMap = new HashMap<>();
 
     private final Map<String, Object3D> object3DMap = new HashMap<>();
 
+    private final Map<String, ObjectModel> objectModelMap = new HashMap<>();
+
     private final Object clearAllActorsLock = new Object();
 
     private ObjectColorPicker objectColorPicker;
 
     private Line3D axes;
-
-//    private Object3D pickedObject;
 
     private EditAxesModel editAxesModel;
 
@@ -105,14 +102,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                     break;
                 }
 
-                Object3D object3D;
-                if (model instanceof ImageActorModel) {
-                    object3D = bitmapPlaneFactory.create(((ImageActorModel) model).bitmap);
-                    model.setPoseTo(object3D);
-                } else {
-                    LOG.e("Unknown ActorModel sub-class: " + model.getClass().getName());
-                    continue;
-                }
+                Object3D object3D = model.create();
 
                 getCurrentScene().addChild(object3D);
                 objectColorPicker.registerObject(object3D);
@@ -135,7 +125,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                     continue;
                 }
 
-                model.setPoseTo(object3D);
+                model.update(object3D);
             }
         }
 
@@ -165,10 +155,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                 actorModelMap.remove(object3D);
 
                 getCurrentScene().removeChild(object3D);
-
-//                if (pickedObject == object3D) {
-//                    onNoObjectPicked();
-//                }
             }
         }
 
@@ -187,10 +173,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                     actorModelMap.remove(object3D);
 
                     getCurrentScene().removeChild(object3D);
-
-//                    if (pickedObject == object3D) {
-//                        onNoObjectPicked();
-//                    }
                 }
             }
         }
@@ -200,13 +182,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     @Override
     public void onObjectPicked(@NonNull Object3D object) {
-//        if (pickedObject == object) {
-//            // Unpick.
-//            changePickedObject(null);
-//        } else {
-//            // Pick.
-//            changePickedObject(object);
-//        }
         changePickedObject(object);
     }
 
@@ -279,21 +254,6 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     }
 
     private void changePickedObject(@Nullable Object3D object) {
-//        pickedObject = object;
-//
-//        ActorModel pickedActor = null;
-//
-//        if (pickedObject != null) {
-//            // The axes model uses the same pose with the picked object.
-//            axes.setPosition(pickedObject.getPosition().clone());
-//            axes.setOrientation(pickedObject.getOrientation().clone());
-//            axes.setVisible(true);
-//
-//            pickedActor = actorModelMap.get(pickedObject);
-//        } else {
-//            axes.setVisible(false);
-//        }
-
         ActorModel pickedActor = null;
 
         if (object != null) {
@@ -344,5 +304,20 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
     public interface OnActorPickedListener {
 
         void onActorPicked(@Nullable ActorModel actorModel);
+    }
+
+    private final class ObjectModel {
+
+        final Scope scope;
+
+        final String actorId;
+
+        final Object3D object3D;
+
+        private ObjectModel(@NonNull Scope scope, @NonNull String actorId, @NonNull Object3D object3D) {
+            this.scope = scope;
+            this.actorId = actorId;
+            this.object3D = object3D;
+        }
     }
 }

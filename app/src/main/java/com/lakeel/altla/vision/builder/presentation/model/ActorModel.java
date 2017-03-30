@@ -10,11 +10,14 @@ import org.rajawali3d.math.vector.Vector3;
 
 import android.support.annotation.NonNull;
 
-public class ActorModel {
+public abstract class ActorModel {
+
+//    public final Scope scope;
 
     public final Actor actor;
 
-    protected ActorModel(@NonNull Actor actor) {
+    protected ActorModel(/*@NonNull Scope scope, */@NonNull Actor actor) {
+//        this.scope = scope;
         this.actor = actor;
     }
 
@@ -37,7 +40,18 @@ public class ActorModel {
                      actor.getScaleZ());
     }
 
-    public void setPoseTo(@NonNull Object3D object3D) {
+    public abstract Object3D create();
+
+    public final void update(@NonNull Object3D object3D) {
+        setPoseTo(object3D);
+
+        updateOverride(object3D);
+    }
+
+    protected void updateOverride(@NonNull Object3D object3D) {
+    }
+
+    private void setPoseTo(@NonNull Object3D object3D) {
         setPositionTo(object3D.getPosition());
 
         try (Pool.Holder<Quaternion> holder = QuaternionPool.get()) {
