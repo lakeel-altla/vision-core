@@ -29,6 +29,8 @@ import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
+import com.lakeel.altla.vision.model.AssetType;
+import com.lakeel.altla.vision.model.Layer;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
@@ -498,10 +500,10 @@ public final class ArPresenter extends BasePresenter<ArView>
         actor.setUserId(CurrentUser.getInstance().getUserId());
         actor.setAreaId(areaSettings.getAreaId());
         // TODO: handle other asset types.
-        actor.setAssetType(Actor.ASSET_TYPE_IMAGE);
+        actor.setAssetTypeAsEnum(AssetType.IMAGE);
         actor.setAssetId(asset.getId());
         // TODO: commercial too.
-        actor.setLayer(Actor.LAYER_NONCOMMERCIAL);
+        actor.setLayerAsEnum(Layer.NONCOMMERCIAL);
         actor.setName(asset.getName());
 
         // Decide the position and the orientation of the dropped user actor.
@@ -758,12 +760,13 @@ public final class ArPresenter extends BasePresenter<ArView>
         void addActor(@NonNull Actor actor) {
             getLog().v("Adding the actor: id = %s", actor.getId());
 
-            switch (actor.getAssetType()) {
-                case Actor.ASSET_TYPE_IMAGE:
+            switch (actor.getAssetTypeAsEnum()) {
+                case IMAGE:
                     addImageActor(actor);
                     break;
                 default:
-                    getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
+                    getLog().e("Unexpected asset type: actorId = %s, assetType = %s",
+                               actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }
@@ -771,18 +774,19 @@ public final class ArPresenter extends BasePresenter<ArView>
         void updateActor(@NonNull Actor actor) {
             getLog().v("Updating the actor: id = %s", actor.getId());
 
-            switch (actor.getAssetType()) {
-                case Actor.ASSET_TYPE_IMAGE:
+            switch (actor.getAssetTypeAsEnum()) {
+                case IMAGE:
                     updateImageActor(actor);
                     break;
                 default:
-                    getLog().e("Unknown asset type: actorId = %s", actor.getAssetType());
+                    getLog().e("Unexpected asset type: actorId = %s, assetType = %s",
+                               actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }
 
         void removeActor(@NonNull String actorId) {
-            getLog().v("Removing the actor: id = %s", actorId);
+            getLog().v("Removing the actor: actorId = %s", actorId);
 
             renderer.removeActor(actorId);
         }
