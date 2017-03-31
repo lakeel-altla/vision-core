@@ -41,11 +41,6 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        int initialScopeValue = arguments.getInt(ARG_SCOPE, -1);
-        if (initialScopeValue < 0) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
-        }
-
         initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
         if (initialScope == null) {
             throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));

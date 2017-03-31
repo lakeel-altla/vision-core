@@ -63,6 +63,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private boolean clearAllActors;
 
+    private boolean tangoLocalized;
+
     public MainRenderer(Context context) {
         super(context);
     }
@@ -94,38 +96,40 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         // Renderer#onRender invoked in OpenGL thread instantiates an actual primitive.
         //
 
-        // Add user actors.
-        synchronized (addActorModelQueue) {
-            while (true) {
-                ActorModel model = addActorModelQueue.poll();
-                if (model == null) {
-                    break;
+        if (tangoLocalized) {
+            // Add user actors.
+            synchronized (addActorModelQueue) {
+                while (true) {
+                    ActorModel model = addActorModelQueue.poll();
+                    if (model == null) {
+                        break;
+                    }
+
+                    Object3D object3D = model.create();
+
+                    getCurrentScene().addChild(object3D);
+                    objectColorPicker.registerObject(object3D);
+                    actorModelMap.put(object3D, model);
+                    object3DMap.put(model.actor.getId(), object3D);
                 }
-
-                Object3D object3D = model.create();
-
-                getCurrentScene().addChild(object3D);
-                objectColorPicker.registerObject(object3D);
-                actorModelMap.put(object3D, model);
-                object3DMap.put(model.actor.getId(), object3D);
             }
-        }
 
-        // Update user actors.
-        synchronized (updateActorModelQueue) {
-            while (true) {
-                ActorModel model = updateActorModelQueue.poll();
-                if (model == null) {
-                    break;
+            // Update user actors.
+            synchronized (updateActorModelQueue) {
+                while (true) {
+                    ActorModel model = updateActorModelQueue.poll();
+                    if (model == null) {
+                        break;
+                    }
+
+                    Object3D object3D = object3DMap.get(model.actor.getId());
+                    if (object3D == null) {
+                        LOG.e("Object3D not found: actorId = %s", model.actor.getId());
+                        continue;
+                    }
+
+                    model.update(object3D);
                 }
-
-                Object3D object3D = object3DMap.get(model.actor.getId());
-                if (object3D == null) {
-                    LOG.e("Object3D not found: actorId = %s", model.actor.getId());
-                    continue;
-                }
-
-                model.update(object3D);
             }
         }
 
@@ -203,6 +207,10 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         raiseOnCurrentCameraTransformUpdated(position.x, position.y, position.z,
                                              orientation.x, orientation.y, orientation.z, orientation.w,
                                              forward.x, forward.y, forward.z);
+    }
+
+    public void setTangoLocalized(boolean tangoLocalized) {
+        this.tangoLocalized = tangoLocalized;
     }
 
     // This method must be invoke on the main thread.

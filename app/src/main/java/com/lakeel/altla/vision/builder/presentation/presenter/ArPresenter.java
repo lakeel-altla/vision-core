@@ -11,6 +11,7 @@ import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
 import com.lakeel.altla.rajawali.pool.Vector3Pool;
 import com.lakeel.altla.tango.OnFrameAvailableListener;
+import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
@@ -22,6 +23,7 @@ import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
+import com.lakeel.altla.vision.builder.presentation.model.TangoLocalizationState;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
@@ -67,6 +69,7 @@ import io.reactivex.disposables.Disposable;
 public final class ArPresenter extends BasePresenter<ArView>
         implements TangoWrapper.OnTangoReadyListener,
                    OnFrameAvailableListener,
+                   OnPoseAvailableListener,
                    MainRenderer.OnCurrentCameraTransformUpdatedListener,
                    MainRenderer.OnActorPickedListener {
 
@@ -113,6 +116,8 @@ public final class ArPresenter extends BasePresenter<ArView>
     private String areaSettingsId;
 
     private AreaSettings areaSettings;
+
+    private TangoLocalizationState tangoLocalizationState;
 
     private ActorManager actorManager;
 
@@ -194,13 +199,11 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onResumeOverride() {
         super.onResumeOverride();
 
+        tangoLocalizationState = TangoLocalizationState.UNKNOWN;
         getView().onUpdateImageButtonAssetListVisible(false);
 
         if (areaSettingsId == null) {
-            visionService.getTangoWrapper().addOnTangoReadyListener(this);
-            visionService.getTangoWrapper().addOnFrameAvailableListener(this);
-            visionService.getTangoWrapper().connect();
-            active = true;
+            connectTango();
         } else {
             Disposable disposable = Maybe
                     .<AreaSettings>create(e -> {
@@ -215,11 +218,7 @@ public final class ArPresenter extends BasePresenter<ArView>
                     })
                     .subscribe(areaSettings -> {
                         this.areaSettings = areaSettings;
-
-                        visionService.getTangoWrapper().addOnTangoReadyListener(this);
-                        visionService.getTangoWrapper().addOnFrameAvailableListener(this);
-                        visionService.getTangoWrapper().connect();
-                        active = true;
+                        connectTango();
                     }, e -> {
                         getLog().e("Failed.", e);
                         getView().onSnackbar(R.string.snackbar_failed);
@@ -235,11 +234,7 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onPauseOverride() {
         super.onPauseOverride();
 
-        active = false;
-        renderer.disconnectFromTangoCamera();
-        visionService.getTangoWrapper().removeOnTangoReadyListener(this);
-        visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
-        visionService.getTangoWrapper().disconnect();
+        disconnectTango();
 
         // Pause the thread for OpenGL in the texture view.
         getView().onPauseTextureView();
@@ -324,6 +319,31 @@ public final class ArPresenter extends BasePresenter<ArView>
     }
 
     @Override
+    public void onPoseAvailable(TangoPoseData pose) {
+        if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION &&
+            pose.targetFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) {
+
+            if (pose.statusCode == TangoPoseData.POSE_VALID) {
+                if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
+                    tangoLocalizationState == TangoLocalizationState.NOT_LOCALIZED) {
+
+                    getLog().d("Localized.");
+                    tangoLocalizationState = TangoLocalizationState.LOCALIZED;
+                    renderer.setTangoLocalized(true);
+                }
+            } else {
+                if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
+                    tangoLocalizationState == TangoLocalizationState.LOCALIZED) {
+
+                    getLog().d("Not localized.");
+                    tangoLocalizationState = TangoLocalizationState.NOT_LOCALIZED;
+                    renderer.setTangoLocalized(false);
+                }
+            }
+        }
+    }
+
+    @Override
     public void onCurrentCameraTransformUpdated(double positionX, double positionY, double positionZ,
                                                 double orientationX, double orientationY, double orientationZ,
                                                 double orientationW, double forwardX, double forwardY,
@@ -362,19 +382,13 @@ public final class ArPresenter extends BasePresenter<ArView>
                 .subscribe(areaSettings -> {
                     this.areaSettings = areaSettings;
 
-                    renderer.clearAllActors();
-                    renderer.disconnectFromTangoCamera();
-                    visionService.getTangoWrapper().removeOnTangoReadyListener(this);
-                    visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
-                    visionService.getTangoWrapper().disconnect();
+                    disconnectTango();
 
                     // Pause the thread for OpenGL in the texture view.
                     getView().onPauseTextureView();
                     getView().onUpdateImageButtonAssetListVisible(true);
 
-                    visionService.getTangoWrapper().addOnTangoReadyListener(this);
-                    visionService.getTangoWrapper().addOnFrameAvailableListener(this);
-                    visionService.getTangoWrapper().connect();
+                    connectTango();
                 }, e -> {
                     getLog().e("Failed.", e);
                     getView().onSnackbar(R.string.snackbar_failed);
@@ -568,6 +582,45 @@ public final class ArPresenter extends BasePresenter<ArView>
         visionService.getUserActorApi().saveActor(pickedActorModel.actor);
     }
 
+    @NonNull
+    private TangoConfig createTangoConfig(@NonNull Tango tango) {
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+
+        // NOTE:
+        // Low latency integration is necessary to achieve a precise alignment of
+        // virtual objects with the RBG image and produce a good AR effect.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+        // Enable the color camera.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+        // NOTE:
+        // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
+//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+
+        if (areaSettings != null && areaSettings.getAreaDescriptionId() != null) {
+            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
+        }
+
+        return config;
+    }
+
+    private void connectTango() {
+        visionService.getTangoWrapper().addOnTangoReadyListener(this);
+        visionService.getTangoWrapper().addOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().addOnPoseAvailableListener(this);
+        visionService.getTangoWrapper().connect();
+        active = true;
+    }
+
+    private void disconnectTango() {
+        active = false;
+        renderer.clearAllActors();
+        renderer.disconnectFromTangoCamera();
+        visionService.getTangoWrapper().removeOnTangoReadyListener(this);
+        visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
+        visionService.getTangoWrapper().removeOnPoseAvailableListener(this);
+        visionService.getTangoWrapper().disconnect();
+    }
+
     private void translateUserActor(float distance) {
         // Scale.
         float scaledDistance = distance * TRANSLATE_OBJECT_DISTANCE_SCALE;
@@ -690,27 +743,6 @@ public final class ArPresenter extends BasePresenter<ArView>
         }
 
         renderer.updateActorModel(pickedActorModel);
-    }
-
-    @NonNull
-    private TangoConfig createTangoConfig(@NonNull Tango tango) {
-        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-
-        // NOTE:
-        // Low latency integration is necessary to achieve a precise alignment of
-        // virtual objects with the RBG image and produce a good AR effect.
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
-        // Enable the color camera.
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
-        // NOTE:
-        // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
-//        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
-
-        if (areaSettings != null && areaSettings.getAreaDescriptionId() != null) {
-            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
-        }
-
-        return config;
     }
 
     private final class ActorManager {
