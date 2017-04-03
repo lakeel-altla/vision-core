@@ -26,21 +26,23 @@ public final class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Binder.radioGroup(this, R.id.radio_group_button).checked(viewModel.radioGroupChecked).bind();
-        Binder.view(this, R.id.button_on_click).click(viewModel.commandClick).bind();
+        Binder binder = new Binder(this);
 
-        Binder.textView(this, R.id.text_view_set_text).text(viewModel.textViewText).bind();
-        Binder.view(this, R.id.button_set_text).click(viewModel.commandTextViewText).bind();
-        Binder.view(this, R.id.button_clear_text).click(viewModel.commandClearTextViewText).bind();
+        binder.radioGroup(R.id.radio_group_button).checked(viewModel.radioGroupChecked).bind();
+        binder.view(R.id.button_on_click).click(viewModel.commandClick).bind();
 
-        Binder.editText(this, R.id.edit_text).text(viewModel.editTextText).bind();
-        Binder.textView(this, R.id.text_view_edit_text_result).text(viewModel.editTextText).bind();
-        Binder.view(this, R.id.button_edit_text_clear_text).click(viewModel.commandClearEditTextText).bind();
+        binder.textView(R.id.text_view_set_text).text(viewModel.textViewText).bind();
+        binder.view(R.id.button_set_text).click(viewModel.commandTextViewText).bind();
+        binder.view(R.id.button_clear_text).click(viewModel.commandClearTextViewText).bind();
 
-        Binder.view(this, R.id.text_view_on_long_click).longClick(viewModel.commandLongClick).bind();
+        binder.editText(R.id.edit_text).text(viewModel.editTextText).bind();
+        binder.textView(R.id.text_view_edit_text_result).text(viewModel.editTextText).bind();
+        binder.view(R.id.button_edit_text_clear_text).click(viewModel.commandClearEditTextText).bind();
 
-        Binder.compoundButton(this, R.id.toggle_button).checked(viewModel.toggleButtonChecked).bind();
-        Binder.textView(this, R.id.text_view_toggle_button_result).text(viewModel.toggleButtonChecked)
+        binder.view(R.id.text_view_on_long_click).longClick(viewModel.commandLongClick).bind();
+
+        binder.compoundButton(R.id.toggle_button).checked(viewModel.toggleButtonChecked).bind();
+        binder.textView(R.id.text_view_toggle_button_result).text(viewModel.toggleButtonChecked)
               .converter(new AbstractPropertyBinding.ConvertDelegate() {
                   @Override
                   public Object convert(Object value) {
@@ -48,7 +50,7 @@ public final class MainActivity extends AppCompatActivity {
                   }
               }, null)
               .bind();
-        Binder.view(this, R.id.edit_text_toggle_enabled).enabled(viewModel.toggleButtonChecked).bind();
+        binder.view(R.id.edit_text_toggle_enabled).enabled(viewModel.toggleButtonChecked).bind();
     }
 
     private final class ViewModel {

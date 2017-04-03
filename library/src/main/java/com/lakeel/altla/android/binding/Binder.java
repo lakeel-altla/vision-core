@@ -18,18 +18,23 @@ import android.widget.TextView;
 
 public final class Binder {
 
-    private Binder() {
+    private final Activity activity;
+
+    private final View container;
+
+    public Binder(@NonNull Activity activity) {
+        this.activity = activity;
+        container = null;
+    }
+
+    public Binder(@NonNull View container) {
+        activity = null;
+        this.container = container;
     }
 
     @NonNull
-    public static ViewTarget view(@NonNull Activity activity, @IdRes int id) {
-        View view = findById(activity, id);
-        return view(view);
-    }
-
-    @NonNull
-    public static ViewTarget view(@NonNull View parent, @IdRes int id) {
-        View view = findById(parent, id);
+    public ViewTarget view(@IdRes int id) {
+        View view = findById(id);
         return view(view);
     }
 
@@ -39,83 +44,61 @@ public final class Binder {
     }
 
     @NonNull
-    public static TextViewTarget textView(@NonNull Activity activity, @IdRes int id) {
-        TextView textView = findById(activity, id);
+    public TextViewTarget textView(@IdRes int id) {
+        TextView textView = findById(id);
         return textView(textView);
     }
 
     @NonNull
-    public static TextViewTarget textView(@NonNull View parent, @IdRes int id) {
-        TextView textView = findById(parent, id);
-        return textView(textView);
-    }
-
-    @NonNull
-    public static TextViewTarget textView(@NonNull TextView textView) {
+    public TextViewTarget textView(@NonNull TextView textView) {
         return new TextViewTarget(textView);
     }
 
     @NonNull
-    public static EditTextTarget editText(@NonNull Activity activity, @IdRes int id) {
-        EditText editText = findById(activity, id);
+    public EditTextTarget editText(@IdRes int id) {
+        EditText editText = findById(id);
         return editText(editText);
     }
 
     @NonNull
-    public static EditTextTarget editText(@NonNull View parent, @IdRes int id) {
-        EditText editText = findById(parent, id);
-        return editText(editText);
-    }
-
-    @NonNull
-    public static EditTextTarget editText(@NonNull EditText editText) {
+    public EditTextTarget editText(@NonNull EditText editText) {
         return new EditTextTarget(editText);
     }
 
     @NonNull
-    public static RadioGroupTarget radioGroup(@NonNull Activity activity, @IdRes int id) {
-        RadioGroup radioGroup = findById(activity, id);
+    public RadioGroupTarget radioGroup(@IdRes int id) {
+        RadioGroup radioGroup = findById(id);
         return radioGroup(radioGroup);
     }
 
     @NonNull
-    public static RadioGroupTarget radioGroup(@NonNull View parent, @IdRes int id) {
-        RadioGroup radioGroup = findById(parent, id);
-        return radioGroup(radioGroup);
-    }
-
-    @NonNull
-    public static RadioGroupTarget radioGroup(@NonNull RadioGroup radioGroup) {
+    public RadioGroupTarget radioGroup(@NonNull RadioGroup radioGroup) {
         return new RadioGroupTarget(radioGroup);
     }
 
     @NonNull
-    public static CompoundButtonTarget compoundButton(@NonNull Activity activity, @IdRes int id) {
-        CompoundButton compoundButton = findById(activity, id);
+    public CompoundButtonTarget compoundButton(@IdRes int id) {
+        CompoundButton compoundButton = findById(id);
         return compoundButton(compoundButton);
     }
 
     @NonNull
-    public static CompoundButtonTarget compoundButton(@NonNull View parent, @IdRes int id) {
-        CompoundButton compoundButton = findById(parent, id);
-        return compoundButton(compoundButton);
-    }
-
-    @NonNull
-    public static CompoundButtonTarget compoundButton(@NonNull CompoundButton compoundButton) {
+    public CompoundButtonTarget compoundButton(@NonNull CompoundButton compoundButton) {
         return new CompoundButtonTarget(compoundButton);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends View> T findById(@NonNull Activity activity, @IdRes int id) {
-        T view = (T) activity.findViewById(id);
-        throwExceptionIfViewIsNull(view);
-        return view;
-    }
+    private <T extends View> T findById(@IdRes int id) {
 
-    @SuppressWarnings("unchecked")
-    private static <T extends View> T findById(@NonNull View parent, @IdRes int id) {
-        T view = (T) parent.findViewById(id);
+        T view;
+        if (activity != null) {
+            view = (T) activity.findViewById(id);
+        } else if (container != null) {
+            view = (T) container.findViewById(id);
+        } else {
+            throw new IllegalStateException("View container not found.");
+        }
+
         throwExceptionIfViewIsNull(view);
         return view;
     }
