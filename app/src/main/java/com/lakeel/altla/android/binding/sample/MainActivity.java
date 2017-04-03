@@ -5,7 +5,6 @@ import com.lakeel.altla.android.binding.BooleanProperty;
 import com.lakeel.altla.android.binding.IntProperty;
 import com.lakeel.altla.android.binding.ObjectProperty;
 import com.lakeel.altla.android.binding.RelayCommand;
-import com.lakeel.altla.android.binding.propertybinding.AbstractPropertyBinding;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -43,12 +42,7 @@ public final class MainActivity extends AppCompatActivity {
 
         binder.compoundButton(R.id.toggle_button).checked(viewModel.toggleButtonChecked).bind();
         binder.textView(R.id.text_view_toggle_button_result).text(viewModel.toggleButtonChecked)
-              .converter(new AbstractPropertyBinding.ConvertDelegate() {
-                  @Override
-                  public Object convert(Object value) {
-                      return value == null ? null : value.toString();
-                  }
-              }, null)
+              .converter(value -> value == null ? null : value.toString(), null)
               .bind();
         binder.view(R.id.edit_text_toggle_enabled).enabled(viewModel.toggleButtonChecked).bind();
     }
@@ -74,17 +68,9 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        RelayCommand commandClick = new RelayCommand(new RelayCommand.ExecuteDelegate() {
-            @Override
-            public void execute() {
-                Toast.makeText(MainActivity.this, "click", Toast.LENGTH_SHORT).show();
-            }
-        }, new RelayCommand.CanExecuteDelegate() {
-            @Override
-            public boolean canExecute() {
-                return radioGroupChecked.get() == R.id.radio_button_button_enabled;
-            }
-        });
+        RelayCommand commandClick = new RelayCommand(
+                () -> Toast.makeText(MainActivity.this, "click", Toast.LENGTH_SHORT).show(),
+                () -> radioGroupChecked.get() == R.id.radio_button_button_enabled);
 
         ObjectProperty<String> textViewText = new ObjectProperty<String>() {
 
@@ -105,19 +91,9 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        RelayCommand commandTextViewText = new RelayCommand(new RelayCommand.ExecuteDelegate() {
-            @Override
-            public void execute() {
-                textViewText.set("Text was set.");
-            }
-        });
+        RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
 
-        RelayCommand commandClearTextViewText = new RelayCommand(new RelayCommand.ExecuteDelegate() {
-            @Override
-            public void execute() {
-                textViewText.set(null);
-            }
-        });
+        RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
 
         ObjectProperty<String> editTextText = new ObjectProperty<String>() {
 
@@ -139,19 +115,10 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        RelayCommand commandClearEditTextText = new RelayCommand(new RelayCommand.ExecuteDelegate() {
-            @Override
-            public void execute() {
-                editTextText.set(null);
-            }
-        });
+        RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
 
-        RelayCommand commandLongClick = new RelayCommand(new RelayCommand.ExecuteDelegate() {
-            @Override
-            public void execute() {
-                Toast.makeText(MainActivity.this, "longClick", Toast.LENGTH_SHORT).show();
-            }
-        });
+        RelayCommand commandLongClick = new RelayCommand(
+                () -> Toast.makeText(MainActivity.this, "longClick", Toast.LENGTH_SHORT).show());
 
         BooleanProperty toggleButtonChecked = new BooleanProperty() {
 
