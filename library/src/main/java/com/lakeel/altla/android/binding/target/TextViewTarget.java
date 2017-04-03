@@ -1,6 +1,7 @@
 package com.lakeel.altla.android.binding.target;
 
 import com.lakeel.altla.android.binding.ObjectProperty;
+import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.propertybinding.TextViewTextPropertyBinding;
 
 import android.support.annotation.NonNull;
@@ -15,7 +16,7 @@ public final class TextViewTarget {
     }
 
     @NonNull
-    public TextViewTextPropertyBinding text(@NonNull ObjectProperty<?> property) {
+    public TextViewTextPropertyBinding text(@NonNull Property<?> property) {
         return new TextViewTextPropertyBinding(textView, property);
     }
 }

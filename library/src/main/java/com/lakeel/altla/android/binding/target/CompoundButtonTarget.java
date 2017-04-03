@@ -1,6 +1,6 @@
 package com.lakeel.altla.android.binding.target;
 
-import com.lakeel.altla.android.binding.BooleanProperty;
+import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.propertybinding.CompoundButtoCheckedBinding;
 
 import android.support.annotation.NonNull;
@@ -15,7 +15,7 @@ public final class CompoundButtonTarget {
     }
 
     @NonNull
-    public CompoundButtoCheckedBinding checked(@NonNull BooleanProperty property) {
+    public CompoundButtoCheckedBinding checked(@NonNull Property<?> property) {
         return new CompoundButtoCheckedBinding(compoundButton, property);
     }
 }

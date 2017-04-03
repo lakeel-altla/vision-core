@@ -1,14 +1,14 @@
 package com.lakeel.altla.android.binding.propertybinding;
 
 import com.lakeel.altla.android.binding.BindingMode;
-import com.lakeel.altla.android.binding.ObjectProperty;
+import com.lakeel.altla.android.binding.Property;
 
 import android.support.annotation.NonNull;
 import android.widget.TextView;
 
-public final class TextViewTextPropertyBinding extends AbstractPropertyBinding<TextView, ObjectProperty<?>> {
+public final class TextViewTextPropertyBinding extends AbstractPropertyBinding<TextView> {
 
-    public TextViewTextPropertyBinding(@NonNull TextView textView, @NonNull ObjectProperty<?> property) {
+    public TextViewTextPropertyBinding(@NonNull TextView textView, @NonNull Property<?> property) {
         super(textView, property);
     }
 
@@ -29,8 +29,8 @@ public final class TextViewTextPropertyBinding extends AbstractPropertyBinding<T
 
     @Override
     protected void updateTargetCore() {
-        Object value = getProperty().get();
-        getView().setText(value == null ? null : value.toString());
+        String value = (String) getConverter().convert(getProperty().getAsObject());
+        getView().setText(value == null ? null : value);
     }
 
     @Override

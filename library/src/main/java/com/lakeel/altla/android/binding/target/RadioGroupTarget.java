@@ -1,6 +1,6 @@
 package com.lakeel.altla.android.binding.target;
 
-import com.lakeel.altla.android.binding.IntProperty;
+import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.propertybinding.RadioGroupCheckedPropertyBinding;
 
 import android.support.annotation.NonNull;
@@ -15,7 +15,7 @@ public final class RadioGroupTarget {
     }
 
     @NonNull
-    public RadioGroupCheckedPropertyBinding checked(@NonNull final IntProperty property) {
+    public RadioGroupCheckedPropertyBinding checked(@NonNull final Property<?> property) {
         RadioGroupCheckedPropertyBinding binding = new RadioGroupCheckedPropertyBinding(radioGroup, property);
         binding.bind();
         return binding;

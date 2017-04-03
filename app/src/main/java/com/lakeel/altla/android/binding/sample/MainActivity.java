@@ -5,6 +5,7 @@ import com.lakeel.altla.android.binding.BooleanProperty;
 import com.lakeel.altla.android.binding.IntProperty;
 import com.lakeel.altla.android.binding.ObjectProperty;
 import com.lakeel.altla.android.binding.RelayCommand;
+import com.lakeel.altla.android.binding.propertybinding.AbstractPropertyBinding;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -39,11 +40,20 @@ public final class MainActivity extends AppCompatActivity {
         Binder.view(this, R.id.text_view_on_long_click).longClick(viewModel.commandLongClick).bind();
 
         Binder.compoundButton(this, R.id.toggle_button).checked(viewModel.toggleButtonChecked).bind();
+        Binder.textView(this, R.id.text_view_toggle_button_result).text(viewModel.toggleButtonChecked)
+              .converter(new AbstractPropertyBinding.ConvertDelegate() {
+                  @Override
+                  public Object convert(Object value) {
+                      return value == null ? null : value.toString();
+                  }
+              }, null)
+              .bind();
     }
 
     private final class ViewModel {
 
         IntProperty radioGroupChecked = new IntProperty() {
+
             int value = R.id.radio_button_button_disabled;
 
             @Override
@@ -74,6 +84,7 @@ public final class MainActivity extends AppCompatActivity {
         });
 
         ObjectProperty<String> textViewText = new ObjectProperty<String>() {
+
             String value;
 
             @Nullable
@@ -106,6 +117,7 @@ public final class MainActivity extends AppCompatActivity {
         });
 
         ObjectProperty<String> editTextText = new ObjectProperty<String>() {
+
             String value;
 
             @Nullable
@@ -139,6 +151,7 @@ public final class MainActivity extends AppCompatActivity {
         });
 
         BooleanProperty toggleButtonChecked = new BooleanProperty() {
+
             boolean value;
 
             @Override

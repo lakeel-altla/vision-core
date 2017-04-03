@@ -1,16 +1,16 @@
 package com.lakeel.altla.android.binding.propertybinding;
 
 import com.lakeel.altla.android.binding.BindingMode;
-import com.lakeel.altla.android.binding.IntProperty;
+import com.lakeel.altla.android.binding.Property;
 
 import android.support.annotation.NonNull;
 import android.widget.RadioGroup;
 
-public final class RadioGroupCheckedPropertyBinding extends AbstractPropertyBinding<RadioGroup, IntProperty> {
+public final class RadioGroupCheckedPropertyBinding extends AbstractPropertyBinding<RadioGroup> {
 
     private RadioGroup.OnCheckedChangeListener onCheckedChangeListener;
 
-    public RadioGroupCheckedPropertyBinding(@NonNull RadioGroup radioGroup, @NonNull IntProperty property) {
+    public RadioGroupCheckedPropertyBinding(@NonNull RadioGroup radioGroup, @NonNull Property<?> property) {
         super(radioGroup, property);
     }
 
@@ -31,12 +31,14 @@ public final class RadioGroupCheckedPropertyBinding extends AbstractPropertyBind
 
     @Override
     protected void updateTargetCore() {
-        getView().check(getProperty().get());
+        Integer value = (Integer) getConverter().convert(getProperty().getAsObject());
+        getView().check(value == null ? 0 : value);
     }
 
     @Override
     protected void updateSourceCore() {
-        getProperty().set(getView().getCheckedRadioButtonId());
+        Object value = getConverter().convertBack(getView().getCheckedRadioButtonId());
+        getProperty().setAsObject(value);
     }
 
     @Override

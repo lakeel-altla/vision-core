@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseProperty implements Property {
+public abstract class BaseProperty implements Property {
 
     private final List<OnValueChangedListener> listeners = new ArrayList<>();
 

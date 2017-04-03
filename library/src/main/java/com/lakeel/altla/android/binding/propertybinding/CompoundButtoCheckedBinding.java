@@ -1,17 +1,16 @@
 package com.lakeel.altla.android.binding.propertybinding;
 
 import com.lakeel.altla.android.binding.BindingMode;
-import com.lakeel.altla.android.binding.BooleanProperty;
+import com.lakeel.altla.android.binding.Property;
 
 import android.support.annotation.NonNull;
 import android.widget.CompoundButton;
 
-public final class CompoundButtoCheckedBinding
-        extends AbstractPropertyBinding<CompoundButton, BooleanProperty> {
+public final class CompoundButtoCheckedBinding extends AbstractPropertyBinding<CompoundButton> {
 
     private CompoundButton.OnCheckedChangeListener onCheckedChangeListener;
 
-    public CompoundButtoCheckedBinding(@NonNull CompoundButton compoundButton, @NonNull BooleanProperty property) {
+    public CompoundButtoCheckedBinding(@NonNull CompoundButton compoundButton, @NonNull Property<?> property) {
         super(compoundButton, property);
     }
 
@@ -32,12 +31,14 @@ public final class CompoundButtoCheckedBinding
 
     @Override
     protected void updateTargetCore() {
-        getView().setChecked(getProperty().get());
+        Boolean value = (Boolean) getConverter().convert(getProperty().getAsObject());
+        getView().setChecked(value);
     }
 
     @Override
     protected void updateSourceCore() {
-        getProperty().set(getView().isChecked());
+        Object value = getConverter().convertBack(getView().isChecked());
+        getProperty().setAsObject(value);
     }
 
     @Override

@@ -1,18 +1,18 @@
 package com.lakeel.altla.android.binding.propertybinding;
 
 import com.lakeel.altla.android.binding.BindingMode;
-import com.lakeel.altla.android.binding.ObjectProperty;
+import com.lakeel.altla.android.binding.Property;
 
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
-public final class EditTextTextPropertyBinding extends AbstractPropertyBinding<EditText, ObjectProperty<String>> {
+public final class EditTextTextPropertyBinding extends AbstractPropertyBinding<EditText> {
 
     private TextWatcher textWatcher;
 
-    public EditTextTextPropertyBinding(@NonNull EditText editText, @NonNull ObjectProperty<String> property) {
+    public EditTextTextPropertyBinding(@NonNull EditText editText, @NonNull Property<?> property) {
         super(editText, property);
     }
 
@@ -33,14 +33,15 @@ public final class EditTextTextPropertyBinding extends AbstractPropertyBinding<E
 
     @Override
     protected void updateTargetCore() {
-        String value = getProperty().get();
+        String value = (String) getConverter().convert(getProperty().getAsObject());
         getView().setText(value == null ? null : value);
     }
 
     @Override
     protected void updateSourceCore() {
         Editable editable = getView().getText();
-        getProperty().set(editable == null ? null : editable.toString());
+        Object value = getConverter().convertBack(editable == null ? null : editable.toString());
+        getProperty().setAsObject(value);
     }
 
     @Override
