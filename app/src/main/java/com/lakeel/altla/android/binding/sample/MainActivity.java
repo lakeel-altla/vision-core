@@ -48,6 +48,7 @@ public final class MainActivity extends AppCompatActivity {
                   }
               }, null)
               .bind();
+        Binder.view(this, R.id.edit_text_toggle_enabled).enabled(viewModel.toggleButtonChecked).bind();
     }
 
     private final class ViewModel {
