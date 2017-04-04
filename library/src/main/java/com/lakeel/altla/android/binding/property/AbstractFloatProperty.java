@@ -2,14 +2,14 @@ package com.lakeel.altla.android.binding.property;
 
 import android.support.annotation.Nullable;
 
-public abstract class AbstractIntProperty extends BaseProperty {
+public abstract class AbstractFloatProperty extends BaseProperty {
 
-    protected AbstractIntProperty() {
+    protected AbstractFloatProperty() {
     }
 
-    public abstract int get();
+    public abstract float get();
 
-    public abstract void set(int value);
+    public abstract void set(float value);
 
     @Nullable
     @Override
@@ -19,6 +19,6 @@ public abstract class AbstractIntProperty extends BaseProperty {
 
     @Override
     public final void setAsObject(@Nullable Object value) {
-        set(value == null ? 0 : (int) value);
+        set(value == null ? 0 : (float) value);
     }
 }
