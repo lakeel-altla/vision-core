@@ -15,11 +15,11 @@ import com.lakeel.altla.android.binding.propertybinder.RadioGroupCheckedProperty
 import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BinderFactory {
+
+    private static final String TAG = BinderFactory.class.getSimpleName();
 
     private final PropertyBindingDefinitionRegistry propertyBindingDefinitionRegistry =
             new PropertyBindingDefinitionRegistry();
@@ -52,19 +54,11 @@ public final class BinderFactory {
 
         try {
             propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
-                    View.class, "enabled", boolean.class,
-                    BindingMode.ONE_WAY, DefaultPropertyBinder.class
-            ));
-            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
-                    TextView.class, "text", CharSequence.class,
-                    BindingMode.ONE_WAY, DefaultPropertyBinder.class
-            ));
-            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
                     EditText.class, "text", CharSequence.class,
                     BindingMode.TWO_WAY, EditTextTextPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
-                    CompoundButton.class, "checked", boolean.class,
+                    CompoundButton.class, "checked",
                     BindingMode.TWO_WAY, CompoundButtonCheckedPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
@@ -92,13 +86,20 @@ public final class BinderFactory {
     public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull String propertyName,
                                                       @NonNull Property<?> source) {
         Class<? extends View> viewType = target.getClass();
+
         PropertyBindingDefinition definition = propertyBindingDefinitionRegistry.find(viewType, propertyName);
         if (definition == null) {
-            throw new IllegalArgumentException(
-                    String.format("No such definition exists: viewType = %s, propertyName = %s",
-                                  viewType, propertyName));
-
+            Log.d(TAG, String.format("The default definition will be used: viewType = %s, propertyName = %s",
+                                     viewType, propertyName));
+            try {
+                definition = PropertyBindingDefinition.create(
+                        viewType, propertyName, BindingMode.ONE_WAY, DefaultPropertyBinder.class);
+            } catch (NoSuchMethodException e) {
+                Log.e(TAG, "Failed to create the definition.", e);
+                throw new RuntimeException(e);
+            }
         }
+
         Constructor<? extends PropertyBinder> constructor = definition.getBinderConstructor();
         try {
             return constructor.newInstance(definition, target, source);
@@ -111,6 +112,7 @@ public final class BinderFactory {
     public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull String commandName,
                                                      @NonNull Command source) {
         Class<? extends View> viewType = target.getClass();
+
         CommandBindingDefinition definition = commandBindingDefinitionRegistry.find(viewType, commandName);
         if (definition == null) {
             throw new IllegalArgumentException(
@@ -118,6 +120,7 @@ public final class BinderFactory {
                                   viewType, commandName));
 
         }
+
         Constructor<? extends CommandBinder> constructor = definition.getBinderConstructor();
         try {
             return constructor.newInstance(definition, target, source);

@@ -48,16 +48,57 @@ public final class PropertyBindingDefinition {
     @NonNull
     public static PropertyBindingDefinition create(@NonNull Class<? extends View> viewType,
                                                    @NonNull String propertyName,
+                                                   @NonNull BindingMode defaultBindingMode,
+                                                   @NonNull Class<? extends PropertyBinder> binderType)
+            throws NoSuchMethodException {
+
+        Method readMethod = null;
+        String readMethodName = PropertyNameResolver.resolveReadMethodNameByNonBoolean(propertyName);
+
+        try {
+            readMethod = viewType.getMethod(readMethodName);
+        } catch (NoSuchMethodException e1) {
+            readMethodName = PropertyNameResolver.resolveReadMethodNameByBoolean(propertyName);
+            try {
+                readMethod = viewType.getMethod(readMethodName);
+            } catch (NoSuchMethodException e2) {
+                Log.d(TAG, String.format("The read method not found: viewType = %s, propertyName = %s",
+                                         viewType, propertyName));
+            }
+        }
+
+        Method writeMethod = null;
+
+        if (readMethod == null) {
+            Log.d(TAG, String.format("The write method can not be resolved: viewType = %s, propertyName = %s",
+                                     viewType, propertyName));
+        } else {
+            Class<?> propertyType = readMethod.getReturnType();
+            String writeMethodName = PropertyNameResolver.resolveWriteMethodName(propertyName);
+
+            try {
+                writeMethod = viewType.getMethod(writeMethodName, propertyType);
+            } catch (NoSuchMethodException e) {
+                Log.d(TAG, String.format(
+                        "The write method not found: viewType = %s, propertyName = %s, propertyType = %s",
+                        viewType, propertyName, propertyType));
+            }
+        }
+
+        return new PropertyBindingDefinition(viewType, propertyName, readMethod, writeMethod, defaultBindingMode,
+                                             binderType);
+    }
+
+    @NonNull
+    public static PropertyBindingDefinition create(@NonNull Class<? extends View> viewType,
+                                                   @NonNull String propertyName,
                                                    @NonNull Class<?> propertyType,
                                                    @NonNull BindingMode defaultBindingMode,
                                                    @NonNull Class<? extends PropertyBinder> binderType)
             throws NoSuchMethodException {
 
-        String readMethodName = PropertyNameResolver.resolveReadMethodName(propertyName, propertyType);
-        String writeMethodName = PropertyNameResolver.resolveWriteMethodName(propertyName);
-
         Method readMethod = null;
-        Method writeMethod = null;
+        String readMethodName = PropertyNameResolver.resolveReadMethodName(propertyName, propertyType);
 
         try {
             readMethod = viewType.getMethod(readMethodName);
@@ -65,6 +106,9 @@ public final class PropertyBindingDefinition {
             Log.d(TAG, String.format("The read method not found: viewType = %s, propertyName = %s, propertyType = %s",
                                      viewType, propertyName, propertyType));
         }
+
+        Method writeMethod = null;
+        String writeMethodName = PropertyNameResolver.resolveWriteMethodName(propertyName);
 
         try {
             writeMethod = viewType.getMethod(writeMethodName, propertyType);

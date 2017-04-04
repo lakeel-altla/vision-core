@@ -37,7 +37,7 @@ public final class PropertyBindingDefinitionRegistry {
 
         if (definition == null) {
             Class<?> superclass = viewType.getSuperclass();
-            return find(superclass, propertyName);
+            return superclass == null ? null : find(superclass, propertyName);
         } else {
             return definition;
         }

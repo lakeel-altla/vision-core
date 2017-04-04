@@ -24,6 +24,16 @@ public final class PropertyNameResolver {
     }
 
     @NonNull
+    public static String resolveReadMethodNameByNonBoolean(@NonNull String propertyName) {
+        return GET_PREFIX + capitalize(propertyName);
+    }
+
+    @NonNull
+    public static String resolveReadMethodNameByBoolean(@NonNull String propertyName) {
+        return IS_PREFIX + capitalize(propertyName);
+    }
+
+    @NonNull
     private static String resolveReadMethodPrefix(@NonNull Class<?> propertyType) {
         return (propertyType == boolean.class || propertyType == Boolean.class) ? IS_PREFIX : SET_PREFIX;
     }
