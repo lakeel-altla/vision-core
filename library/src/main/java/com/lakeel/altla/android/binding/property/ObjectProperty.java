@@ -2,24 +2,34 @@ package com.lakeel.altla.android.binding.property;
 
 import android.support.annotation.Nullable;
 
-public abstract class ObjectProperty<T> extends BaseProperty {
+import java.util.Objects;
 
-    protected ObjectProperty() {
+public class ObjectProperty<T> extends AbstractObjectProperty<T> {
+
+    private T value;
+
+    public ObjectProperty() {
+    }
+
+    public ObjectProperty(T value) {
+        this.value = value;
     }
 
     @Nullable
-    public abstract T get();
-
-    public abstract void set(@Nullable T value);
-
     @Override
-    public final Object getAsObject() {
-        return get();
+    public final T get() {
+        return value;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public final void setAsObject(Object value) {
-        set((T) value);
+    public final void set(@Nullable T value) {
+        if (!Objects.equals(this.value, value)) {
+            this.value = value;
+            onValueChanged();
+        }
+    }
+
+    protected void onValueChanged() {
+        raiseOnValueChanged();
     }
 }

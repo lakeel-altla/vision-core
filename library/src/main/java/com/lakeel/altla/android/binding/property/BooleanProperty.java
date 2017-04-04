@@ -1,24 +1,30 @@
 package com.lakeel.altla.android.binding.property;
 
-import android.support.annotation.Nullable;
+public class BooleanProperty extends AbstractBooleanProperty {
 
-public abstract class BooleanProperty extends BaseProperty {
+    private boolean value;
 
-    protected BooleanProperty() {
+    public BooleanProperty() {
     }
 
-    public abstract boolean get();
-
-    public abstract void set(boolean value);
-
-    @Nullable
-    @Override
-    public final Object getAsObject() {
-        return get();
+    public BooleanProperty(boolean value) {
+        this.value = value;
     }
 
     @Override
-    public final void setAsObject(@Nullable Object value) {
-        set(value == null ? false : (Boolean) value);
+    public final boolean get() {
+        return value;
+    }
+
+    @Override
+    public final void set(boolean value) {
+        if (this.value != value) {
+            this.value = value;
+            onValueChanged();
+        }
+    }
+
+    protected void onValueChanged() {
+        raiseOnValueChanged();
     }
 }

@@ -1,24 +1,30 @@
 package com.lakeel.altla.android.binding.property;
 
-import android.support.annotation.Nullable;
+public class IntProperty extends AbstractIntProperty {
 
-public abstract class IntProperty extends BaseProperty {
+    private int value;
 
-    protected IntProperty() {
+    public IntProperty() {
     }
 
-    public abstract int get();
-
-    public abstract void set(int value);
-
-    @Nullable
-    @Override
-    public final Object getAsObject() {
-        return get();
+    public IntProperty(int value) {
+        this.value = value;
     }
 
     @Override
-    public final void setAsObject(@Nullable Object value) {
-        set(value == null ? 0 : (Integer) value);
+    public final int get() {
+        return value;
+    }
+
+    @Override
+    public final void set(int value) {
+        if (this.value != value) {
+            this.value = value;
+            onValueChanged();
+        }
+    }
+
+    protected void onValueChanged() {
+        raiseOnValueChanged();
     }
 }
