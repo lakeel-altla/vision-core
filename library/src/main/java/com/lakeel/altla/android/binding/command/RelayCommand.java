@@ -1,4 +1,4 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.command;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

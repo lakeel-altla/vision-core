@@ -1,4 +1,6 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.command;
+
+import com.lakeel.altla.android.binding.Command;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;

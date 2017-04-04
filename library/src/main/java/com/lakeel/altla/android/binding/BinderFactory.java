@@ -1,5 +1,6 @@
 package com.lakeel.altla.android.binding;
 
+import com.lakeel.altla.android.binding.annotation.DefaultAnnotationBinder;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinition;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinitionRegistry;
 import com.lakeel.altla.android.binding.commandbinder.CompoundButtonCheckedPropertyBinder;

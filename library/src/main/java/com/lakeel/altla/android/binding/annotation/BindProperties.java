@@ -1,4 +1,4 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,13 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface BindProperty {
+public @interface BindProperties {
 
-    int id();
-
-    String name();
-
-    BindingMode mode() default BindingMode.DEFAULT;
-
-    String converter() default "";
+    BindProperty[] value();
 }

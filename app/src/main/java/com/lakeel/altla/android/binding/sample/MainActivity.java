@@ -1,16 +1,16 @@
 package com.lakeel.altla.android.binding.sample;
 
-import com.lakeel.altla.android.binding.BindCommand;
-import com.lakeel.altla.android.binding.BindProperties;
-import com.lakeel.altla.android.binding.BindProperty;
+import com.lakeel.altla.android.binding.annotation.BindCommand;
+import com.lakeel.altla.android.binding.annotation.BindProperties;
+import com.lakeel.altla.android.binding.annotation.BindProperty;
 import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.BooleanProperty;
+import com.lakeel.altla.android.binding.property.BooleanProperty;
 import com.lakeel.altla.android.binding.Converter;
-import com.lakeel.altla.android.binding.ConverterName;
-import com.lakeel.altla.android.binding.IntProperty;
-import com.lakeel.altla.android.binding.ObjectProperty;
-import com.lakeel.altla.android.binding.RelayCommand;
-import com.lakeel.altla.android.binding.RelayConverter;
+import com.lakeel.altla.android.binding.annotation.ConverterName;
+import com.lakeel.altla.android.binding.property.IntProperty;
+import com.lakeel.altla.android.binding.property.ObjectProperty;
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.converter.RelayConverter;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

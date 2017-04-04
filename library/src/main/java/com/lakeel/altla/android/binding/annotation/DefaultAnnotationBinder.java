@@ -1,4 +1,14 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.annotation;
+
+import com.lakeel.altla.android.binding.AnnotationBinder;
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.BindingMode;
+import com.lakeel.altla.android.binding.Command;
+import com.lakeel.altla.android.binding.CommandBinder;
+import com.lakeel.altla.android.binding.Converter;
+import com.lakeel.altla.android.binding.Property;
+import com.lakeel.altla.android.binding.PropertyBinder;
+import com.lakeel.altla.android.binding.Unbindable;
 
 import android.support.annotation.NonNull;
 
@@ -8,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-final class DefaultAnnotationBinder implements AnnotationBinder {
+public final class DefaultAnnotationBinder implements AnnotationBinder {
 
     private final Map<String, Converter> converterMap = new HashMap<>();
 
@@ -18,7 +28,7 @@ final class DefaultAnnotationBinder implements AnnotationBinder {
 
     private final BinderFactory binderFactory;
 
-    DefaultAnnotationBinder(@NonNull BinderFactory binderFactory) {
+    public DefaultAnnotationBinder(@NonNull BinderFactory binderFactory) {
         this.binderFactory = binderFactory;
     }
 
@@ -41,7 +51,7 @@ final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    AnnotationBinder create(@NonNull Object object) {
+    public AnnotationBinder create(@NonNull Object object) {
         Class<?> clazz = object.getClass();
 
         try {

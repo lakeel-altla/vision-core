@@ -1,4 +1,4 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.property;
 
 import android.support.annotation.Nullable;
 

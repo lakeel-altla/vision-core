@@ -1,4 +1,6 @@
-package com.lakeel.altla.android.binding;
+package com.lakeel.altla.android.binding.converter;
+
+import com.lakeel.altla.android.binding.Converter;
 
 import android.support.annotation.Nullable;
 
