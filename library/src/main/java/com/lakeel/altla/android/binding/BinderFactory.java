@@ -84,9 +84,7 @@ public final class BinderFactory {
 
     @NonNull
     public AnnotationBinder create(@NonNull Object object) {
-        AnnotationBinder binder = new AnnotationBinder(this);
-        binder.parseFields(object);
-        return binder;
+        return new DefaultAnnotationBinder(this).create(object);
     }
 
     @NonNull
