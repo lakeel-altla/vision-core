@@ -122,7 +122,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     }
 
     protected void updateTargetCore() {
-        Method method = definition.getSetterMethod();
+        Method method = definition.getWriteMethod();
         if (method != null) {
             Object value = converter.convert(source.getAsObject());
             try {
@@ -134,7 +134,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     }
 
     protected void updateSourceCore() {
-        Method method = definition.getGetterMethod();
+        Method method = definition.getReadMethod();
         if (method != null) {
             try {
                 Object value = converter.convertBack(method.invoke(target));

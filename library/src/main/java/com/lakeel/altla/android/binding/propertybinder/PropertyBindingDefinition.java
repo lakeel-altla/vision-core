@@ -6,6 +6,7 @@ import com.lakeel.altla.android.binding.PropertyBinder;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
 import java.lang.reflect.Constructor;
@@ -13,46 +14,84 @@ import java.lang.reflect.Method;
 
 public final class PropertyBindingDefinition {
 
+    private static final String TAG = PropertyBindingDefinition.class.getSimpleName();
+
     private final Class<? extends View> viewType;
 
     private final String propertyName;
 
-    private final Class<?> propertyType;
-
-    private final String getterName;
-
-    private final String setterName;
-
     private final BindingMode defaultBindingMode;
 
-    private final Class<? extends PropertyBinder> binderType;
+    private final Method readMethod;
 
-    private final Method getterMethod;
-
-    private final Method setterMethod;
+    private final Method writeMethod;
 
     private final Constructor<? extends PropertyBinder> binderConstructor;
 
     public PropertyBindingDefinition(@NonNull Class<? extends View> viewType,
                                      @NonNull String propertyName,
-                                     @NonNull Class<?> propertyType,
-                                     @Nullable String getterName,
-                                     @Nullable String setterName,
+                                     @Nullable Method readMethod,
+                                     @Nullable Method writeMethod,
                                      @NonNull BindingMode defaultBindingMode,
                                      @NonNull Class<? extends PropertyBinder> binderType)
             throws NoSuchMethodException {
+
         this.viewType = viewType;
         this.propertyName = propertyName;
-        this.propertyType = propertyType;
-        this.getterName = getterName;
-        this.setterName = setterName;
+        this.readMethod = readMethod;
+        this.writeMethod = writeMethod;
         this.defaultBindingMode = defaultBindingMode;
-        this.binderType = binderType;
-
-        getterMethod = getterName == null ? null : viewType.getMethod(getterName);
-        setterMethod = setterName == null ? null : viewType.getMethod(setterName, propertyType);
 
         binderConstructor = binderType.getConstructor(PropertyBindingDefinition.class, View.class, Property.class);
+    }
+
+    @NonNull
+    public static PropertyBindingDefinition create(@NonNull Class<? extends View> viewType,
+                                                   @NonNull String propertyName,
+                                                   @NonNull Class<?> propertyType,
+                                                   @NonNull BindingMode defaultBindingMode,
+                                                   @NonNull Class<? extends PropertyBinder> binderType)
+            throws NoSuchMethodException {
+
+        String readMethodName = PropertyNameResolver.resolveReadMethodName(propertyName, propertyType);
+        String writeMethodName = PropertyNameResolver.resolveWriteMethodName(propertyName);
+
+        Method readMethod = null;
+        Method writeMethod = null;
+
+        try {
+            readMethod = viewType.getMethod(readMethodName);
+        } catch (NoSuchMethodException e) {
+            Log.d(TAG, String.format("The read method not found: viewType = %s, propertyName = %s, propertyType = %s",
+                                     viewType, propertyName, propertyType));
+        }
+
+        try {
+            writeMethod = viewType.getMethod(writeMethodName, propertyType);
+        } catch (NoSuchMethodException e) {
+            Log.d(TAG, String.format("The write method not found: viewType = %s, propertyName = %s, propertyType = %s",
+                                     viewType, propertyName, propertyType));
+        }
+
+        return new PropertyBindingDefinition(viewType, propertyName, readMethod, writeMethod, defaultBindingMode,
+                                             binderType);
+    }
+
+    @NonNull
+    public static PropertyBindingDefinition create(@NonNull Class<? extends View> viewType,
+                                                   @NonNull String propertyName,
+                                                   @NonNull Class<?> propertyType,
+                                                   @Nullable String readMethodName,
+                                                   @Nullable String writeMethodName,
+                                                   @NonNull BindingMode defaultBindingMode,
+                                                   @NonNull Class<? extends PropertyBinder> binderType)
+            throws NoSuchMethodException {
+
+        Method readMethod = readMethodName == null ? null : viewType.getMethod(readMethodName);
+        Method writeMethod = writeMethodName == null ? null : viewType.getMethod(writeMethodName, propertyType);
+
+        return new PropertyBindingDefinition(viewType, propertyName, readMethod, writeMethod, defaultBindingMode,
+                                             binderType);
     }
 
     @NonNull
@@ -66,38 +105,18 @@ public final class PropertyBindingDefinition {
     }
 
     @NonNull
-    public Class<?> getPropertyType() {
-        return propertyType;
-    }
-
-    @Nullable
-    public String getGetterName() {
-        return getterName;
-    }
-
-    @Nullable
-    public String getSetterName() {
-        return setterName;
-    }
-
-    @NonNull
     public BindingMode getDefaultBindingMode() {
         return defaultBindingMode;
     }
 
-    @NonNull
-    public Class<? extends PropertyBinder> getBinderType() {
-        return binderType;
+    @Nullable
+    public Method getReadMethod() {
+        return readMethod;
     }
 
     @Nullable
-    public Method getGetterMethod() {
-        return getterMethod;
-    }
-
-    @Nullable
-    public Method getSetterMethod() {
-        return setterMethod;
+    public Method getWriteMethod() {
+        return writeMethod;
     }
 
     @NonNull

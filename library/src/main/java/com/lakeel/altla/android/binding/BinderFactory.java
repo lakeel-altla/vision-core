@@ -51,23 +51,23 @@ public final class BinderFactory {
         this.container = container;
 
         try {
-            propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    View.class, "enabled", boolean.class, null, "setEnabled",
+            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
+                    View.class, "enabled", boolean.class,
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
-            propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    TextView.class, "text", CharSequence.class, null, "setText",
+            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
+                    TextView.class, "text", CharSequence.class,
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
-            propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    EditText.class, "text", CharSequence.class, null, "setText",
+            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
+                    EditText.class, "text", CharSequence.class,
                     BindingMode.TWO_WAY, EditTextTextPropertyBinder.class
             ));
-            propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    CompoundButton.class, "checked", boolean.class, "isChecked", "setChecked",
+            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
+                    CompoundButton.class, "checked", boolean.class,
                     BindingMode.TWO_WAY, CompoundButtonCheckedPropertyBinder.class
             ));
-            propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
+            propertyBindingDefinitionRegistry.register(PropertyBindingDefinition.create(
                     RadioGroup.class, "checkedButton", int.class, "getCheckedRadioButtonId", "check",
                     BindingMode.TWO_WAY, RadioGroupCheckedPropertyBinder.class
             ));
