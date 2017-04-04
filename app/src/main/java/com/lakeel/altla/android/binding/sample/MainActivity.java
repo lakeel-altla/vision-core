@@ -76,7 +76,6 @@ public final class MainActivity extends AppCompatActivity {
         final BooleanProperty toggleButtonChecked = new BooleanProperty();
 
         @ConverterName("objectStringConverter")
-        final Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString(),
-                                                                   null);
+        final Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString());
     }
 }

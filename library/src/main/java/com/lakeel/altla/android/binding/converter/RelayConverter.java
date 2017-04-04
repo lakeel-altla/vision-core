@@ -2,6 +2,7 @@ package com.lakeel.altla.android.binding.converter;
 
 import com.lakeel.altla.android.binding.Converter;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 public final class RelayConverter implements Converter {
@@ -9,6 +10,10 @@ public final class RelayConverter implements Converter {
     private final ConvertDelegate convertDelegate;
 
     private final ConvertBackDelegate convertBackDelegate;
+
+    public RelayConverter(@NonNull ConvertDelegate convertDelegate) {
+        this(convertDelegate, null);
+    }
 
     public RelayConverter(@Nullable ConvertDelegate convertDelegate,
                           @Nullable ConvertBackDelegate convertBackDelegate) {
