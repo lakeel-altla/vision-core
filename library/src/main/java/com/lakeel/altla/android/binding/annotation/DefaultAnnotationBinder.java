@@ -68,6 +68,10 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
                     handleBindProperties(field, object);
                 } else if (field.isAnnotationPresent(BindCommand.class)) {
                     handleBindCommand(field, object);
+                } else if (field.isAnnotationPresent(OnClickCommand.class)) {
+                    handleOnClickCommand(field, object);
+                } else if (field.isAnnotationPresent(OnLongClickCommand.class)) {
+                    handleOnLongClickCommand(field, object);
                 }
             }
         } catch (IllegalAccessException e) {
@@ -111,7 +115,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
 
         Property<?> source = getSourceProperty(field, object);
 
-        PropertyBinder propertyBinder = createBinder(bindProperty, source);
+        PropertyBinder propertyBinder = createPropertyBinder(bindProperty, source);
         propertyBinders.add(propertyBinder);
     }
 
@@ -124,7 +128,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
         Property<?> source = getSourceProperty(field, object);
 
         for (BindProperty bindProperty : bindProperties.value()) {
-            PropertyBinder propertyBinder = createBinder(bindProperty, source);
+            PropertyBinder propertyBinder = createPropertyBinder(bindProperty, source);
             propertyBinders.add(propertyBinder);
         }
     }
@@ -143,7 +147,8 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
         return Property.class.cast(fieldValue);
     }
 
-    private PropertyBinder createBinder(@NonNull BindProperty bindProperty, @NonNull Property<?> source) {
+    @NonNull
+    private PropertyBinder createPropertyBinder(@NonNull BindProperty bindProperty, @NonNull Property<?> source) {
         int id = bindProperty.id();
         String propertyName = bindProperty.name();
         BindingMode mode = bindProperty.mode();
@@ -164,7 +169,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
         return binder;
     }
 
-    private void handleBindCommand(Field field, Object object) throws IllegalAccessException {
+    private void handleBindCommand(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
         BindCommand bindCommand = field.getAnnotation(BindCommand.class);
         if (bindCommand == null) {
             throw new IllegalArgumentException(String.format("Field '%s' has no '%s'.", field, BindCommand.class));
@@ -172,7 +177,34 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
 
         Command source = getSourceCommand(field, object);
 
-        CommandBinder commandBinder = createBinder(bindCommand, source);
+        CommandBinder commandBinder = createCommandBinder(bindCommand, source);
+        commandBinders.add(commandBinder);
+    }
+
+    private void handleOnClickCommand(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
+        OnClickCommand onClickCommand = field.getAnnotation(OnClickCommand.class);
+        if (onClickCommand == null) {
+            throw new IllegalArgumentException(String.format("Field '%s' has no '%s'.", field, OnClickCommand.class));
+        }
+
+        int id = onClickCommand.value();
+        Command source = getSourceCommand(field, object);
+
+        CommandBinder commandBinder = createCommandBinder(id, "onClick", source);
+        commandBinders.add(commandBinder);
+    }
+
+    private void handleOnLongClickCommand(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
+        OnLongClickCommand onLongClickCommand = field.getAnnotation(OnLongClickCommand.class);
+        if (onLongClickCommand == null) {
+            throw new IllegalArgumentException(String.format(
+                    "Field '%s' has no '%s'.", field, OnLongClickCommand.class));
+        }
+
+        int id = onLongClickCommand.value();
+        Command source = getSourceCommand(field, object);
+
+        CommandBinder commandBinder = createCommandBinder(id, "onClick", source);
         commandBinders.add(commandBinder);
     }
 
@@ -191,10 +223,15 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    private CommandBinder createBinder(BindCommand bindCommand, Command source) {
+    private CommandBinder createCommandBinder(BindCommand bindCommand, Command source) {
         int id = bindCommand.id();
         String commandName = bindCommand.name();
 
+        return createCommandBinder(id, commandName, source);
+    }
+
+    @NonNull
+    private CommandBinder createCommandBinder(int id, String commandName, Command source) {
         return binderFactory.create(id, commandName, source);
     }
 

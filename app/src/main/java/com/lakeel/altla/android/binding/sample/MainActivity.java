@@ -1,16 +1,17 @@
 package com.lakeel.altla.android.binding.sample;
 
-import com.lakeel.altla.android.binding.annotation.BindCommand;
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.annotation.BindProperties;
 import com.lakeel.altla.android.binding.annotation.BindProperty;
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.property.BooleanProperty;
-import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.annotation.ConverterName;
-import com.lakeel.altla.android.binding.property.IntProperty;
-import com.lakeel.altla.android.binding.property.ObjectProperty;
+import com.lakeel.altla.android.binding.annotation.OnClickCommand;
+import com.lakeel.altla.android.binding.annotation.OnLongClickCommand;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.converter.RelayConverter;
+import com.lakeel.altla.android.binding.property.BooleanProperty;
+import com.lakeel.altla.android.binding.property.IntProperty;
+import com.lakeel.altla.android.binding.property.ObjectProperty;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -57,7 +58,7 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        @BindCommand(id = R.id.button_on_click, name = "onClick")
+        @OnClickCommand(R.id.button_on_click)
         RelayCommand commandClick = new RelayCommand(
                 () -> Toast.makeText(MainActivity.this, "onClick", Toast.LENGTH_SHORT).show(),
                 () -> radioGroupChecked.get() == R.id.radio_button_button_enabled);
@@ -82,10 +83,10 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        @BindCommand(id = R.id.button_set_text, name = "onClick")
+        @OnClickCommand(R.id.button_set_text)
         RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
 
-        @BindCommand(id = R.id.button_clear_text, name = "onClick")
+        @OnClickCommand(R.id.button_clear_text)
         RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
 
         @BindProperties({ @BindProperty(id = R.id.edit_text, name = "text"),
@@ -110,10 +111,10 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        @BindCommand(id = R.id.button_edit_text_clear_text, name = "onClick")
+        @OnClickCommand(R.id.button_edit_text_clear_text)
         RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
 
-        @BindCommand(id = R.id.text_view_on_long_click, name = "onLongClick")
+        @OnLongClickCommand(R.id.text_view_on_long_click)
         RelayCommand commandLongClick = new RelayCommand(
                 () -> Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show());
 
@@ -140,7 +141,6 @@ public final class MainActivity extends AppCompatActivity {
         };
 
         @ConverterName("objectStringConverter")
-        Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString(),
-                                                             null);
+        Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString(), null);
     }
 }
