@@ -5,36 +5,35 @@ import android.support.annotation.Nullable;
 
 public final class RelayCommand extends AbstractCommand {
 
-    private final ExecuteDelegate executeDelegate;
+    private final Execute execute;
 
-    private final CanExecuteDelegate canExecuteDelegate;
+    private final CanExecute canExecute;
 
-    public RelayCommand(@NonNull ExecuteDelegate executeDelegate) {
-        this(executeDelegate, null);
+    public RelayCommand(@NonNull Execute execute) {
+        this(execute, null);
     }
 
-    public RelayCommand(@NonNull ExecuteDelegate executeDelegate,
-                        @Nullable CanExecuteDelegate canExecuteDelegate) {
-        this.executeDelegate = executeDelegate;
-        this.canExecuteDelegate = canExecuteDelegate;
+    public RelayCommand(@NonNull Execute execute, @Nullable CanExecute canExecute) {
+        this.execute = execute;
+        this.canExecute = canExecute;
     }
 
     @Override
     public final void execute() {
-        executeDelegate.execute();
+        execute.execute();
     }
 
     @Override
     public final boolean canExecute() {
-        return canExecuteDelegate == null || canExecuteDelegate.canExecute();
+        return canExecute == null || canExecute.canExecute();
     }
 
-    public interface ExecuteDelegate {
+    public interface Execute {
 
         void execute();
     }
 
-    public interface CanExecuteDelegate {
+    public interface CanExecute {
 
         boolean canExecute();
     }
