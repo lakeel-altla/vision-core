@@ -27,7 +27,7 @@ public final class MainActivity extends AppCompatActivity {
 
         BinderFactory binderFactory = new BinderFactory(this);
 
-        binderFactory.create(R.id.radio_group_button, "checked", viewModel.radioGroupChecked).bind();
+        binderFactory.create(R.id.radio_group_button, "checkedButton", viewModel.radioGroupChecked).bind();
         binderFactory.create(R.id.button_on_click, "onClick", viewModel.commandClick).bind();
 
         binderFactory.create(R.id.text_view_set_text, "text", viewModel.textViewText).bind();

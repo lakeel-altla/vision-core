@@ -65,7 +65,7 @@ public final class BinderFactory {
                     BindingMode.TWO_WAY, CompoundButtonCheckedPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    RadioGroup.class, "checked", int.class, "getCheckedRadioButtonId", "check",
+                    RadioGroup.class, "checkedButton", int.class, "getCheckedRadioButtonId", "check",
                     BindingMode.TWO_WAY, RadioGroupCheckedPropertyBinder.class
             ));
 
