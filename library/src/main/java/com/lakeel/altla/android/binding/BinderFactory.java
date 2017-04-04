@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class BinderFactory {
 
@@ -49,31 +51,31 @@ public final class BinderFactory {
 
         try {
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    View.class, "enabled", boolean.class, null, "setEnabled",
+                    View.class, PropertyName.ENABLED, boolean.class, null, "setEnabled",
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    TextView.class, "text", CharSequence.class, null, "setText",
+                    TextView.class, PropertyName.TEXT, CharSequence.class, null, "setText",
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    EditText.class, "text", CharSequence.class, null, "setText",
+                    EditText.class, PropertyName.TEXT, CharSequence.class, null, "setText",
                     BindingMode.TWO_WAY, EditTextTextPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    CompoundButton.class, "checked", boolean.class, "isChecked", "setChecked",
+                    CompoundButton.class, PropertyName.CHECKED, boolean.class, "isChecked", "setChecked",
                     BindingMode.TWO_WAY, CompoundButtonCheckedPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    RadioGroup.class, "checkedButton", int.class, "getCheckedRadioButtonId", "check",
+                    RadioGroup.class, PropertyName.CHECKED_BUTTON, int.class, "getCheckedRadioButtonId", "check",
                     BindingMode.TWO_WAY, RadioGroupCheckedPropertyBinder.class
             ));
 
             commandBindingDefinitionRegistry.register(new CommandBindingDefinition(
-                    View.class, "onClick", ViewOnClickCommandBinder.class
+                    View.class, CommandName.ON_CLICK, ViewOnClickCommandBinder.class
             ));
             commandBindingDefinitionRegistry.register(new CommandBindingDefinition(
-                    View.class, "onLongClick", ViewOnLongClickCommandBinder.class
+                    View.class, CommandName.ON_LONG_CLICK, ViewOnLongClickCommandBinder.class
             ));
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -81,7 +83,14 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull String propertyName,
+    public AnnotationBinder create(@NonNull Object object) {
+        AnnotationBinder binder = new AnnotationBinder(this);
+        binder.parseFields(object);
+        return binder;
+    }
+
+    @NonNull
+    public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull PropertyName propertyName,
                                                       @NonNull Property<?> source) {
         Class<? extends View> viewType = target.getClass();
         PropertyBindingDefinition definition = propertyBindingDefinitionRegistry.find(viewType, propertyName);
@@ -100,7 +109,7 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull String commandName,
+    public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull CommandName commandName,
                                                      @NonNull Command source) {
         Class<? extends View> viewType = target.getClass();
         CommandBindingDefinition definition = commandBindingDefinitionRegistry.find(viewType, commandName);
@@ -119,14 +128,14 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull String propertyName,
+    public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull PropertyName propertyName,
                                                       @NonNull Property<?> source) {
         TView target = findById(id);
         return create(target, propertyName, source);
     }
 
     @NonNull
-    public <TView extends View> CommandBinder create(@IdRes int id, @NonNull String commandName,
+    public <TView extends View> CommandBinder create(@IdRes int id, @NonNull CommandName commandName,
                                                      @NonNull Command source) {
         TView target = findById(id);
         return create(target, commandName, source);
@@ -144,9 +153,25 @@ public final class BinderFactory {
         }
 
         if (view == null) {
-            throw new IllegalStateException("No view container exists.");
+            throw new IllegalStateException("No id container exists.");
         }
 
         return view;
+    }
+
+    private final class CompositeUnbindable implements Unbindable {
+
+        private final List<Unbindable> unbindables = new ArrayList<>();
+
+        public void add(@NonNull Unbindable unbindable) {
+            unbindables.add(unbindable);
+        }
+
+        @Override
+        public void unbind() {
+            for (Unbindable unbindable : unbindables) {
+                unbindable.unbind();
+            }
+        }
     }
 }

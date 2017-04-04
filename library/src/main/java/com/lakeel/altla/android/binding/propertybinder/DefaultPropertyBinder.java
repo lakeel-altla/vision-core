@@ -8,7 +8,6 @@ import com.lakeel.altla.android.binding.PropertyBinder;
 import com.lakeel.altla.android.binding.Unbindable;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,22 +47,6 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     @Override
     public final PropertyBinder converter(@NonNull Converter converter) {
         this.converter = converter;
-        return this;
-    }
-
-    @Override
-    public PropertyBinder converter(@Nullable final Convert convert, @Nullable final ConvertBack convertBack) {
-        converter = new Converter() {
-            @Override
-            public Object convert(Object value) {
-                return convert == null ? value : convert.convert(value);
-            }
-
-            @Override
-            public Object convertBack(Object value) {
-                return convertBack == null ? value : convertBack.convertBack(value);
-            }
-        };
         return this;
     }
 

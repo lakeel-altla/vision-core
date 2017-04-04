@@ -2,6 +2,7 @@ package com.lakeel.altla.android.binding.commandbinder;
 
 import com.lakeel.altla.android.binding.Command;
 import com.lakeel.altla.android.binding.CommandBinder;
+import com.lakeel.altla.android.binding.CommandName;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -12,13 +13,13 @@ public final class CommandBindingDefinition {
 
     private final Class<? extends View> viewType;
 
-    private final String commandName;
+    private final CommandName commandName;
 
     private final Class<? extends CommandBinder> binderType;
 
     private final Constructor<? extends CommandBinder> binderConstructor;
 
-    public CommandBindingDefinition(@NonNull Class<? extends View> viewType, @NonNull String commandName,
+    public CommandBindingDefinition(@NonNull Class<? extends View> viewType, @NonNull CommandName commandName,
                                     @NonNull Class<? extends CommandBinder> binderType)
             throws NoSuchMethodException {
         this.viewType = viewType;
@@ -34,7 +35,7 @@ public final class CommandBindingDefinition {
     }
 
     @NonNull
-    public String getCommandName() {
+    public CommandName getCommandName() {
         return commandName;
     }
 
