@@ -95,7 +95,6 @@ public final class BinderFactory {
         try {
             return constructor.newInstance(definition, target, source);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            // TODO
             throw new RuntimeException(e);
         }
     }
@@ -115,7 +114,6 @@ public final class BinderFactory {
         try {
             return constructor.newInstance(definition, target, source);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            // TODO
             throw new RuntimeException(e);
         }
     }

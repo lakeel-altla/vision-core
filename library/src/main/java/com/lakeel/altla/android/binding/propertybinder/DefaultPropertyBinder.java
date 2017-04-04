@@ -145,8 +145,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
             try {
                 method.invoke(target, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                // TODO
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }
@@ -158,8 +157,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
                 Object value = converter.convertBack(method.invoke(target));
                 source.setAsObject(value);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                // TODO
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }
