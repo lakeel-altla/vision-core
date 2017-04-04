@@ -78,6 +78,16 @@ public final class BinderFactory {
     }
 
     @NonNull
+    public PropertyBindingDefinitionRegistry getPropertyBindingDefinitionRegistry() {
+        return propertyBindingDefinitionRegistry;
+    }
+
+    @NonNull
+    public CommandBindingDefinitionRegistry getCommandBindingDefinitionRegistry() {
+        return commandBindingDefinitionRegistry;
+    }
+
+    @NonNull
     public AnnotationBinder create(@NonNull Object object) {
         return new DefaultAnnotationBinder(this).create(object);
     }
