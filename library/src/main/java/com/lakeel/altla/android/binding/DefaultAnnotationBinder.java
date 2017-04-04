@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class DefaultAnnotationBinder {
+final class DefaultAnnotationBinder implements AnnotationBinder {
 
     private final Map<String, Converter> converterMap = new HashMap<>();
 
@@ -22,7 +22,26 @@ public final class DefaultAnnotationBinder {
         this.binderFactory = binderFactory;
     }
 
-    void create(@NonNull Object object) {
+    @NonNull
+    @Override
+    public Unbindable bind() {
+        CompositeUnbindable compositeUnbindable = new CompositeUnbindable();
+
+        for (PropertyBinder propertyBinder : propertyBinders) {
+            Unbindable unbindable = propertyBinder.bind();
+            compositeUnbindable.add(unbindable);
+        }
+
+        for (CommandBinder commandBinder : commandBinders) {
+            Unbindable unbindable = commandBinder.bind();
+            compositeUnbindable.add(unbindable);
+        }
+
+        return compositeUnbindable;
+    }
+
+    @NonNull
+    AnnotationBinder create(@NonNull Object object) {
         Class<?> clazz = object.getClass();
 
         try {
@@ -44,6 +63,8 @@ public final class DefaultAnnotationBinder {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+
+        return this;
     }
 
     private void handleConverter(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
@@ -165,23 +186,6 @@ public final class DefaultAnnotationBinder {
         CommandName commandName = bindCommand.name();
 
         return binderFactory.create(id, commandName, source);
-    }
-
-    @NonNull
-    public Unbindable bind() {
-        CompositeUnbindable compositeUnbindable = new CompositeUnbindable();
-
-        for (PropertyBinder propertyBinder : propertyBinders) {
-            Unbindable unbindable = propertyBinder.bind();
-            compositeUnbindable.add(unbindable);
-        }
-
-        for (CommandBinder commandBinder : commandBinders) {
-            Unbindable unbindable = commandBinder.bind();
-            compositeUnbindable.add(unbindable);
-        }
-
-        return compositeUnbindable;
     }
 
     private final class CompositeUnbindable implements Unbindable {
