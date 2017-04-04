@@ -11,5 +11,5 @@ public @interface BindCommand {
 
     int id();
 
-    CommandName name();
+    String name();
 }

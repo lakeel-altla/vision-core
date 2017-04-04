@@ -3,7 +3,6 @@ package com.lakeel.altla.android.binding.propertybinder;
 import com.lakeel.altla.android.binding.BindingMode;
 import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.PropertyBinder;
-import com.lakeel.altla.android.binding.PropertyName;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +15,7 @@ public final class PropertyBindingDefinition {
 
     private final Class<? extends View> viewType;
 
-    private final PropertyName propertyName;
+    private final String propertyName;
 
     private final Class<?> propertyType;
 
@@ -35,7 +34,7 @@ public final class PropertyBindingDefinition {
     private final Constructor<? extends PropertyBinder> binderConstructor;
 
     public PropertyBindingDefinition(@NonNull Class<? extends View> viewType,
-                                     @NonNull PropertyName propertyName,
+                                     @NonNull String propertyName,
                                      @NonNull Class<?> propertyType,
                                      @Nullable String getterName,
                                      @Nullable String setterName,
@@ -62,7 +61,7 @@ public final class PropertyBindingDefinition {
     }
 
     @NonNull
-    public PropertyName getPropertyName() {
+    public String getPropertyName() {
         return propertyName;
     }
 

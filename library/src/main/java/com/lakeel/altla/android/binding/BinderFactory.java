@@ -51,31 +51,31 @@ public final class BinderFactory {
 
         try {
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    View.class, PropertyName.ENABLED, boolean.class, null, "setEnabled",
+                    View.class, "enabled", boolean.class, null, "setEnabled",
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    TextView.class, PropertyName.TEXT, CharSequence.class, null, "setText",
+                    TextView.class, "text", CharSequence.class, null, "setText",
                     BindingMode.ONE_WAY, DefaultPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    EditText.class, PropertyName.TEXT, CharSequence.class, null, "setText",
+                    EditText.class, "text", CharSequence.class, null, "setText",
                     BindingMode.TWO_WAY, EditTextTextPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    CompoundButton.class, PropertyName.CHECKED, boolean.class, "isChecked", "setChecked",
+                    CompoundButton.class, "checked", boolean.class, "isChecked", "setChecked",
                     BindingMode.TWO_WAY, CompoundButtonCheckedPropertyBinder.class
             ));
             propertyBindingDefinitionRegistry.register(new PropertyBindingDefinition(
-                    RadioGroup.class, PropertyName.CHECKED_BUTTON, int.class, "getCheckedRadioButtonId", "check",
+                    RadioGroup.class, "checkedButton", int.class, "getCheckedRadioButtonId", "check",
                     BindingMode.TWO_WAY, RadioGroupCheckedPropertyBinder.class
             ));
 
             commandBindingDefinitionRegistry.register(new CommandBindingDefinition(
-                    View.class, CommandName.ON_CLICK, ViewOnClickCommandBinder.class
+                    View.class, "onClick", ViewOnClickCommandBinder.class
             ));
             commandBindingDefinitionRegistry.register(new CommandBindingDefinition(
-                    View.class, CommandName.ON_LONG_CLICK, ViewOnLongClickCommandBinder.class
+                    View.class, "onLongClick", ViewOnLongClickCommandBinder.class
             ));
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -88,7 +88,7 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull PropertyName propertyName,
+    public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull String propertyName,
                                                       @NonNull Property<?> source) {
         Class<? extends View> viewType = target.getClass();
         PropertyBindingDefinition definition = propertyBindingDefinitionRegistry.find(viewType, propertyName);
@@ -107,7 +107,7 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull CommandName commandName,
+    public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull String commandName,
                                                      @NonNull Command source) {
         Class<? extends View> viewType = target.getClass();
         CommandBindingDefinition definition = commandBindingDefinitionRegistry.find(viewType, commandName);
@@ -126,14 +126,14 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull PropertyName propertyName,
+    public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull String propertyName,
                                                       @NonNull Property<?> source) {
         TView target = findById(id);
         return create(target, propertyName, source);
     }
 
     @NonNull
-    public <TView extends View> CommandBinder create(@IdRes int id, @NonNull CommandName commandName,
+    public <TView extends View> CommandBinder create(@IdRes int id, @NonNull String commandName,
                                                      @NonNull Command source) {
         TView target = findById(id);
         return create(target, commandName, source);

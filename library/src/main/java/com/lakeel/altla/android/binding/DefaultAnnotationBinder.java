@@ -135,7 +135,7 @@ final class DefaultAnnotationBinder implements AnnotationBinder {
 
     private PropertyBinder createBinder(@NonNull BindProperty bindProperty, @NonNull Property<?> source) {
         int id = bindProperty.id();
-        PropertyName propertyName = bindProperty.name();
+        String propertyName = bindProperty.name();
         BindingMode mode = bindProperty.mode();
 
         PropertyBinder binder = binderFactory.create(id, propertyName, source)
@@ -183,7 +183,7 @@ final class DefaultAnnotationBinder implements AnnotationBinder {
     @NonNull
     private CommandBinder createBinder(BindCommand bindCommand, Command source) {
         int id = bindCommand.id();
-        CommandName commandName = bindCommand.name();
+        String commandName = bindCommand.name();
 
         return binderFactory.create(id, commandName, source);
     }

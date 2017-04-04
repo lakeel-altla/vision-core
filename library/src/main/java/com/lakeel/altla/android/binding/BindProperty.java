@@ -11,7 +11,7 @@ public @interface BindProperty {
 
     int id();
 
-    PropertyName name();
+    String name();
 
     BindingMode mode() default BindingMode.DEFAULT;
 
