@@ -1,0 +1,202 @@
+package com.lakeel.altla.vision.builder.presentation.presenter;
+
+import com.lakeel.altla.vision.ArgumentNullException;
+import com.lakeel.altla.vision.api.VisionService;
+import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
+import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView;
+import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.AreaDescription;
+import com.lakeel.altla.vision.model.Scope;
+import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
+import com.lakeel.altla.vision.presentation.presenter.model.DataList;
+
+import org.parceler.Parcels;
+
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
+public final class AreaDescriptionByAreaListPresenter extends BasePresenter<AreaDescriptionByAreaListView>
+        implements DataList.OnItemListener {
+
+    private static final String ARG_SCOPE = "scrope";
+
+    private static final String ARG_AREA = "area";
+
+    @Inject
+    VisionService visionService;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    private final List<AreaDescription> items = new ArrayList<>();
+
+    private Scope scope;
+
+    private Area area;
+
+    private AreaDescription selectedAreaDescription;
+
+    @Inject
+    public AreaDescriptionByAreaListPresenter() {
+    }
+
+    @NonNull
+    public static Bundle createArguments(@NonNull Scope scope, @NonNull Area area) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
+        bundle.putParcelable(ARG_AREA, Parcels.wrap(area));
+        return bundle;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
+        super.onCreate(arguments, savedInstanceState);
+
+        if (arguments == null) throw new ArgumentNullException("arguments");
+
+        scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        if (scope == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
+        }
+
+
+        area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
+        if (area == null) {
+            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
+        }
+    }
+
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
+    }
+
+    @Override
+    protected void onStartOverride() {
+        super.onStartOverride();
+
+        items.clear();
+        getView().onDataSetChanged();
+
+        Disposable disposable = Single.<List<AreaDescription>>create(e -> {
+            switch (scope) {
+                case PUBLIC: {
+                    visionService.getPublicAreaDescriptionApi()
+                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
+                                     Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
+                                     e.onSuccess(areaDescriptions);
+                                 }, e::onError);
+                    break;
+                }
+                case USER: {
+                    visionService.getUserAreaDescriptionApi()
+                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
+                                     Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
+                                     e.onSuccess(areaDescriptions);
+                                 }, e::onError);
+                    break;
+                }
+            }
+        }).subscribe(areaDescriptions -> {
+            items.addAll(areaDescriptions);
+            getView().onDataSetChanged();
+        }, e -> {
+            getLog().e("Failed.", e);
+            getView().onSnackbar(R.string.snackbar_failed);
+        });
+        compositeDisposable.add(disposable);
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        compositeDisposable.clear();
+    }
+
+    @Override
+    public void onItemInserted(int index) {
+        getView().onItemInserted(index);
+    }
+
+    @Override
+    public void onItemChanged(int index) {
+        getView().onItemChanged(index);
+    }
+
+    @Override
+    public void onItemRemoved(int index) {
+        getView().onItemRemoved(index);
+    }
+
+    @Override
+    public void onItemMoved(int from, int to) {
+        getView().onItemMoved(from, to);
+    }
+
+    @Override
+    public void onDataSetChanged() {
+        getView().onDataSetChanged();
+    }
+
+    public int getItemCount() {
+        return items.size();
+    }
+
+    @NonNull
+    public ItemPresenter createItemPresenter() {
+        return new ItemPresenter();
+    }
+
+    public void onItemSelected(int position) {
+        if (0 <= position) {
+            selectedAreaDescription = items.get(position);
+        } else {
+            selectedAreaDescription = null;
+        }
+
+        getView().onUpdateButtonSelectEnabled(canSelect());
+    }
+
+    public void onClickButtonClose() {
+        getView().onCloseView();
+    }
+
+    public void onClickButtonSelect() {
+        getView().onAreaDescriptionSelected(selectedAreaDescription);
+        getView().onCloseView();
+    }
+
+    private boolean canSelect() {
+        return selectedAreaDescription != null;
+    }
+
+    public final class ItemPresenter {
+
+        private AreaDescriptionItemView itemView;
+
+        public void onCreateItemView(@NonNull AreaDescriptionItemView itemView) {
+            this.itemView = itemView;
+        }
+
+        public void onBind(int position) {
+            AreaDescription areaDescription = items.get(position);
+            itemView.onUpdateAreaDescriptionId(areaDescription.getId());
+            itemView.onUpdateName(areaDescription.getName());
+        }
+    }
+}
