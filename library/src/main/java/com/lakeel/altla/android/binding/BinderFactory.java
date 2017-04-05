@@ -11,7 +11,6 @@ import com.lakeel.altla.android.binding.propertybinder.PropertyBindingDefinition
 import com.lakeel.altla.android.binding.propertybinder.PropertyBindingDefinitionRegistry;
 import com.lakeel.altla.android.binding.propertybinder.RadioGroupCheckedPropertyBinder;
 
-import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -22,8 +21,6 @@ import android.widget.RadioGroup;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class BinderFactory {
 
@@ -35,20 +32,9 @@ public final class BinderFactory {
     private final CommandBindingDefinitionRegistry commandBindingDefinitionRegistry =
             new CommandBindingDefinitionRegistry();
 
-    private final Activity activity;
+    private final ViewContainer container;
 
-    private final View container;
-
-    public BinderFactory(@NonNull Activity activity) {
-        this(activity, null);
-    }
-
-    public BinderFactory(@NonNull View container) {
-        this(null, container);
-    }
-
-    private BinderFactory(Activity activity, View container) {
-        this.activity = activity;
+    public BinderFactory(@NonNull ViewContainer container) {
         this.container = container;
 
         try {
@@ -150,34 +136,11 @@ public final class BinderFactory {
     @NonNull
     @SuppressWarnings("unchecked")
     private <T extends View> T findById(@IdRes int id) {
-        T view = null;
-
-        if (activity != null) {
-            view = (T) activity.findViewById(id);
-        } else if (container != null) {
-            view = (T) container.findViewById(id);
-        }
-
+        T view = (T) container.findViewById(id);
         if (view == null) {
             throw new IllegalStateException("No id container exists.");
         }
 
         return view;
-    }
-
-    private final class CompositeUnbindable implements Unbindable {
-
-        private final List<Unbindable> unbindables = new ArrayList<>();
-
-        public void add(@NonNull Unbindable unbindable) {
-            unbindables.add(unbindable);
-        }
-
-        @Override
-        public void unbind() {
-            for (Unbindable unbindable : unbindables) {
-                unbindable.unbind();
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.lakeel.altla.android.binding.sample;
 
+import com.lakeel.altla.android.binding.ActivityViewContainer;
 import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.annotation.AnnotationBinderFactory;
@@ -29,7 +30,8 @@ public final class MainActivity extends AppCompatActivity {
 
         viewModel.onCreate(savedInstanceState);
 
-        AnnotationBinderFactory factory = new AnnotationBinderFactory(new BinderFactory(this));
+        AnnotationBinderFactory factory = new AnnotationBinderFactory(
+                new BinderFactory(new ActivityViewContainer(this)));
         factory.create(viewModel).bind();
     }
 
@@ -40,7 +42,7 @@ public final class MainActivity extends AppCompatActivity {
         viewModel.onSaveInstanceState(outState);
     }
 
-    private final class ViewModel {
+    public final class ViewModel {
 
         private static final String STATE_RADIO_GROUP_CHECKED = "radioGroupChecked";
 
@@ -51,41 +53,45 @@ public final class MainActivity extends AppCompatActivity {
         private static final String STATE_TOGGLE_BUTTON_CHECKED = "toggleButtonChecked";
 
         @BindProperty(id = R.id.radio_group_button, name = "checkedButton")
-        IntProperty radioGroupChecked;
+        public IntProperty radioGroupChecked;
 
         @OnClickCommand(R.id.button_on_click)
-        final RelayCommand commandClick = new RelayCommand(
+        public final RelayCommand commandClick = new RelayCommand(
                 () -> Toast.makeText(MainActivity.this, "onClick", Toast.LENGTH_SHORT).show(),
                 () -> radioGroupChecked.get() == R.id.radio_button_button_enabled);
 
         @BindProperty(id = R.id.text_view_set_text, name = "text")
-        StringProperty textViewText;
+        public StringProperty textViewText;
 
         @OnClickCommand(R.id.button_set_text)
-        final RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
+        public final RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
 
         @OnClickCommand(R.id.button_clear_text)
-        final RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
+        public final RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
 
-        @BindProperties({ @BindProperty(id = R.id.edit_text, name = "text"),
-                          @BindProperty(id = R.id.text_view_edit_text_result, name = "text") })
-        StringProperty editTextText;
+        @BindProperties({
+                                @BindProperty(id = R.id.edit_text, name = "text"),
+                                @BindProperty(id = R.id.text_view_edit_text_result, name = "text")
+                        })
+        public StringProperty editTextText;
 
         @OnClickCommand(R.id.button_edit_text_clear_text)
-        final RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
+        public final RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
 
         @OnLongClickCommand(R.id.text_view_on_long_click)
-        final RelayCommand commandLongClick = new RelayCommand(
+        public final RelayCommand commandLongClick = new RelayCommand(
                 () -> Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show());
 
-        @BindProperties({ @BindProperty(id = R.id.toggle_button, name = "checked"),
-                          @BindProperty(id = R.id.text_view_toggle_button_result, name = "text",
-                                        converter = "objectStringConverter"),
-                          @BindProperty(id = R.id.edit_text_toggle_enabled, name = "enabled") })
-        BooleanProperty toggleButtonChecked;
+        @BindProperties({
+                                @BindProperty(id = R.id.toggle_button, name = "checked"),
+                                @BindProperty(id = R.id.text_view_toggle_button_result, name = "text",
+                                              converter = "objectStringConverter"),
+                                @BindProperty(id = R.id.edit_text_toggle_enabled, name = "enabled")
+                        })
+        public BooleanProperty toggleButtonChecked;
 
         @ConverterName("objectStringConverter")
-        final Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString());
+        public Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString());
 
         private ViewModel() {
         }
