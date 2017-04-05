@@ -94,7 +94,7 @@ public final class BinderFactory {
 
     @NonNull
     public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull String propertyName,
-                                                      @NonNull Property<?> source) {
+                                                      @NonNull Property source) {
         Class<? extends View> viewType = target.getClass();
 
         PropertyBindingDefinition definition = propertyBindingDefinitionRegistry.find(viewType, propertyName);
@@ -141,7 +141,7 @@ public final class BinderFactory {
 
     @NonNull
     public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull String propertyName,
-                                                      @NonNull Property<?> source) {
+                                                      @NonNull Property source) {
         TView target = findById(id);
         return create(target, propertyName, source);
     }
