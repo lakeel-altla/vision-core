@@ -1,5 +1,6 @@
 package com.lakeel.altla.android.binding;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinition;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinitionRegistry;
 import com.lakeel.altla.android.binding.commandbinder.CompoundButtonCheckedPropertyBinder;
@@ -120,6 +121,12 @@ public final class BinderFactory {
     }
 
     @NonNull
+    public <TView extends View> CommandBinder create(@NonNull TView target, @NonNull String commandName,
+                                                     @NonNull CommandExecuteDelegate executeDelegate) {
+        return create(target, commandName, new RelayCommand(executeDelegate));
+    }
+
+    @NonNull
     public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull String propertyName,
                                                       @NonNull Property source) {
         TView target = findById(id);
@@ -131,6 +138,13 @@ public final class BinderFactory {
                                                      @NonNull Command source) {
         TView target = findById(id);
         return create(target, commandName, source);
+    }
+
+    @NonNull
+    public <TView extends View> CommandBinder create(@IdRes int id, @NonNull String commandName,
+                                                     @NonNull CommandExecuteDelegate executeDelegate) {
+        TView target = findById(id);
+        return create(target, commandName, executeDelegate);
     }
 
     @NonNull

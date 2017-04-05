@@ -8,7 +8,6 @@ import com.lakeel.altla.android.binding.annotation.BindProperties;
 import com.lakeel.altla.android.binding.annotation.BindProperty;
 import com.lakeel.altla.android.binding.annotation.ConverterName;
 import com.lakeel.altla.android.binding.annotation.OnClickCommand;
-import com.lakeel.altla.android.binding.annotation.OnLongClickCommand;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.converter.RelayConverter;
 import com.lakeel.altla.android.binding.property.BooleanProperty;
@@ -30,9 +29,14 @@ public final class MainActivity extends AppCompatActivity {
 
         viewModel.onCreate(savedInstanceState);
 
-        AnnotationBinderFactory factory = new AnnotationBinderFactory(
-                new BinderFactory(new ActivityViewContainer(this)));
-        factory.create(viewModel).bind();
+        BinderFactory binderFactory = new BinderFactory(new ActivityViewContainer(this));
+        AnnotationBinderFactory annotationBinderFactory = new AnnotationBinderFactory(binderFactory);
+
+        annotationBinderFactory.create(viewModel).bind();
+        binderFactory.create(R.id.button_set_text, "onClick", viewModel::setTextViewText).bind();
+        binderFactory.create(R.id.button_clear_text, "onClick", viewModel::clearTextViewText).bind();
+        binderFactory.create(R.id.button_edit_text_clear_text, "onClick", viewModel::clearEditTextText).bind();
+        binderFactory.create(R.id.text_view_on_long_click, "onClick", viewModel::onLongClick).bind();
     }
 
     @Override
@@ -46,7 +50,7 @@ public final class MainActivity extends AppCompatActivity {
 
         private static final String STATE_RADIO_GROUP_CHECKED = "radioGroupChecked";
 
-        private static final String STATE_TEXT_VIEW_TEXT = "textViewText";
+        private static final String STATE_TEXT_VIEW_TEXT = "setTextViewText";
 
         private static final String STATE_EDIT_TEXT_TEXT = "editTextText";
 
@@ -63,24 +67,11 @@ public final class MainActivity extends AppCompatActivity {
         @BindProperty(id = R.id.text_view_set_text, name = "text")
         public StringProperty textViewText;
 
-        @OnClickCommand(R.id.button_set_text)
-        public final RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
-
-        @OnClickCommand(R.id.button_clear_text)
-        public final RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
-
         @BindProperties({
                                 @BindProperty(id = R.id.edit_text, name = "text"),
                                 @BindProperty(id = R.id.text_view_edit_text_result, name = "text")
                         })
         public StringProperty editTextText;
-
-        @OnClickCommand(R.id.button_edit_text_clear_text)
-        public final RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
-
-        @OnLongClickCommand(R.id.text_view_on_long_click)
-        public final RelayCommand commandLongClick = new RelayCommand(
-                () -> Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show());
 
         @BindProperties({
                                 @BindProperty(id = R.id.toggle_button, name = "checked"),
@@ -117,6 +108,22 @@ public final class MainActivity extends AppCompatActivity {
             outState.putParcelable(STATE_TEXT_VIEW_TEXT, textViewText);
             outState.putParcelable(STATE_EDIT_TEXT_TEXT, editTextText);
             outState.putParcelable(STATE_TOGGLE_BUTTON_CHECKED, toggleButtonChecked);
+        }
+
+        private void setTextViewText() {
+            textViewText.set("Text was set.");
+        }
+
+        private void clearTextViewText() {
+            textViewText.set(null);
+        }
+
+        private void clearEditTextText() {
+            editTextText.set(null);
+        }
+
+        private void onLongClick() {
+            Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show();
         }
     }
 }
