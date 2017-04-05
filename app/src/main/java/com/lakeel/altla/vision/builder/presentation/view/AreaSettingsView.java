@@ -4,20 +4,8 @@ import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.Scope;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 public interface AreaSettingsView {
-
-    void onUpdateAreaMode(@StringRes int resId);
-
-    void onUpdateAreaName(@Nullable String areaName);
-
-    void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName);
-
-    void onUpdateButtonSelectAreaDescriptionEnabled(boolean enabled);
-
-    void onUpdateButtonStartEnabled(boolean enabled);
 
     void onShowAreaSettingsHistoryView();
 

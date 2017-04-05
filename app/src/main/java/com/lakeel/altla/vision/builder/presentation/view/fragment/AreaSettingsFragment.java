@@ -1,5 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
+import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
@@ -15,40 +16,19 @@ import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
         implements AreaSettingsView {
 
     @Inject
     AreaSettingsPresenter presenter;
-
-    @BindView(R.id.text_view_area_mode)
-    TextView textViewAreaMode;
-
-    @BindView(R.id.text_view_area_name)
-    TextView textViewAreaName;
-
-    @BindView(R.id.text_view_area_description_name)
-    TextView textViewAreaDescriptionName;
-
-    @BindView(R.id.image_button_select_area_description)
-    ImageButton imageButtonSelectAreaDescription;
-
-    @BindView(R.id.button_start)
-    Button buttonStart;
 
     private InteractionListener interactionListener;
 
@@ -97,32 +77,20 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
-    }
 
-    @Override
-    public void onUpdateAreaMode(@StringRes int resId) {
-        textViewAreaMode.setText(resId);
-    }
-
-    @Override
-    public void onUpdateAreaName(@Nullable String areaName) {
-        textViewAreaName.setText(areaName);
-    }
-
-    @Override
-    public void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName) {
-        textViewAreaDescriptionName.setText(areaDescriptionName);
-    }
-
-    @Override
-    public void onUpdateButtonSelectAreaDescriptionEnabled(boolean enabled) {
-        imageButtonSelectAreaDescription.setEnabled(enabled);
-        imageButtonSelectAreaDescription.setColorFilter(resolveImageButtonTint(enabled));
-    }
-
-    @Override
-    public void onUpdateButtonStartEnabled(boolean enabled) {
-        buttonStart.setEnabled(enabled);
+        BinderFactory binderFactory = new BinderFactory(view);
+        binderFactory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode).bind();
+        binderFactory.create(R.id.text_view_area_name, "text", presenter.propertyAreaName).bind();
+        binderFactory.create(R.id.text_view_area_description_name, "text", presenter.propertyAreaDescriptionName)
+                     .bind();
+        binderFactory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
+        binderFactory.create(R.id.image_button_history, "onClick", presenter.commandShowHistory).bind();
+        binderFactory.create(R.id.image_button_area_mode, "onClick", presenter.commandShowAreaMode).bind();
+        binderFactory.create(R.id.image_button_area_find, "onClick", presenter.commandShowAreaFind).bind();
+        binderFactory
+                .create(R.id.image_button_area_description_list, "onClick", presenter.commandShowAreaDescriptionList)
+                .bind();
+        binderFactory.create(R.id.button_start, "onClick", presenter.commandStart).bind();
     }
 
     @Override
@@ -156,51 +124,21 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     public void onAreaModeSelected(@NonNull Scope scope) {
-        presenter.onAreaModeSelected(scope);
+        presenter.propertyScope.set(scope);
     }
 
     public void onAreaSelected(@NonNull Area area) {
-        presenter.onAreaSelected(area);
+        presenter.propertyArea.set(area);
     }
 
     public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
-        presenter.onAreaDescriptionSelected(areaDescription);
+        presenter.propertyAreaDescription.set(areaDescription);
     }
 
     public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
                                        @NonNull Area area,
                                        @NonNull AreaDescription areaDescription) {
         presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickButtonClose() {
-        presenter.onClickButtonClose();
-    }
-
-    @OnClick(R.id.image_button_history)
-    void onClickButtonHistory() {
-        presenter.onClickButtonHistory();
-    }
-
-    @OnClick(R.id.image_button_select_area_mode)
-    void onClickButtonSelectAreaMode() {
-        presenter.onClickButtonSelectAreaMode();
-    }
-
-    @OnClick(R.id.image_button_select_area)
-    void onClickButtonSelectArea() {
-        presenter.onClickButtonSelectArea();
-    }
-
-    @OnClick(R.id.image_button_select_area_description)
-    void onClickButtonSelectAreaDescription() {
-        presenter.onClickButtonSelectAreaDescription();
-    }
-
-    @OnClick(R.id.button_start)
-    void onClickButtonStart() {
-        presenter.onClickButtonStart();
     }
 
     @ColorInt

@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.ObjectProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
@@ -13,6 +15,7 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcels;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,15 +29,101 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @Inject
     VisionService visionService;
 
-    private Scope initialScope;
+    @Inject
+    Resources resources;
 
     private AreaSettings areaSettings;
 
-    private Scope scope;
+    @NonNull
+    public ObjectProperty<Scope> propertyScope = new ObjectProperty<Scope>(Scope.PUBLIC) {
+        @Override
+        protected void onValueChanged() {
+            super.onValueChanged();
 
-    private Area area;
+            Scope value = get();
+            if (value == null) {
+                propertyAreaMode.set(null);
+            } else {
+                int resId = (get() == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
+                propertyAreaMode.set(resources.getString(resId));
+            }
 
-    private AreaDescription areaDescription;
+            propertyArea.set(null);
+        }
+    };
+
+    @NonNull
+    public ObjectProperty<Area> propertyArea = new ObjectProperty<Area>() {
+        @Override
+        protected void onValueChanged() {
+            super.onValueChanged();
+
+            Area value = get();
+            propertyAreaName.set(value == null ? null : value.getName());
+            propertyAreaDescription.set(null);
+
+            commandShowAreaDescriptionList.raiseOnCanExecuteChanged();
+        }
+    };
+
+    @NonNull
+    public ObjectProperty<AreaDescription> propertyAreaDescription = new ObjectProperty<AreaDescription>() {
+        @Override
+        protected void onValueChanged() {
+            super.onValueChanged();
+
+            AreaDescription value = get();
+            propertyAreaDescriptionName.set(value == null ? null : value.getName());
+
+            commandStart.raiseOnCanExecuteChanged();
+        }
+    };
+
+    @NonNull
+    public ObjectProperty<String> propertyAreaMode = new ObjectProperty<>();
+
+    @NonNull
+    public ObjectProperty<String> propertyAreaName = new ObjectProperty<>();
+
+    @NonNull
+    public ObjectProperty<String> propertyAreaDescriptionName = new ObjectProperty<>();
+
+    @NonNull
+    public RelayCommand commandClose = new RelayCommand(() -> getView().onCloseView());
+
+    @NonNull
+    public RelayCommand commandShowHistory = new RelayCommand(() -> getView().onShowAreaSettingsHistoryView());
+
+    @NonNull
+    public RelayCommand commandShowAreaMode = new RelayCommand(() -> {
+        Scope value = propertyScope.get();
+        if (value != null) {
+            getView().onShowAreaModeView(value);
+        }
+    });
+
+    @NonNull
+    public RelayCommand commandShowAreaFind = new RelayCommand(() -> {
+        Scope value = propertyScope.get();
+        if (value != null) {
+            getView().onShowAreaFindView(value);
+        }
+    });
+
+    @NonNull
+    public RelayCommand commandShowAreaDescriptionList = new RelayCommand
+            (() -> {
+                Scope scopeValue = propertyScope.get();
+                Area areaValue = propertyArea.get();
+                if (scopeValue != null && areaValue != null) {
+                    getView().onShowAreaDescriptionByAreaListView(scopeValue, areaValue);
+                }
+            },
+             () -> propertyArea.get() != null
+            );
+
+    @NonNull
+    public RelayCommand commandStart = new RelayCommand(this::start, this::canStart);
 
     @Inject
     public AreaSettingsPresenter() {
@@ -53,66 +142,14 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        Scope initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
         if (initialScope == null) {
             throw new ArgumentNullException(String.format("Argument '%s' is required.", ARG_SCOPE));
         }
 
-        scope = initialScope;
+        propertyScope.set(initialScope);
 
         // TODO: restore saved fields.
-    }
-
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        int resId = (scope == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
-        getView().onUpdateAreaMode(resId);
-        getView().onUpdateAreaName(area == null ? null : area.getName());
-        getView().onUpdateAreaDescriptionName(areaDescription == null ? null : areaDescription.getName());
-
-        getView().onUpdateButtonSelectAreaDescriptionEnabled(canSelectAreaDescription());
-        getView().onUpdateButtonStartEnabled(canStart());
-    }
-
-    public void onAreaModeSelected(@NonNull Scope scope) {
-        if (this.scope != scope) {
-            this.scope = scope;
-            area = null;
-            areaDescription = null;
-
-            int resId =
-                    (scope == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
-            getView().onUpdateAreaMode(resId);
-            getView().onUpdateAreaName(null);
-            getView().onUpdateAreaDescriptionName(null);
-            getView().onUpdateButtonSelectAreaDescriptionEnabled(canSelectAreaDescription());
-            getView().onUpdateButtonStartEnabled(canStart());
-        }
-    }
-
-    public void onAreaSelected(@Nullable Area area) {
-        String oldAreaId = (this.area == null) ? null : this.area.getId();
-        String newAreaId = (area == null) ? null : area.getId();
-
-        if (oldAreaId == null || !oldAreaId.equals(newAreaId)) {
-            this.area = area;
-            areaDescription = null;
-
-            getView().onUpdateAreaName(area == null ? null : area.getName());
-            getView().onUpdateAreaDescriptionName(null);
-            getView().onUpdateButtonSelectAreaDescriptionEnabled(canSelectAreaDescription());
-            getView().onUpdateButtonStartEnabled(canStart());
-        }
-    }
-
-    public void onAreaDescriptionSelected(@Nullable AreaDescription areaDescription) {
-        this.areaDescription = areaDescription;
-
-        getView().onUpdateAreaDescriptionName(areaDescription == null ? null : areaDescription.getName());
-        getView().onUpdateButtonSelectAreaDescriptionEnabled(canSelectAreaDescription());
-        getView().onUpdateButtonStartEnabled(canStart());
     }
 
     public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
@@ -120,40 +157,22 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                                        @NonNull AreaDescription areaDescription) {
         this.areaSettings = areaSettings;
 
-        onAreaModeSelected(areaSettings.getAreaScopeAsEnum());
-        onAreaSelected(area);
-        onAreaDescriptionSelected(areaDescription);
+        propertyScope.set(areaSettings.getAreaScopeAsEnum());
+        propertyArea.set(area);
+        propertyAreaDescription.set(areaDescription);
     }
 
-    public void onClickButtonClose() {
-        getView().onCloseView();
-    }
+    private void start() {
+        if (!canStart()) return;
 
-    public void onClickButtonHistory() {
-        getView().onShowAreaSettingsHistoryView();
-    }
-
-    public void onClickButtonSelectAreaMode() {
-        getView().onShowAreaModeView(scope);
-    }
-
-    public void onClickButtonSelectArea() {
-        getView().onShowAreaFindView(scope);
-    }
-
-    public void onClickButtonSelectAreaDescription() {
-        getView().onShowAreaDescriptionByAreaListView(scope, area);
-    }
-
-    public void onClickButtonStart() {
         if (areaSettings == null) {
             areaSettings = new AreaSettings();
             areaSettings.setUserId(CurrentUser.getInstance().getUserId());
         }
 
-        areaSettings.setAreaScopeAsEnum(scope);
-        areaSettings.setAreaId(area.getId());
-        areaSettings.setAreaDescriptionId(areaDescription.getId());
+        areaSettings.setAreaScopeAsEnum(propertyScope.get());
+        areaSettings.setAreaId(propertyArea.get().getId());
+        areaSettings.setAreaDescriptionId(propertyAreaDescription.get().getId());
 
         visionService.getUserAreaSettingsApi()
                      .saveUserAreaSettings(areaSettings);
@@ -162,11 +181,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         getView().onCloseView();
     }
 
-    private boolean canSelectAreaDescription() {
-        return area != null;
-    }
-
     private boolean canStart() {
-        return area != null && areaDescription != null;
+        return propertyScope.get() != null && propertyArea.get() != null && propertyAreaDescription.get() != null;
     }
 }
