@@ -39,8 +39,8 @@ public final class MainActivity extends AppCompatActivity {
         final IntProperty radioGroupChecked = new IntProperty(R.id.radio_button_button_disabled) {
 
             @Override
-            protected void onValueChanged() {
-                super.onValueChanged();
+            protected void onValueChanged(int oldValue, int newValue) {
+                super.onValueChanged(oldValue, newValue);
                 commandClick.raiseOnCanExecuteChanged();
             }
         };
