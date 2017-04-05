@@ -1,6 +1,5 @@
 package com.lakeel.altla.android.binding;
 
-import com.lakeel.altla.android.binding.annotation.DefaultAnnotationBinder;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinition;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinitionRegistry;
 import com.lakeel.altla.android.binding.commandbinder.CompoundButtonCheckedPropertyBinder;
@@ -85,11 +84,6 @@ public final class BinderFactory {
     @NonNull
     public CommandBindingDefinitionRegistry getCommandBindingDefinitionRegistry() {
         return commandBindingDefinitionRegistry;
-    }
-
-    @NonNull
-    public AnnotationBinder create(@NonNull Object object) {
-        return new DefaultAnnotationBinder(this).create(object);
     }
 
     @NonNull

@@ -1,10 +1,10 @@
 package com.lakeel.altla.android.binding.annotation;
 
-import com.lakeel.altla.android.binding.AnnotationBinder;
 import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.android.binding.BindingMode;
 import com.lakeel.altla.android.binding.Command;
 import com.lakeel.altla.android.binding.CommandBinder;
+import com.lakeel.altla.android.binding.CompositeUnbindable;
 import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.PropertyBinder;
@@ -51,7 +51,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    public AnnotationBinder create(@NonNull Object object) {
+    AnnotationBinder create(@NonNull Object object) {
         Class<?> clazz = object.getClass();
 
         try {
@@ -233,21 +233,5 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     @NonNull
     private CommandBinder createCommandBinder(int id, String commandName, Command source) {
         return binderFactory.create(id, commandName, source);
-    }
-
-    private final class CompositeUnbindable implements Unbindable {
-
-        private final List<Unbindable> unbindables = new ArrayList<>();
-
-        public void add(@NonNull Unbindable unbindable) {
-            unbindables.add(unbindable);
-        }
-
-        @Override
-        public void unbind() {
-            for (Unbindable unbindable : unbindables) {
-                unbindable.unbind();
-            }
-        }
     }
 }
