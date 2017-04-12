@@ -45,7 +45,7 @@ public final class ViewBindingFactory {
 
     @NonNull
     private View resolveView(@IdRes int id) {
-        View view = viewResolver.findViewById(id);
+        View view = viewResolver.resolve(id);
         if (view == null) {
             throw new IllegalArgumentException("View not found.");
         }

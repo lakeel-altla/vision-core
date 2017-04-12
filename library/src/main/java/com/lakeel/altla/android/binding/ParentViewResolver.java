@@ -15,7 +15,7 @@ public final class ParentViewResolver implements ViewResolver {
 
     @Nullable
     @Override
-    public View findViewById(@IdRes int id) {
+    public View resolve(@IdRes int id) {
         return view.findViewById(id);
     }
 }
