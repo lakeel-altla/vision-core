@@ -2,14 +2,14 @@ package com.lakeel.altla.android.binding.property;
 
 import android.support.annotation.Nullable;
 
-public abstract class AbstractBooleanProperty extends BaseProperty {
+public abstract class AbstractLongProperty extends BaseProperty {
 
-    protected AbstractBooleanProperty() {
+    protected AbstractLongProperty() {
     }
 
-    public abstract boolean get();
+    public abstract long get();
 
-    public abstract void set(boolean value);
+    public abstract void set(long value);
 
     @Nullable
     @Override
@@ -19,6 +19,6 @@ public abstract class AbstractBooleanProperty extends BaseProperty {
 
     @Override
     public final void setValue(@Nullable Object value) {
-        set(value == null ? false : (Boolean) value);
+        set(value == null ? 0 : (long) value);
     }
 }
