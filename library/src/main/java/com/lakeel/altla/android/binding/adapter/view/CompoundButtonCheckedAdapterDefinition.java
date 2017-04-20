@@ -1,9 +1,9 @@
 package com.lakeel.altla.android.binding.adapter.view;
 
 import com.lakeel.altla.android.binding.DefaultBindingModeResolver;
-import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.adapter.AbstractPropertyAdapterDefinition;
-import com.lakeel.altla.android.binding.property.BaseProperty;
+import com.lakeel.altla.android.property.AbstractProperty;
+import com.lakeel.altla.android.property.Property;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,7 +20,7 @@ public final class CompoundButtonCheckedAdapterDefinition extends AbstractProper
         return new Adapter((CompoundButton) owner);
     }
 
-    private final class Adapter extends BaseProperty implements DefaultBindingModeResolver {
+    private final class Adapter extends AbstractProperty implements DefaultBindingModeResolver {
 
         private final CompoundButton compoundButton;
 
